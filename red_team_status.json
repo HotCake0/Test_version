@@ -4,7 +4,7 @@
         "name": "쪼이",
         "is_live": true,
         "title": "쪼이",
-        "viewers": 56,
+        "viewers": 60,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257162",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290257162"
     },
@@ -18,7 +18,7 @@
         "name": "니니밍",
         "is_live": true,
         "title": "[지력] 배그밍 킬 보여준댜! 방셀33/330",
-        "viewers": 59,
+        "viewers": 57,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261430",
         "live_url": "https://play.sooplive.co.kr/niniming/290261430"
     },
@@ -27,7 +27,7 @@
         "name": "감자가비",
         "is_live": true,
         "title": "[고래상사]ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ",
-        "viewers": 276,
+        "viewers": 237,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261194",
         "live_url": "https://play.sooplive.co.kr/doki0818/290261194"
     },
@@ -50,7 +50,7 @@
         "name": "구월이",
         "is_live": true,
         "title": "[사자회] 소똥",
-        "viewers": 19,
+        "viewers": 16,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261340",
         "live_url": "https://play.sooplive.co.kr/isq1158/290261340"
     },
@@ -59,7 +59,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC] 깃발전쟁 졌지만 재미썼잖아 후열 우마이 💖 한정 방셀 33/330",
-        "viewers": 22,
+        "viewers": 20,
         "thumbnail": "https://liveimg.afreecatv.com/m/290260620",
         "live_url": "https://play.sooplive.co.kr/eun0333/290260620"
     },
@@ -71,10 +71,6 @@
     {
         "id": "kayooo",
         "name": "용아리",
-        "is_live": true,
-        "title": "롤체무뎌보쟈~~🎄방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 12,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290260636",
-        "live_url": "https://play.sooplive.co.kr/kayooo/290260636"
+        "is_live": false
     }
 ]
