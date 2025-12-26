@@ -11,6 +11,7 @@
             --accent-green: #00ffa3;
             --accent-red: #ff4d4d;
             --accent-blue: #4d94ff;
+            --accent-purple: #a34dff; /* 진행팀 색상 추가 */
             --text-white: #ffffff;
             --text-gray: #aaaaaa;
         }
@@ -30,7 +31,7 @@
             background-color: var(--card-bg);
             padding: 12px 20px;
             display: flex;
-            flex-direction: column; /* 세로 배치로 변경하여 필터 공간 확보 */
+            flex-direction: column;
             gap: 10px;
             border-bottom: 2px solid #333;
             z-index: 10;
@@ -42,7 +43,6 @@
             gap: 15px;
         }
 
-        /* [추가] 팀 필터 스타일 */
         .team-filter {
             display: flex;
             gap: 8px;
@@ -63,6 +63,8 @@
         .filter-btn.active[data-team="all"] { background: #444; color: white; border-color: #666; }
         .filter-btn.active[data-team="red"] { background: #4d1a1a; color: #ff9999; border-color: var(--accent-red); }
         .filter-btn.active[data-team="blue"] { background: #1a2a4d; color: #99c2ff; border-color: var(--accent-blue); }
+        /* 진행팀 활성 스타일 */
+        .filter-btn.active[data-team="manager"] { background: #2d1a4d; color: #d199ff; border-color: var(--accent-purple); }
 
         .live-dot {
             width: 10px; height: 10px;
@@ -80,7 +82,6 @@
             padding-bottom: 5px;
         }
 
-        /* 스크롤바 디자인 */
         #member-list::-webkit-scrollbar { height: 4px; }
         #member-list::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
 
@@ -154,6 +155,7 @@
                 <button class="filter-btn active" data-team="all" onclick="setFilter('all')">전체</button>
                 <button class="filter-btn" data-team="red" onclick="setFilter('red')">레드팀</button>
                 <button class="filter-btn" data-team="blue" onclick="setFilter('blue')">블루팀</button>
+                <button class="filter-btn" data-team="manager" onclick="setFilter('manager')">진행팀</button>
             </div>
         </div>
         <div id="member-list"></div>
@@ -174,29 +176,34 @@
             "kayooo": "용아리", "rkdalstnld": "주드", "gtw0308": "황정민",
             "star124": "하밍", "villlo": "왜냐니", "toocat030": "또오냥",
             "xpdpfv2": "이지수", "rjsdnr115": "고채린", "yotsubakoe": "코에",
-            "etwo22": "이투", "o0opha": "서라0"
+            "etwo22": "이투", "o0opha": "서라0",
+            "melodingding": "멜로딩딩" // 진행팀 추가
         };
 
         let selectedMembers = new Set();
         let statusData = [];
-        let currentFilter = 'all'; // [추가] 현재 선택된 팀 필터 상태
+        let currentFilter = 'all';
 
         async function fetchStatus() {
             try {
                 const ts = new Date().getTime();
-                const [redRes, blueRes] = await Promise.all([
+                // red, blue, manager 세 개의 데이터를 모두 가져옴
+                const [redRes, blueRes, managerRes] = await Promise.all([
                     fetch(`red_team_status.json?t=${ts}`),
-                    fetch(`blue_team_status.json?t=${ts}`)
+                    fetch(`blue_team_status.json?t=${ts}`),
+                    fetch(`manager_status.json?t=${ts}`)
                 ]);
                 
                 const redData = await redRes.json();
                 const blueData = await blueRes.json();
+                const managerData = await managerRes.json();
 
-                // [중요] 각 멤버 데이터에 팀 정보 추가
-                const taggedRed = redData.map(m => ({...m, team: 'red'}));
-                const taggedBlue = blueData.map(m => ({...m, team: 'blue'}));
-
-                statusData = [...taggedRed, ...taggedBlue];
+                // 각 팀 정보 태깅 후 병합
+                statusData = [
+                    ...redData.map(m => ({...m, team: 'red'})),
+                    ...blueData.map(m => ({...m, team: 'blue'})),
+                    ...managerData.map(m => ({...m, team: 'manager'}))
+                ];
                 
                 renderSelector();
             } catch (err) {
@@ -204,15 +211,11 @@
             }
         }
 
-        // [추가] 필터 변경 함수
         function setFilter(team) {
             currentFilter = team;
-            
-            // 버튼 활성화 스타일 변경
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.team === team);
             });
-
             renderSelector();
         }
 
@@ -220,7 +223,6 @@
             const listContainer = document.getElementById('member-list');
             listContainer.innerHTML = '';
 
-            // [수정] 필터링 로직 적용
             const filteredData = statusData.filter(member => {
                 if (currentFilter === 'all') return true;
                 return member.team === currentFilter;
