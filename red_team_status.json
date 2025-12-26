@@ -3,8 +3,8 @@
         "id": "joyjo2",
         "name": "쪼이",
         "is_live": true,
-        "title": "쪼이",
-        "viewers": 67,
+        "title": "쪼이 증강칼바람",
+        "viewers": 61,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257162",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290257162"
     },
@@ -16,18 +16,14 @@
     {
         "id": "niniming",
         "name": "니니밍",
-        "is_live": true,
-        "title": "[지력] 화이띵화이띵⭐ 방셀33/330",
-        "viewers": 47,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290261430",
-        "live_url": "https://play.sooplive.co.kr/niniming/290261430"
+        "is_live": false
     },
     {
         "id": "doki0818",
         "name": "감자가비",
         "is_live": true,
         "title": "[고래상사]ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ",
-        "viewers": 189,
+        "viewers": 224,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261194",
         "live_url": "https://play.sooplive.co.kr/doki0818/290261194"
     },
@@ -36,7 +32,7 @@
         "name": "기찬하",
         "is_live": true,
         "title": "[습레기통] 기산타랑 후열 소통할싸람ㅣ크리스마스 룰렛 33/330",
-        "viewers": 44,
+        "viewers": 48,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257176",
         "live_url": "https://play.sooplive.co.kr/khj011219/290257176"
     },
@@ -50,7 +46,7 @@
         "name": "구월이",
         "is_live": true,
         "title": "[사자회] 사자회 긴급 칼바람 증강",
-        "viewers": 14,
+        "viewers": 17,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261340",
         "live_url": "https://play.sooplive.co.kr/isq1158/290261340"
     },
@@ -59,7 +55,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC] 찐 후열 롤체 가보쟈이 💖 한정 방셀 33/330",
-        "viewers": 11,
+        "viewers": 12,
         "thumbnail": "https://liveimg.afreecatv.com/m/290260620",
         "live_url": "https://play.sooplive.co.kr/eun0333/290260620"
     },
