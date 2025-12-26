@@ -4,7 +4,7 @@
         "name": "쪼이",
         "is_live": true,
         "title": "쪼이 증강칼바람",
-        "viewers": 60,
+        "viewers": 58,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257162",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290257162"
     },
@@ -28,7 +28,7 @@
         "name": "기찬하",
         "is_live": true,
         "title": "[습레기통] 가스트 리더입니다 단체곡 정하기ㅣ크리스마스 룰렛 33/330",
-        "viewers": 51,
+        "viewers": 53,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257176",
         "live_url": "https://play.sooplive.co.kr/khj011219/290257176"
     },
@@ -45,11 +45,7 @@
     {
         "id": "eun0333",
         "name": "우미",
-        "is_live": true,
-        "title": "[LAC] 롤체 레전드 미녀 오월이랑 일반8인 💖 한정 방셀 33/330",
-        "viewers": 4,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290260620",
-        "live_url": "https://play.sooplive.co.kr/eun0333/290260620"
+        "is_live": false
     },
     {
         "id": "jjoasseo13",
