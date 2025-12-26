@@ -3,8 +3,8 @@
         "id": "joyjo2",
         "name": "쪼이",
         "is_live": true,
-        "title": "쪼이 GTA 고래전쟁 깃발전쟁 컨텐츠 대결이 받습니다",
-        "viewers": 69,
+        "title": "쪼이",
+        "viewers": 63,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257162",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290257162"
     },
@@ -12,8 +12,8 @@
         "id": "wkdghdtjr99",
         "name": "여백이다",
         "is_live": true,
-        "title": "8시) 울산큰고래 깃발전쟁! 레드팀 출격!",
-        "viewers": 7,
+        "title": "아이온2 뉴비는 오늘도 힘들다",
+        "viewers": 5,
         "thumbnail": "https://liveimg.afreecatv.com/m/290260430",
         "live_url": "https://play.sooplive.co.kr/wkdghdtjr99/290260430"
     },
@@ -21,8 +21,8 @@
         "id": "niniming",
         "name": "니니밍",
         "is_live": true,
-        "title": "[지력] GTA 점령전은 이기쟈!!🔴레드팀!멤버⭐방셀33/330",
-        "viewers": 62,
+        "title": "[지력] 배그밍 킬 보여준댜! 방셀33/330",
+        "viewers": 61,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261430",
         "live_url": "https://play.sooplive.co.kr/niniming/290261430"
     },
@@ -31,7 +31,7 @@
         "name": "감자가비",
         "is_live": true,
         "title": "[고래상사]져서 분하니까 롤체 이기기",
-        "viewers": 52,
+        "viewers": 46,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261194",
         "live_url": "https://play.sooplive.co.kr/doki0818/290261194"
     },
@@ -39,8 +39,8 @@
         "id": "khj011219",
         "name": "기찬하",
         "is_live": true,
-        "title": "[습레기통] 기산타랑 소통할쏴람ㅣ크리스마스 룰렛 33/330",
-        "viewers": 38,
+        "title": "[습레기통] 왁굳님이랑.. 롤내전하고 싶다..ㅣ크리스마스 룰렛 33/330",
+        "viewers": 39,
         "thumbnail": "https://liveimg.afreecatv.com/m/290257176",
         "live_url": "https://play.sooplive.co.kr/khj011219/290257176"
     },
@@ -49,7 +49,7 @@
         "name": "아눙",
         "is_live": true,
         "title": "[홍신소] 후열 LAC / 확정 방셀 1225개",
-        "viewers": 19,
+        "viewers": 21,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261098",
         "live_url": "https://play.sooplive.co.kr/015234/290261098"
     },
@@ -58,7 +58,7 @@
         "name": "구월이",
         "is_live": true,
         "title": "[사자회] 고래전쟁 레드팀입니다!",
-        "viewers": 19,
+        "viewers": 18,
         "thumbnail": "https://liveimg.afreecatv.com/m/290261340",
         "live_url": "https://play.sooplive.co.kr/isq1158/290261340"
     },
@@ -66,25 +66,21 @@
         "id": "eun0333",
         "name": "우미",
         "is_live": true,
-        "title": "[LAC] 8시 울큰고님 GTA 깃발 점령전 레드팀!!🐧 한정 방셀 33/330",
-        "viewers": 14,
+        "title": "[LAC] 하필 왜 오늘 점검인데 우마이 💖 크리스마스 한정 방셀 33/330/1225",
+        "viewers": 18,
         "thumbnail": "https://liveimg.afreecatv.com/m/290260620",
         "live_url": "https://play.sooplive.co.kr/eun0333/290260620"
     },
     {
         "id": "jjoasseo13",
         "name": "죠아써",
-        "is_live": true,
-        "title": "[홍신소] 8시) 울큰고님 깃발 전쟁 / 산타 방셀 확정 524 💙시그풍",
-        "viewers": 17,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290256554",
-        "live_url": "https://play.sooplive.co.kr/jjoasseo13/290256554"
+        "is_live": false
     },
     {
         "id": "kayooo",
         "name": "용아리",
         "is_live": true,
-        "title": "울큰고님 깃발 전쟁출전!❤️레드팀🎄방셀 룰렛 33/330 🦖[사자회]",
+        "title": "GTA 가리사우루스🎄방셀 룰렛 33/330 🦖[사자회]",
         "viewers": 11,
         "thumbnail": "https://liveimg.afreecatv.com/m/290260636",
         "live_url": "https://play.sooplive.co.kr/kayooo/290260636"
