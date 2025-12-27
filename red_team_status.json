@@ -37,11 +37,7 @@
     {
         "id": "eun0333",
         "name": "우미",
-        "is_live": true,
-        "title": "[LAC] 하이구 보스 우마이 💖 산타걸 한정 방셀 33/330",
-        "viewers": 19,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290291160",
-        "live_url": "https://play.sooplive.co.kr/eun0333/290291160"
+        "is_live": false
     },
     {
         "id": "jjoasseo13",
