@@ -4,7 +4,7 @@
         "name": "쪼이",
         "is_live": true,
         "title": "쪼이 딴딴배 킬내기 오아밸런스",
-        "viewers": 111,
+        "viewers": 117,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282048",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290282048"
     },
@@ -16,11 +16,7 @@
     {
         "id": "niniming",
         "name": "니니밍",
-        "is_live": true,
-        "title": "[지력] 오늘도 호홋~!!! ⭐ 방셀33/330",
-        "viewers": 27,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290282110",
-        "live_url": "https://play.sooplive.co.kr/niniming/290282110"
+        "is_live": false
     },
     {
         "id": "doki0818",
@@ -31,8 +27,8 @@
         "id": "khj011219",
         "name": "기찬하",
         "is_live": true,
-        "title": "[습레기통] 가스트 노래.. 연습 우리 이대로 괜찮을까?ㅣ크리스마스 룰렛 33/330",
-        "viewers": 50,
+        "title": "[습레기통] 소통시간ㅣ크리스마스 룰렛 33/330",
+        "viewers": 53,
         "thumbnail": "https://liveimg.afreecatv.com/m/290283100",
         "live_url": "https://play.sooplive.co.kr/khj011219/290283100"
     },
