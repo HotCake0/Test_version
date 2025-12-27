@@ -4,7 +4,7 @@
         "name": "주드",
         "is_live": true,
         "title": "주드 타요형 포켓몬 타워 디펜스CK",
-        "viewers": 11,
+        "viewers": 15,
         "thumbnail": "https://liveimg.afreecatv.com/m/290293524",
         "live_url": "https://play.sooplive.co.kr/rkdalstnld/290293524"
     },
@@ -13,7 +13,7 @@
         "name": "황정민",
         "is_live": true,
         "title": "타요 포켓몬 타워 디펜스 CK",
-        "viewers": 75,
+        "viewers": 72,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282034",
         "live_url": "https://play.sooplive.co.kr/gtw0308/290282034"
     },
@@ -21,8 +21,8 @@
         "id": "star124",
         "name": "하밍",
         "is_live": true,
-        "title": "🍊타요님 포켓몬 타워 디펜스 CK !",
-        "viewers": 16,
+        "title": "🍊타요님 포켓몬 타워 디펜스 CK ! w.해리,떵규,딸기슈몽이",
+        "viewers": 14,
         "thumbnail": "https://liveimg.afreecatv.com/m/290285442",
         "live_url": "https://play.sooplive.co.kr/star124/290285442"
     },
@@ -43,11 +43,7 @@
     {
         "id": "xpdpfv2",
         "name": "이지수",
-        "is_live": true,
-        "title": "[고래상사] 헉 지수 9주년이래요! 멸망전 대비 배그 연습 w.김마렌 쏭이 조아라",
-        "viewers": 42,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290287280",
-        "live_url": "https://play.sooplive.co.kr/xpdpfv2/290287280"
+        "is_live": false
     },
     {
         "id": "rjsdnr115",
@@ -58,7 +54,7 @@
         "id": "yotsubakoe",
         "name": "코에",
         "is_live": true,
-        "title": "🍀스타 메운디 미션 걸어주세요! (w.은초롱,빈쫑,비비)🎄 / 그캠단체방셀 3천개🎤",
+        "title": "🍀스타 메운디 미션 걸어주세요! (w.비비)🎄 / 그캠단체방셀 3천개🎤",
         "viewers": 43,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282710",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290282710"
