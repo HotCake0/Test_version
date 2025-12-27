@@ -7,18 +7,14 @@
     {
         "id": "gtw0308",
         "name": "황정민",
-        "is_live": true,
-        "title": "타요 포켓몬 타워 디펜스 CK 2",
-        "viewers": 53,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290282034",
-        "live_url": "https://play.sooplive.co.kr/gtw0308/290282034"
+        "is_live": false
     },
     {
         "id": "star124",
         "name": "하밍",
         "is_live": true,
-        "title": "🍊타요님 포켓몬 타워 디펜스 CK ! w.해리,떵규,딸기슈몽이",
-        "viewers": 20,
+        "title": "🍊포켓몬 타워 디펜스 !",
+        "viewers": 16,
         "thumbnail": "https://liveimg.afreecatv.com/m/290285442",
         "live_url": "https://play.sooplive.co.kr/star124/290285442"
     },
@@ -47,7 +43,7 @@
         "name": "코에",
         "is_live": true,
         "title": "🍀스타 메운디 미션 걸어주세요! (w.비비)🎄 / 그캠단체방셀 3천개🎤",
-        "viewers": 44,
+        "viewers": 47,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282710",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290282710"
     },
