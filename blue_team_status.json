@@ -2,14 +2,18 @@
     {
         "id": "rkdalstnld",
         "name": "주드",
-        "is_live": false
+        "is_live": true,
+        "title": "주드 타요형 포켓몬 타워 디펜스CK",
+        "viewers": 11,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290293524",
+        "live_url": "https://play.sooplive.co.kr/rkdalstnld/290293524"
     },
     {
         "id": "gtw0308",
         "name": "황정민",
         "is_live": true,
-        "title": "2025 숲 시상식 훔쳐보기",
-        "viewers": 70,
+        "title": "타요 포켓몬 타워 디펜스 CK",
+        "viewers": 77,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282034",
         "live_url": "https://play.sooplive.co.kr/gtw0308/290282034"
     },
@@ -17,8 +21,8 @@
         "id": "star124",
         "name": "하밍",
         "is_live": true,
-        "title": "🍊SOOP 시상식 같이 보기 !",
-        "viewers": 17,
+        "title": "🍊타요님 포켓몬 타워 디펜스 CK !",
+        "viewers": 13,
         "thumbnail": "https://liveimg.afreecatv.com/m/290285442",
         "live_url": "https://play.sooplive.co.kr/star124/290285442"
     },
@@ -26,8 +30,8 @@
         "id": "villlo",
         "name": "왜냐니",
         "is_live": true,
-        "title": "호호호호",
-        "viewers": 24,
+        "title": "구너냐니 입중계) 노팅엄 파이팅!!!!",
+        "viewers": 25,
         "thumbnail": "https://liveimg.afreecatv.com/m/290284272",
         "live_url": "https://play.sooplive.co.kr/villlo/290284272"
     },
@@ -36,7 +40,7 @@
         "name": "또오냥",
         "is_live": true,
         "title": "룸 404가 뭔데? 오늘 게스트 있음",
-        "viewers": 67,
+        "viewers": 56,
         "thumbnail": "https://liveimg.afreecatv.com/m/290286354",
         "live_url": "https://play.sooplive.co.kr/toocat030/290286354"
     },
@@ -45,7 +49,7 @@
         "name": "이지수",
         "is_live": true,
         "title": "[고래상사] 멸망전 대비 배그 연습 w.김마렌 쏭이 조아라",
-        "viewers": 63,
+        "viewers": 52,
         "thumbnail": "https://liveimg.afreecatv.com/m/290287280",
         "live_url": "https://play.sooplive.co.kr/xpdpfv2/290287280"
     },
@@ -54,7 +58,7 @@
         "name": "고채린",
         "is_live": true,
         "title": "[홍신소] 나 순도기 !",
-        "viewers": 22,
+        "viewers": 20,
         "thumbnail": "https://liveimg.afreecatv.com/m/290283194",
         "live_url": "https://play.sooplive.co.kr/rjsdnr115/290283194"
     },
@@ -62,8 +66,8 @@
         "id": "yotsubakoe",
         "name": "코에",
         "is_live": true,
-        "title": "🍀시상식 같이봐요!🎄 / 그캠단체방셀 3천개🎤",
-        "viewers": 36,
+        "title": "🍀후열 롤 연습!! (w.은초롱,온유일,이투,빈쫑)🎄 / 그캠단체방셀 3천개🎤",
+        "viewers": 37,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282710",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290282710"
     },
@@ -71,8 +75,8 @@
         "id": "etwo22",
         "name": "이투",
         "is_live": true,
-        "title": "👻숲 연말 시상식 함께보기 캐치캐치~",
-        "viewers": 30,
+        "title": "👻그린캠프와 롤 캐치캐치",
+        "viewers": 26,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282932",
         "live_url": "https://play.sooplive.co.kr/etwo22/290282932"
     },
