@@ -4,7 +4,7 @@
         "name": "쪼이",
         "is_live": true,
         "title": "쪼이 딴딴배 킬내기 오아밸런스",
-        "viewers": 113,
+        "viewers": 117,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282048",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290282048"
     },
@@ -17,8 +17,8 @@
         "id": "niniming",
         "name": "니니밍",
         "is_live": true,
-        "title": "[지력]모두의마블 개초보 w빡쏘 ⭐ 방셀33/330",
-        "viewers": 48,
+        "title": "[지력] 오늘도 호홋~!!! ⭐ 방셀33/330",
+        "viewers": 47,
         "thumbnail": "https://liveimg.afreecatv.com/m/290282110",
         "live_url": "https://play.sooplive.co.kr/niniming/290282110"
     },
@@ -39,11 +39,7 @@
     {
         "id": "015234",
         "name": "아눙",
-        "is_live": true,
-        "title": "[홍신소] 오늘은",
-        "viewers": 17,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290292854",
-        "live_url": "https://play.sooplive.co.kr/015234/290292854"
+        "is_live": false
     },
     {
         "id": "isq1158",
@@ -55,7 +51,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC] 하이구! 오랜만에 진짜 경찰 우마이 💖 산타걸 한정 방셀 33/330",
-        "viewers": 30,
+        "viewers": 36,
         "thumbnail": "https://liveimg.afreecatv.com/m/290291160",
         "live_url": "https://play.sooplive.co.kr/eun0333/290291160"
     },
@@ -73,7 +69,7 @@
         "name": "용아리",
         "is_live": true,
         "title": "롤린이 롤 캐릭터 돌잡이 하기🦕 방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 12,
+        "viewers": 13,
         "thumbnail": "https://liveimg.afreecatv.com/m/290279086",
         "live_url": "https://play.sooplive.co.kr/kayooo/290279086"
     }
