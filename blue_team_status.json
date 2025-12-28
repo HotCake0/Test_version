@@ -30,11 +30,7 @@
     {
         "id": "toocat030",
         "name": "또오냥",
-        "is_live": true,
-        "title": "최강버튜버2 당첨된 오냥입니다..와우!!!",
-        "viewers": 87,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290320116",
-        "live_url": "https://play.sooplive.co.kr/toocat030/290320116"
+        "is_live": false
     },
     {
         "id": "xpdpfv2",
@@ -51,7 +47,7 @@
         "name": "코에",
         "is_live": true,
         "title": "🍀오늘도 롤 돌격!! (w.은초롱,한비,빈쫑,주드)🎄 / 그캠단체방셀 3천개🎤",
-        "viewers": 34,
+        "viewers": 37,
         "thumbnail": "https://liveimg.afreecatv.com/m/290314254",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290314254"
     },
