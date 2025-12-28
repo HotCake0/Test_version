@@ -2,11 +2,7 @@
     {
         "id": "rkdalstnld",
         "name": "주드",
-        "is_live": true,
-        "title": "주드 새벽 롤",
-        "viewers": 8,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290311868",
-        "live_url": "https://play.sooplive.co.kr/rkdalstnld/290311868"
+        "is_live": false
     },
     {
         "id": "gtw0308",
@@ -41,11 +37,7 @@
     {
         "id": "yotsubakoe",
         "name": "코에",
-        "is_live": true,
-        "title": "🍀오늘도 롤 돌격!! (w.은초롱,한비,빈쫑,주드)🎄 / 그캠단체방셀 3천개🎤",
-        "viewers": 34,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290314254",
-        "live_url": "https://play.sooplive.co.kr/yotsubakoe/290314254"
+        "is_live": false
     },
     {
         "id": "etwo22",
