@@ -4,7 +4,7 @@
         "name": "주드",
         "is_live": true,
         "title": "주드 새벽 롤",
-        "viewers": 18,
+        "viewers": 17,
         "thumbnail": "https://liveimg.afreecatv.com/m/290311868",
         "live_url": "https://play.sooplive.co.kr/rkdalstnld/290311868"
     },
@@ -18,7 +18,7 @@
         "name": "하밍",
         "is_live": true,
         "title": "🍊AI 맞추기 !",
-        "viewers": 16,
+        "viewers": 20,
         "thumbnail": "https://liveimg.afreecatv.com/m/290320552",
         "live_url": "https://play.sooplive.co.kr/star124/290320552"
     },
@@ -32,34 +32,26 @@
         "name": "또오냥",
         "is_live": true,
         "title": "최강버튜버2 당첨된 오냥입니다..와우!!!",
-        "viewers": 81,
+        "viewers": 92,
         "thumbnail": "https://liveimg.afreecatv.com/m/290320116",
         "live_url": "https://play.sooplive.co.kr/toocat030/290320116"
     },
     {
         "id": "xpdpfv2",
         "name": "이지수",
-        "is_live": true,
-        "title": "[고래상사] 지수 오늘 8주년이에욤>3<",
-        "viewers": 28,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290307304",
-        "live_url": "https://play.sooplive.co.kr/xpdpfv2/290307304"
+        "is_live": false
     },
     {
         "id": "rjsdnr115",
         "name": "고채린",
-        "is_live": true,
-        "title": "[홍신소] LAC EMS 나야나 순덕이 방셀 1225/2872",
-        "viewers": 21,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290312126",
-        "live_url": "https://play.sooplive.co.kr/rjsdnr115/290312126"
+        "is_live": false
     },
     {
         "id": "yotsubakoe",
         "name": "코에",
         "is_live": true,
         "title": "🍀오늘도 롤 돌격!! (w.은초롱,한비,빈쫑,주드)🎄 / 그캠단체방셀 3천개🎤",
-        "viewers": 42,
+        "viewers": 39,
         "thumbnail": "https://liveimg.afreecatv.com/m/290314254",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290314254"
     },
