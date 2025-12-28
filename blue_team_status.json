@@ -4,7 +4,7 @@
         "name": "주드",
         "is_live": true,
         "title": "주드 새벽 롤",
-        "viewers": 9,
+        "viewers": 8,
         "thumbnail": "https://liveimg.afreecatv.com/m/290311868",
         "live_url": "https://play.sooplive.co.kr/rkdalstnld/290311868"
     },
@@ -16,11 +16,7 @@
     {
         "id": "star124",
         "name": "하밍",
-        "is_live": true,
-        "title": "🍊아이언4 미드연습중",
-        "viewers": 19,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290320552",
-        "live_url": "https://play.sooplive.co.kr/star124/290320552"
+        "is_live": false
     },
     {
         "id": "villlo",
@@ -47,7 +43,7 @@
         "name": "코에",
         "is_live": true,
         "title": "🍀오늘도 롤 돌격!! (w.은초롱,한비,빈쫑,주드)🎄 / 그캠단체방셀 3천개🎤",
-        "viewers": 29,
+        "viewers": 34,
         "thumbnail": "https://liveimg.afreecatv.com/m/290314254",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290314254"
     },
