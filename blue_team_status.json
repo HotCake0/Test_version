@@ -24,14 +24,18 @@
         "name": "또오냥",
         "is_live": true,
         "title": "또오냥 이거 보고 웃냐?",
-        "viewers": 83,
+        "viewers": 80,
         "thumbnail": "https://liveimg.afreecatv.com/m/290303230",
         "live_url": "https://play.sooplive.co.kr/toocat030/290303230"
     },
     {
         "id": "xpdpfv2",
         "name": "이지수",
-        "is_live": false
+        "is_live": true,
+        "title": "[고래상사] 안녕하세요:)",
+        "viewers": 51,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290307304",
+        "live_url": "https://play.sooplive.co.kr/xpdpfv2/290307304"
     },
     {
         "id": "rjsdnr115",
