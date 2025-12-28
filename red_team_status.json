@@ -21,7 +21,11 @@
     {
         "id": "doki0818",
         "name": "감자가비",
-        "is_live": false
+        "is_live": true,
+        "title": "[고래상사]9시)고래상사 연말 시상식!!",
+        "viewers": 10,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290315344",
+        "live_url": "https://play.sooplive.co.kr/doki0818/290315344"
     },
     {
         "id": "khj011219",
@@ -33,7 +37,7 @@
         "name": "아눙",
         "is_live": true,
         "title": "[홍신소] 8시 홍신소 연말 토크토크",
-        "viewers": 19,
+        "viewers": 16,
         "thumbnail": "https://liveimg.afreecatv.com/m/290311692",
         "live_url": "https://play.sooplive.co.kr/015234/290311692"
     },
@@ -52,7 +56,7 @@
         "name": "죠아써",
         "is_live": true,
         "title": "[홍신소] 8시 홍신소 연말 모임  / 산타 방셀 확정 524 💙시그풍",
-        "viewers": 28,
+        "viewers": 30,
         "thumbnail": "https://liveimg.afreecatv.com/m/290309830",
         "live_url": "https://play.sooplive.co.kr/jjoasseo13/290309830"
     },
@@ -61,7 +65,7 @@
         "name": "용아리",
         "is_live": true,
         "title": "사자회 롤린이 모임🦕 방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 15,
+        "viewers": 13,
         "thumbnail": "https://liveimg.afreecatv.com/m/290309758",
         "live_url": "https://play.sooplive.co.kr/kayooo/290309758"
     }
