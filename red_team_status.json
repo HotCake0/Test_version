@@ -4,7 +4,7 @@
         "name": "쪼이",
         "is_live": true,
         "title": "쪼이 배그멸망전 티어 회의",
-        "viewers": 118,
+        "viewers": 120,
         "thumbnail": "https://liveimg.afreecatv.com/m/290308580",
         "live_url": "https://play.sooplive.co.kr/joyjo2/290308580"
     },
@@ -27,7 +27,7 @@
         "name": "감자가비",
         "is_live": true,
         "title": "[고래상사]증칼 고래내전 드가자~",
-        "viewers": 29,
+        "viewers": 27,
         "thumbnail": "https://liveimg.afreecatv.com/m/290315344",
         "live_url": "https://play.sooplive.co.kr/doki0818/290315344"
     },
@@ -39,20 +39,12 @@
     {
         "id": "015234",
         "name": "아눙",
-        "is_live": true,
-        "title": "[홍신소] 후열 LAC",
-        "viewers": 17,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290311692",
-        "live_url": "https://play.sooplive.co.kr/015234/290311692"
+        "is_live": false
     },
     {
         "id": "isq1158",
         "name": "구월이",
-        "is_live": true,
-        "title": "[사자회]소똥",
-        "viewers": 10,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290317298",
-        "live_url": "https://play.sooplive.co.kr/isq1158/290317298"
+        "is_live": false
     },
     {
         "id": "eun0333",
