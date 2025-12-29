@@ -24,7 +24,7 @@
         "name": "기찬하",
         "is_live": true,
         "title": "[습레기통] 안녕하세용가리ㅣ크리스마스 룰렛 33/330",
-        "viewers": 64,
+        "viewers": 81,
         "thumbnail": "https://liveimg.afreecatv.com/m/290332156",
         "live_url": "https://play.sooplive.co.kr/khj011219/290332156"
     },
@@ -51,6 +51,10 @@
     {
         "id": "kayooo",
         "name": "용아리",
-        "is_live": false
+        "is_live": true,
+        "title": "안녕사우루스/ 7시) 롤체 더블업 대전 [문제가 두배]🦕 방셀 룰렛 33/330 🦖[사자회]",
+        "viewers": 6,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290333498",
+        "live_url": "https://play.sooplive.co.kr/kayooo/290333498"
     }
 ]
