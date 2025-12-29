@@ -2,7 +2,11 @@
     {
         "id": "rkdalstnld",
         "name": "주드",
-        "is_live": false
+        "is_live": true,
+        "title": "주드 배그멸망전 경매 우리팀은?",
+        "viewers": 44,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290335516",
+        "live_url": "https://play.sooplive.co.kr/rkdalstnld/290335516"
     },
     {
         "id": "gtw0308",
@@ -27,14 +31,18 @@
     {
         "id": "xpdpfv2",
         "name": "이지수",
-        "is_live": false
+        "is_live": true,
+        "title": "[고래상사] 안녕하세요:-)",
+        "viewers": 9,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290336298",
+        "live_url": "https://play.sooplive.co.kr/xpdpfv2/290336298"
     },
     {
         "id": "rjsdnr115",
         "name": "고채린",
         "is_live": true,
         "title": "[홍신소] 고채린x이깨굴x하비x또야몽 파티애니멀즈",
-        "viewers": 19,
+        "viewers": 24,
         "thumbnail": "https://liveimg.afreecatv.com/m/290334576",
         "live_url": "https://play.sooplive.co.kr/rjsdnr115/290334576"
     },
