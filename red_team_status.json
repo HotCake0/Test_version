@@ -21,11 +21,7 @@
     {
         "id": "doki0818",
         "name": "감자가비",
-        "is_live": true,
-        "title": "[고래상사]FC26감독모드 축알못인데오...",
-        "viewers": 60,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290343204",
-        "live_url": "https://play.sooplive.co.kr/doki0818/290343204"
+        "is_live": false
     },
     {
         "id": "khj011219",
