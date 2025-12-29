@@ -2,10 +2,6 @@
     {
         "id": "melodingding",
         "name": "멜로딩딩",
-        "is_live": true,
-        "title": "[고래상사] 잠시쉬어감",
-        "viewers": 30,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290339356",
-        "live_url": "https://play.sooplive.co.kr/melodingding/290339356"
+        "is_live": false
     }
 ]
