@@ -29,7 +29,7 @@
         "name": "이지수",
         "is_live": true,
         "title": "[고래상사] 멸망전 대비 저티어랜드 연습",
-        "viewers": 32,
+        "viewers": 31,
         "thumbnail": "https://liveimg.afreecatv.com/m/290336298",
         "live_url": "https://play.sooplive.co.kr/xpdpfv2/290336298"
     },
@@ -45,18 +45,14 @@
     {
         "id": "yotsubakoe",
         "name": "코에",
-        "is_live": true,
-        "title": "🍀로스트아크 오랜만에?🎤",
-        "viewers": 29,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290337196",
-        "live_url": "https://play.sooplive.co.kr/yotsubakoe/290337196"
+        "is_live": false
     },
     {
         "id": "etwo22",
         "name": "이투",
         "is_live": true,
         "title": "👻ai 영상 맞춰버리기 게임 / 맞추는 만큼 기부",
-        "viewers": 28,
+        "viewers": 31,
         "thumbnail": "https://liveimg.afreecatv.com/m/290336904",
         "live_url": "https://play.sooplive.co.kr/etwo22/290336904"
     },
