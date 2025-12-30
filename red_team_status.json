@@ -39,7 +39,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC/롤동] 후열 우마이 어트렉션 💖 한정 방셀 33/330 이틀남아따 =''v''=",
-        "viewers": 36,
+        "viewers": 35,
         "thumbnail": "https://liveimg.afreecatv.com/m/290354058",
         "live_url": "https://play.sooplive.co.kr/eun0333/290354058"
     },
@@ -51,10 +51,6 @@
     {
         "id": "kayooo",
         "name": "용아리",
-        "is_live": true,
-        "title": "탈탈 털렸사우루스🦕 방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 7,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290358566",
-        "live_url": "https://play.sooplive.co.kr/kayooo/290358566"
+        "is_live": false
     }
 ]
