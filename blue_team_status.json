@@ -42,14 +42,18 @@
     {
         "id": "etwo22",
         "name": "이투",
-        "is_live": false
+        "is_live": true,
+        "title": "👻이투, 이대로 괜찮은가?(집 비번 까먹음)",
+        "viewers": 11,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290357282",
+        "live_url": "https://play.sooplive.co.kr/etwo22/290357282"
     },
     {
         "id": "o0opha",
         "name": "서라0",
         "is_live": true,
         "title": "[습레기통] 나왔다!!!!",
-        "viewers": 30,
+        "viewers": 39,
         "thumbnail": "https://liveimg.afreecatv.com/m/290355966",
         "live_url": "https://play.sooplive.co.kr/o0opha/290355966"
     }
