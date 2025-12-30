@@ -2,11 +2,7 @@
     {
         "id": "joyjo2",
         "name": "쪼이",
-        "is_live": true,
-        "title": "쪼이 쪼등학교 글램핑 (w. 모야 꼼모리 찌로리)",
-        "viewers": 320,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290354836",
-        "live_url": "https://play.sooplive.co.kr/joyjo2/290354836"
+        "is_live": false
     },
     {
         "id": "wkdghdtjr99",
@@ -20,7 +16,11 @@
     {
         "id": "niniming",
         "name": "니니밍",
-        "is_live": false
+        "is_live": true,
+        "title": "[지력] 밍하밍하 추운 겨울바람⭐ 룰렛33/330",
+        "viewers": 29,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290361460",
+        "live_url": "https://play.sooplive.co.kr/niniming/290361460"
     },
     {
         "id": "doki0818",
@@ -47,7 +47,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC/롤동] 아이언1 💖 한정 방셀 33/330 이틀남아따 =''v''=",
-        "viewers": 15,
+        "viewers": 14,
         "thumbnail": "https://liveimg.afreecatv.com/m/290354058",
         "live_url": "https://play.sooplive.co.kr/eun0333/290354058"
     },
@@ -60,8 +60,8 @@
         "id": "kayooo",
         "name": "용아리",
         "is_live": true,
-        "title": "🦖땃쥐의 롤 원데이 클래스🦕 방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 7,
+        "title": "🦖롤린이가 배우는 땃쥐의 롤 원데이 클래스🦕 방셀 룰렛 33/330 🦖[사자회]",
+        "viewers": 9,
         "thumbnail": "https://liveimg.afreecatv.com/m/290358566",
         "live_url": "https://play.sooplive.co.kr/kayooo/290358566"
     }
