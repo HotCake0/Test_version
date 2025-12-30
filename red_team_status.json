@@ -7,18 +7,14 @@
     {
         "id": "wkdghdtjr99",
         "name": "여백이다",
-        "is_live": true,
-        "title": "바카르마) 검성 1.3 뉴비... 도와주세요 선생님들",
-        "viewers": 6,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290345226",
-        "live_url": "https://play.sooplive.co.kr/wkdghdtjr99/290345226"
+        "is_live": false
     },
     {
         "id": "niniming",
         "name": "니니밍",
         "is_live": true,
         "title": "[지력] 밍하밍하 추운 겨울바람⭐ 룰렛33/330",
-        "viewers": 34,
+        "viewers": 37,
         "thumbnail": "https://liveimg.afreecatv.com/m/290361460",
         "live_url": "https://play.sooplive.co.kr/niniming/290361460"
     },
@@ -47,7 +43,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC/롤동] 아이언1 💖 한정 방셀 33/330 이틀남아따 =''v''=",
-        "viewers": 14,
+        "viewers": 15,
         "thumbnail": "https://liveimg.afreecatv.com/m/290354058",
         "live_url": "https://play.sooplive.co.kr/eun0333/290354058"
     },
@@ -61,7 +57,7 @@
         "name": "용아리",
         "is_live": true,
         "title": "🦖롤린이가 배우는 땃쥐의 롤 원데이 클래스🦕 방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 11,
+        "viewers": 12,
         "thumbnail": "https://liveimg.afreecatv.com/m/290358566",
         "live_url": "https://play.sooplive.co.kr/kayooo/290358566"
     }
