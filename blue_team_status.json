@@ -17,11 +17,7 @@
     {
         "id": "villlo",
         "name": "왜냐니",
-        "is_live": true,
-        "title": "이게 1등 팀이야~",
-        "viewers": 25,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290373294",
-        "live_url": "https://play.sooplive.co.kr/villlo/290373294"
+        "is_live": false
     },
     {
         "id": "toocat030",
