@@ -12,11 +12,7 @@
     {
         "id": "niniming",
         "name": "니니밍",
-        "is_live": true,
-        "title": "[지력] ㄷㄷㄷㄷ31일이야 ⭐ 룰렛33/330",
-        "viewers": 24,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290361460",
-        "live_url": "https://play.sooplive.co.kr/niniming/290361460"
+        "is_live": false
     },
     {
         "id": "doki0818",
@@ -43,7 +39,7 @@
         "name": "우미",
         "is_live": true,
         "title": "[LAC/롤동] 후열 우마이 어트렉션 💖 한정 방셀 33/330 이틀남아따 =''v''=",
-        "viewers": 35,
+        "viewers": 33,
         "thumbnail": "https://liveimg.afreecatv.com/m/290354058",
         "live_url": "https://play.sooplive.co.kr/eun0333/290354058"
     },
@@ -57,7 +53,7 @@
         "name": "용아리",
         "is_live": true,
         "title": "공룡 복원하다가 방송 터진애🦕 방셀 룰렛 33/330 🦖[사자회]",
-        "viewers": 9,
+        "viewers": 10,
         "thumbnail": "https://liveimg.afreecatv.com/m/290358566",
         "live_url": "https://play.sooplive.co.kr/kayooo/290358566"
     }
