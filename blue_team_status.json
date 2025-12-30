@@ -2,11 +2,7 @@
     {
         "id": "rkdalstnld",
         "name": "주드",
-        "is_live": true,
-        "title": "주드X연보라X달묘X엣치쿠 멸망전 연습 배그",
-        "viewers": 21,
-        "thumbnail": "https://liveimg.afreecatv.com/m/290360344",
-        "live_url": "https://play.sooplive.co.kr/rkdalstnld/290360344"
+        "is_live": false
     },
     {
         "id": "gtw0308",
@@ -28,7 +24,7 @@
         "name": "또오냥",
         "is_live": true,
         "title": "뉴걸파티 지원자 추려보자",
-        "viewers": 73,
+        "viewers": 69,
         "thumbnail": "https://liveimg.afreecatv.com/m/290370906",
         "live_url": "https://play.sooplive.co.kr/toocat030/290370906"
     },
@@ -47,7 +43,7 @@
         "name": "코에",
         "is_live": true,
         "title": "🍀10시 그린캠프 송년회!🎤",
-        "viewers": 28,
+        "viewers": 33,
         "thumbnail": "https://liveimg.afreecatv.com/m/290357378",
         "live_url": "https://play.sooplive.co.kr/yotsubakoe/290357378"
     },
@@ -56,7 +52,7 @@
         "name": "이투",
         "is_live": true,
         "title": "👻그린캠프 망년회",
-        "viewers": 26,
+        "viewers": 22,
         "thumbnail": "https://liveimg.afreecatv.com/m/290357282",
         "live_url": "https://play.sooplive.co.kr/etwo22/290357282"
     },
