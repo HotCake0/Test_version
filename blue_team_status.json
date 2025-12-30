@@ -22,7 +22,11 @@
     {
         "id": "toocat030",
         "name": "또오냥",
-        "is_live": false
+        "is_live": true,
+        "title": "[온양선녀]연말 게스트 : 뮤즈",
+        "viewers": 107,
+        "thumbnail": "https://liveimg.afreecatv.com/m/290352642",
+        "live_url": "https://play.sooplive.co.kr/toocat030/290352642"
     },
     {
         "id": "xpdpfv2",
