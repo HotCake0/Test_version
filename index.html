@@ -6,7 +6,7 @@
     <title>고래시티 - Gorae City</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
-        /* 기본 설정 */
+        /* [기본 설정] */
         * {
             margin: 0;
             padding: 0;
@@ -17,13 +17,13 @@
         body {
             background-color: #111;
             color: white;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
+            overflow: hidden; /* 전체 페이지 스크롤 방지 (앱 같은 느낌) */
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            height: 100vh; /* 화면 꽉 채우기 */
         }
 
-        /* 배경 이미지 설정 */
+        /* [배경 이미지 설정] */
         .bg-container {
             position: fixed;
             top: 0;
@@ -31,41 +31,39 @@
             width: 100%;
             height: 100vh;
             z-index: -1;
-            /* 파일명을 실제 저장된 이름으로 변경해주세요 */
+            /* 요청하신 대로 파일명 변경 완료 */
             background-image: url('background.jpg'); 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
 
-        /* 전체 배경 어둡게 처리 (오버레이) */
+        /* 배경 오버레이 (글자 가독성용) */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.3); /* 전체적인 밝기 조절 (0.3 ~ 0.5 추천) */
+            background: rgba(0, 0, 0, 0.35);
             z-index: -1;
         }
 
-        /* 네비게이션 바 */
+        /* [헤더] */
         header {
-            position: fixed;
-            top: 0;
             width: 100%;
             padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
+            flex-shrink: 0; /* 크기 줄어듦 방지 */
         }
 
         .nav-logo {
             font-weight: 800;
             font-size: 1.2rem;
             letter-spacing: 1px;
-            opacity: 0.9;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
@@ -80,33 +78,41 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        .nav-links button:hover {
-            color: #fff;
-        }
+        .nav-links button:hover { color: #fff; }
 
-        /* 메인 컨텐츠 영역 */
-        .main-container {
-            flex: 1; /* 남은 공간을 다 차지하게 함 */
+        /* [공통 컨텐츠 영역] */
+        .content-wrapper {
+            flex: 1; /* 남은 공간 모두 차지 */
+            position: relative;
+            overflow: hidden; /* 내부 스크롤을 위해 숨김 */
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            transition: opacity 0.5s ease;
-            width: 100%;
+            justify-content: center; /* 세로 중앙 정렬 */
         }
 
-        /* 로고 스타일 */
+        /* [메인 화면] */
+        .main-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: opacity 0.4s ease;
+            position: absolute; /* 겹치게 배치 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
         .main-logo {
             max-width: 650px;
             width: 80%;
             margin-bottom: 50px;
-            /* 로고 그림자 강화 */
             filter: drop-shadow(0 0 15px rgba(0,0,0,0.6));
             animation: fadeInDown 1s ease-out;
         }
 
-        /* 버튼 그룹 */
+        /* 버튼 디자인 */
         .btn-group {
             display: flex;
             gap: 20px;
@@ -125,136 +131,106 @@
             backdrop-filter: blur(5px);
         }
 
-        .btn-primary {
-            background-color: white;
-            color: #000;
-            border-color: white;
-        }
+        .btn-primary { background-color: white; color: #000; border-color: white; }
+        .btn-primary:hover { background-color: #ddd; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
-        .btn-primary:hover {
-            background-color: #ddd;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
+        .btn-secondary { background-color: rgba(0, 0, 0, 0.6); color: white; }
+        .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.2); border-color: white; transform: translateY(-3px); }
 
-        .btn-secondary {
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-color: white;
-            transform: translateY(-3px);
-        }
-
-        /* 소식 페이지 */
+        /* [소식/패치노트 화면] */
         .news-container {
-            display: none;
-            flex: 1;
-            padding-top: 100px;
-            max-width: 1000px;
+            display: none; /* 초기엔 숨김 */
             width: 100%;
+            height: 100%; /* 부모 높이 꽉 채움 */
+            max-width: 1000px;
             margin: 0 auto;
             opacity: 0;
-            transition: opacity 0.5s ease;
-            padding-bottom: 50px;
+            transition: opacity 0.4s ease;
+            
+            /* 내부 스크롤 설정 */
+            overflow-y: auto; 
+            padding: 40px 20px;
+            
+            /* 스크롤바 디자인 */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
         }
 
         .news-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
             padding-bottom: 20px;
-            padding-left: 20px;
-            padding-right: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            /* 헤더 배경이 없으면 글자가 겹치므로 살짝 어둡게 처리 */
+            /* text-shadow로 가독성 확보 */
         }
 
         .news-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
         .close-btn {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.4);
             color: white;
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 30px;
             cursor: pointer;
             transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
-        
-        .close-btn:hover {
-            background: white;
-            color: black;
-        }
+        .close-btn:hover { background: white; color: black; }
 
+        /* 패치노트 카드 */
         .patch-note {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
             padding: 30px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             backdrop-filter: blur(10px);
-            margin-left: 20px;
-            margin-right: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.5s ease-out;
         }
 
-        .patch-date { color: #aaa; font-size: 0.9rem; margin-bottom: 10px; display: block; }
-        .patch-version { color: #4facfe; font-weight: bold; margin-right: 10px; }
-        .patch-content ul { list-style-position: inside; margin-top: 15px; color: #ddd; line-height: 1.6; }
+        .patch-date { color: #aaa; font-size: 0.9rem; margin-bottom: 8px; display: block; }
+        .patch-version { color: #4facfe; font-weight: bold; margin-right: 10px; font-size: 1.1rem; }
+        .patch-content ul { list-style-position: inside; margin-top: 15px; color: #e0e0e0; line-height: 1.7; }
+        .patch-content li { margin-bottom: 5px; }
 
-        /* 푸터 스타일 수정됨 */
+        /* [푸터] */
         footer {
             width: 100%;
             text-align: center;
-            padding: 60px 20px 30px 20px; /* 위쪽 여백을 늘려 자연스럽게 */
+            padding: 40px 20px 30px 20px;
             color: rgba(255, 255, 255, 0.9);
-            position: relative;
-            z-index: 10;
-            
-            /* 배경색 삭제 -> 그라데이션 추가 (글자 가독성 확보용) */
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%);
+            flex-shrink: 0; /* 크기 줄어듦 방지 */
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 60%, transparent 100%);
+            z-index: 50;
         }
 
-        footer h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        footer p {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-            margin-bottom: 5px;
-        }
-
-        .developer-info {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: #ccc;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
-        
-        .copyright {
-            margin-top: 15px;
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
+        footer h3 { font-size: 1.3rem; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+        footer p { font-size: 0.9rem; margin-bottom: 4px; text-shadow: 0 1px 3px rgba(0,0,0,1); opacity: 0.9; }
+        .developer-info { margin-top: 20px; font-size: 0.8rem; color: #bbb; text-shadow: 0 1px 2px black; }
+        .copyright { margin-top: 15px; font-size: 0.75rem; opacity: 0.6; }
 
         /* 애니메이션 */
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* 스크롤바 커스텀 */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6); }
+
     </style>
 </head>
 <body>
@@ -271,71 +247,110 @@
         </nav>
     </header>
 
-    <main id="mainPage" class="main-container">
-        <img src="logo.png" alt="고래시티 로고" class="main-logo">
-
-        <div class="btn-group">
-            <a href="https://www.notion.so/ko-kr" target="_blank" class="btn btn-primary">서버 가이드</a>
-            <button onclick="showNews()" class="btn btn-secondary">소식 / 패치노트</button>
-        </div>
-    </main>
-
-    <section id="newsPage" class="news-container">
-        <div class="news-header">
-            <h2 class="news-title">패치 노트</h2>
-            <button class="close-btn" onclick="showMain()">돌아가기</button>
-        </div>
-
-        <article class="patch-note">
-            <span class="patch-date">2025.01.01</span>
-            <h3><span class="patch-version">v1.0.0</span> 고래시티 그랜드 오픈</h3>
-            <div class="patch-content">
-                <ul>
-                    <li>고래시티 서버가 정식으로 오픈되었습니다.</li>
-                    <li>기본 직업군 및 경제 시스템 적용 완료</li>
-                </ul>
+    <div class="content-wrapper">
+        
+        <main id="mainPage" class="main-container">
+            <img src="logo.png" alt="고래시티 로고" class="main-logo">
+            <div class="btn-group">
+                <a href="https://www.notion.so/ko-kr" target="_blank" class="btn btn-primary">서버 가이드</a>
+                <button onclick="showNews()" class="btn btn-secondary">소식 / 패치노트</button>
             </div>
-        </article>
-    </section>
+        </main>
+
+        <section id="newsPage" class="news-container">
+            <div class="news-header">
+                <h2 class="news-title">패치 노트</h2>
+                <button class="close-btn" onclick="showMain()">돌아가기</button>
+            </div>
+
+            <article class="patch-note">
+                <span class="patch-date">2025.01.15</span>
+                <h3><span class="patch-version">v1.1.0</span> 대규모 콘텐츠 업데이트</h3>
+                <div class="patch-content">
+                    <ul>
+                        <li>신규 직업 '해양 경찰' 및 전용 보트 추가</li>
+                        <li>카지노 시스템 오픈 (다이아몬드 카지노)</li>
+                        <li>차량 핸들링 현실성 패치 적용</li>
+                        <li>서버 최적화 및 간헐적 튕김 현상 수정</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="patch-note">
+                <span class="patch-date">2025.01.08</span>
+                <h3><span class="patch-version">v1.0.5</span> 경제 밸런스 패치</h3>
+                <div class="patch-content">
+                    <ul>
+                        <li>편의점 및 주유소 아르바이트 수익 상향 조정</li>
+                        <li>고급 세단 차량 가격 변동</li>
+                        <li>낚시 컨텐츠 어종 추가 및 확률 조정</li>
+                        <li>일부 구역 텍스처 깨짐 현상 수정</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="patch-note">
+                <span class="patch-date">2025.01.01</span>
+                <h3><span class="patch-version">v1.0.0</span> 고래시티 그랜드 오픈</h3>
+                <div class="patch-content">
+                    <ul>
+                        <li>고래시티 서버 정식 오픈!</li>
+                        <li>초기 정착 지원금 이벤트 (~1/31)</li>
+                        <li>디스코드 연동 화이트리스트 시스템 적용</li>
+                        <li>뉴비존 튜토리얼 퀘스트 추가</li>
+                    </ul>
+                </div>
+            </article>
+
+            <div style="height: 20px;"></div>
+        </section>
+
+    </div>
 
     <footer>
         <h3>고래상사</h3>
         <p>Los Santos Maze Bank Tower 74~81F</p>
         <p>전화: 02-1234-5678 | 이메일: whale@gorae.co.kr</p>
-        
         <div class="developer-info">
-            Frontend & Design by [개발자 이름] | Server Dev by [서버 개발자 이름]
+            Frontend by [내 이름] | Server Dev by [서버 개발자]
         </div>
-        
         <p class="copyright">© 2025 GORAECORP. All Rights Reserved.</p>
     </footer>
 
     <script>
+        // 화면 전환 스크립트
         function showNews() {
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
-            const footer = document.querySelector('footer');
 
+            // 메인 숨기기
             mainPage.style.opacity = '0';
             
             setTimeout(() => {
                 mainPage.style.display = 'none';
-                newsPage.style.display = 'flex';
-                // 소식창을 볼 때도 푸터가 자연스럽게 보이도록 유지
-                setTimeout(() => { newsPage.style.opacity = '1'; }, 50);
-            }, 500);
+                newsPage.style.display = 'block';
+                // 약간의 딜레이 후 등장
+                setTimeout(() => {
+                    newsPage.style.opacity = '1';
+                }, 50);
+            }, 400);
         }
 
         function showMain() {
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
 
+            // 뉴스 숨기기
             newsPage.style.opacity = '0';
+
             setTimeout(() => {
                 newsPage.style.display = 'none';
                 mainPage.style.display = 'flex';
-                setTimeout(() => { mainPage.style.opacity = '1'; }, 50);
-            }, 500);
+                // 약간의 딜레이 후 등장
+                setTimeout(() => {
+                    mainPage.style.opacity = '1';
+                }, 50);
+            }, 400);
         }
     </script>
 </body>
