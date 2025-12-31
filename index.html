@@ -3,296 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>깃발전쟁 멀티뷰</title>
+    <title>고래시티 - Gorae City</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
-        :root {
-            --bg-dark: #0f0f0f;
-            --card-bg: #1e1e1e;
-            --accent-green: #00ffa3;
-            --accent-red: #ff4d4d;
-            --accent-blue: #4d94ff;
-            --accent-purple: #a34dff; /* 진행팀 색상 추가 */
-            --text-white: #ffffff;
-            --text-gray: #aaaaaa;
+        /* 기본 설정 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-white);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
+            background-color: #111;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* 배경 이미지 설정 (업로드해주신 1번 사진) */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100vh;
-            overflow: hidden;
+            z-index: -1;
+            /* 파일명을 실제 저장된 이름으로 변경하거나, 파일 이름을 아래와 같이 맞춰주세요 */
+            background-image: url('중첩_시퀀스_89.00_00_07_45.스틸_001.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
+        /* 배경 어둡게 처리 (글자 가독성을 위해) */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4); /* 0.4 수치를 조절하여 밝기 조절 가능 */
+            z-index: -1;
+            backdrop-filter: blur(2px); /* 배경 살짝 흐리게 */
+        }
+
+        /* 네비게이션 바 */
         header {
-            background-color: var(--card-bg);
-            padding: 12px 20px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .nav-links button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            margin-left: 30px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-links button:hover {
+            color: #fff;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        .main-container {
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            border-bottom: 2px solid #333;
-            z-index: 10;
-        }
-
-        .header-top {
-            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 15px;
+            text-align: center;
+            transition: opacity 0.5s ease;
         }
 
-        .team-filter {
+        /* 로고 스타일 (업로드해주신 2번 사진) */
+        .main-logo {
+            max-width: 600px; /* 로고 크기 조절 */
+            width: 80%;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+            animation: fadeInDown 1s ease-out;
+        }
+
+        /* 버튼 그룹 */
+        .btn-group {
             display: flex;
-            gap: 8px;
-            margin-bottom: 5px;
+            gap: 20px;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
         }
 
-        .filter-btn {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: var(--text-gray);
-            padding: 5px 12px;
-            border-radius: 4px;
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
         }
 
-        .filter-btn.active[data-team="all"] { background: #444; color: white; border-color: #666; }
-        .filter-btn.active[data-team="red"] { background: #4d1a1a; color: #ff9999; border-color: var(--accent-red); }
-        .filter-btn.active[data-team="blue"] { background: #1a2a4d; color: #99c2ff; border-color: var(--accent-blue); }
-        /* 진행팀 활성 스타일 */
-        .filter-btn.active[data-team="manager"] { background: #2d1a4d; color: #d199ff; border-color: var(--accent-purple); }
-
-        .live-dot {
-            width: 10px; height: 10px;
-            background-color: #ff4d4d;
-            border-radius: 50%;
-            display: inline-block;
-            animation: blink 1.5s infinite;
+        /* 메인 액션 버튼 (가이드) */
+        .btn-primary {
+            background-color: white;
+            color: #000;
+            border-color: white;
         }
-        @keyframes blink { 50% { opacity: 0.3; } }
 
-        #member-list {
+        .btn-primary:hover {
+            background-color: #ddd;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* 보조 액션 버튼 (소식) */
+        .btn-secondary {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-3px);
+        }
+
+        /* 소식 페이지 (초기엔 숨김) */
+        .news-container {
+            display: none; /* JS로 토글 */
+            padding-top: 100px;
+            max-width: 1000px;
+            margin: 0 auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .news-header {
             display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        #member-list::-webkit-scrollbar { height: 4px; }
-        #member-list::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
-
-        .member-btn {
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            background: #2a2a2a;
-            border: 2px solid transparent;
-            padding: 6px 14px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 20px;
+        }
+
+        .news-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
             border-radius: 30px;
             cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
+            transition: 0.3s;
+        }
+        
+        .close-btn:hover {
+            background: white;
+            color: black;
         }
 
-        .member-btn.offline {
-            filter: grayscale(100%);
-            opacity: 0.4;
-            cursor: not-allowed;
-            pointer-events: none;
+        /* 패치노트 카드 스타일 */
+        .patch-note {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
         }
 
-        .member-btn.active {
-            border-color: var(--accent-green);
-            background: #1a3a2a;
+        .patch-date {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: block;
         }
 
-        .member-btn img {
-            width: 32px; height: 20px;
-            object-fit: cover;
-            border-radius: 4px;
+        .patch-version {
+            color: #4facfe;
+            font-weight: bold;
+            margin-right: 10px;
         }
 
-        .member-info { font-size: 0.85rem; font-weight: bold; }
-        .viewer-count { font-size: 0.7rem; color: var(--text-gray); font-weight: normal; }
-
-        #view-grid {
-            flex-grow: 1;
-            display: grid;
-            gap: 5px;
-            padding: 5px;
-            background-color: #000;
+        .patch-content ul {
+            list-style-position: inside;
+            margin-top: 15px;
+            color: #ddd;
+            line-height: 1.6;
         }
 
-        .grid-1 { grid-template-columns: 1fr; }
-        .grid-2 { grid-template-columns: 1fr 1fr; }
-        .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-
-        .video-wrapper { position: relative; width: 100%; height: 100%; }
-        iframe { width: 100%; height: 100%; border: none; }
-
-        .empty-msg {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #555;
-            text-align: center;
+        /* 애니메이션 정의 */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+
     </style>
 </head>
 <body>
 
+    <div class="bg-container"></div>
+    <div class="overlay"></div>
+
     <header>
-        <div class="header-top">
-            <div style="min-width: 110px;">
-                <span class="live-dot"></span>
-                <strong style="font-size: 0.9rem; margin-left: 5px;">LIVE (<span id="count">0</span>/4)</strong>
-            </div>
-            <div class="team-filter">
-                <button class="filter-btn active" data-team="all" onclick="setFilter('all')">전체</button>
-                <button class="filter-btn" data-team="red" onclick="setFilter('red')">레드팀</button>
-                <button class="filter-btn" data-team="blue" onclick="setFilter('blue')">블루팀</button>
-                <button class="filter-btn" data-team="manager" onclick="setFilter('manager')">진행팀</button>
-            </div>
-        </div>
-        <div id="member-list"></div>
+        <div class="nav-logo">GORAE CITY</div>
+        <nav class="nav-links">
+            <button onclick="showMain()">홈</button>
+            <button onclick="window.open('https://notion.so', '_blank')">가이드</button>
+            <button onclick="showNews()">업데이트</button>
+        </nav>
     </header>
 
-    <div id="view-grid" class="grid-1">
-        <div class="empty-msg">
-            <h2>깃발전쟁 멀티뷰</h2>
-            <p>방송 중인 멤버를 선택해 주세요. (최대 4명)</p>
+    <main id="mainPage" class="main-container">
+        <img src="logo.png" alt="고래시티 로고" class="main-logo">
+
+        <div class="btn-group">
+            <a href="https://www.notion.so/ko-kr" target="_blank" class="btn btn-primary">
+                서버 가이드
+            </a>
+            
+            <button onclick="showNews()" class="btn btn-secondary">
+                소식 / 패치노트
+            </button>
         </div>
-    </div>
+    </main>
+
+    <section id="newsPage" class="news-container">
+        <div class="news-header">
+            <h2 class="news-title">패치 노트</h2>
+            <button class="close-btn" onclick="showMain()">돌아가기</button>
+        </div>
+
+        <article class="patch-note">
+            <span class="patch-date">2025.01.01</span>
+            <h3><span class="patch-version">v1.0.0</span> 고래시티 그랜드 오픈</h3>
+            <div class="patch-content">
+                <ul>
+                    <li>고래시티 서버가 정식으로 오픈되었습니다.</li>
+                    <li>기본 직업군(경찰, 의료, 정비) 시스템 구현 완료</li>
+                    <li>하우징 시스템 및 차량 튜닝 샵 추가</li>
+                    <li>초기 정착 지원금 이벤트 진행 중</li>
+                </ul>
+            </div>
+        </article>
+
+        <article class="patch-note">
+            <span class="patch-date">2024.12.25</span>
+            <h3><span class="patch-version">Beta</span> 베타 테스트 진행</h3>
+            <div class="patch-content">
+                <ul>
+                    <li>서버 안정화 테스트 진행</li>
+                    <li>디스코드 연동 시스템 점검</li>
+                </ul>
+            </div>
+        </article>
+    </section>
 
     <script>
-        const MEMBER_NAMES = {
-            "joyjo2": "쪼이", "wkdghdtjr99": "여백이다", "niniming": "니니밍",
-            "doki0818": "감자가비", "khj011219": "기찬하", "015234": "아눙",
-            "isq1158": "구월이", "eun0333": "우미", "jjoasseo13": "죠아써",
-            "kayooo": "용아리", "rkdalstnld": "주드", "gtw0308": "황정민",
-            "star124": "하밍", "villlo": "왜냐니", "toocat030": "또오냥",
-            "xpdpfv2": "이지수", "rjsdnr115": "고채린", "yotsubakoe": "코에",
-            "etwo22": "이투", "o0opha": "서라0",
-            "melodingding": "멜로딩딩" // 진행팀 추가
-        };
+        // 페이지 전환 스크립트
+        function showNews() {
+            const mainPage = document.getElementById('mainPage');
+            const newsPage = document.getElementById('newsPage');
 
-        let selectedMembers = new Set();
-        let statusData = [];
-        let currentFilter = 'all';
-
-        async function fetchStatus() {
-            try {
-                const ts = new Date().getTime();
-                // red, blue, manager 세 개의 데이터를 모두 가져옴
-                const [redRes, blueRes, managerRes] = await Promise.all([
-                    fetch(`red_team_status.json?t=${ts}`),
-                    fetch(`blue_team_status.json?t=${ts}`),
-                    fetch(`manager_status.json?t=${ts}`)
-                ]);
-                
-                const redData = await redRes.json();
-                const blueData = await blueRes.json();
-                const managerData = await managerRes.json();
-
-                // 각 팀 정보 태깅 후 병합
-                statusData = [
-                    ...redData.map(m => ({...m, team: 'red'})),
-                    ...blueData.map(m => ({...m, team: 'blue'})),
-                    ...managerData.map(m => ({...m, team: 'manager'}))
-                ];
-                
-                renderSelector();
-            } catch (err) {
-                console.error("데이터 로드 실패");
-            }
+            // 메인 페이지 숨김 효과
+            mainPage.style.opacity = '0';
+            
+            setTimeout(() => {
+                mainPage.style.display = 'none';
+                newsPage.style.display = 'block';
+                // 약간의 지연 후 등장 효과
+                setTimeout(() => {
+                    newsPage.style.opacity = '1';
+                }, 50);
+            }, 500); // 0.5초 뒤 전환
         }
 
-        function setFilter(team) {
-            currentFilter = team;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.team === team);
-            });
-            renderSelector();
+        function showMain() {
+            const mainPage = document.getElementById('mainPage');
+            const newsPage = document.getElementById('newsPage');
+
+            // 뉴스 페이지 숨김 효과
+            newsPage.style.opacity = '0';
+
+            setTimeout(() => {
+                newsPage.style.display = 'none';
+                mainPage.style.display = 'flex';
+                // 약간의 지연 후 등장 효과
+                setTimeout(() => {
+                    mainPage.style.opacity = '1';
+                }, 50);
+            }, 500);
         }
-
-        function renderSelector() {
-            const listContainer = document.getElementById('member-list');
-            listContainer.innerHTML = '';
-
-            const filteredData = statusData.filter(member => {
-                if (currentFilter === 'all') return true;
-                return member.team === currentFilter;
-            });
-
-            filteredData.forEach(member => {
-                const btn = document.createElement('div');
-                const isLive = member.is_live;
-                const isActive = selectedMembers.has(member.id);
-
-                btn.className = `member-btn ${isLive ? '' : 'offline'} ${isActive ? 'active' : ''}`;
-                
-                if (isLive) {
-                    btn.onclick = () => toggleView(member.id);
-                }
-
-                const displayName = MEMBER_NAMES[member.id] || member.id;
-                const viewerText = isLive ? `👤 ${member.viewers.toLocaleString()}` : 'OFF';
-                const thumb = isLive ? member.thumbnail : 'https://via.placeholder.com/32x20?text=X';
-
-                btn.innerHTML = `
-                    <img src="${thumb}">
-                    <div class="member-info">
-                        <div>${displayName}</div>
-                        <div class="viewer-count">${viewerText}</div>
-                    </div>
-                `;
-                listContainer.appendChild(btn);
-            });
-            document.getElementById('count').innerText = selectedMembers.size;
-        }
-
-        function toggleView(id) {
-            if (selectedMembers.has(id)) {
-                selectedMembers.delete(id);
-            } else {
-                if (selectedMembers.size >= 4) {
-                    alert("최대 4명까지만 선택 가능합니다.");
-                    return;
-                }
-                selectedMembers.add(id);
-            }
-            renderSelector();
-            updateGrid();
-        }
-
-        function updateGrid() {
-            const gridContainer = document.getElementById('view-grid');
-            gridContainer.innerHTML = '';
-            const count = selectedMembers.size;
-
-            if (count === 0) {
-                gridContainer.innerHTML = '<div class="empty-msg"><p>선택된 방송이 없습니다.</p></div>';
-                return;
-            }
-
-            gridContainer.className = count >= 3 ? 'grid-3' : count === 2 ? 'grid-2' : 'grid-1';
-
-            selectedMembers.forEach(id => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'video-wrapper';
-                wrapper.innerHTML = `
-                    <iframe src="https://play.sooplive.co.kr/${id}/embed" allowfullscreen scrolling="no"></iframe>
-                `;
-                gridContainer.appendChild(wrapper);
-            });
-        }
-
-        fetchStatus();
-        setInterval(fetchStatus, 30000); 
     </script>
 </body>
 </html>
