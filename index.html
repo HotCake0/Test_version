@@ -17,54 +17,52 @@
         body {
             background-color: #111;
             color: white;
-            overflow: hidden; /* 전체 페이지 스크롤 방지 (앱 같은 느낌) */
-            display: flex;
-            flex-direction: column;
-            height: 100vh; /* 화면 꽉 채우기 */
+            overflow: hidden; /* 전체 페이지 스크롤 방지 (앱 스타일) */
+            height: 100vh;
         }
 
-        /* [배경 이미지 설정] */
+        /* [배경 이미지] */
         .bg-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100vh;
-            z-index: -1;
-            /* 요청하신 대로 파일명 변경 완료 */
+            z-index: -2;
             background-image: url('background.jpg'); 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
 
-        /* 배경 오버레이 (글자 가독성용) */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.4);
             z-index: -1;
         }
 
-        /* [헤더] */
+        /* [헤더 - 상단 고정] */
         header {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 20px 40px;
+            padding: 25px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
-            flex-shrink: 0; /* 크기 줄어듦 방지 */
+            z-index: 1000; /* 제일 위에 표시 */
         }
 
         .nav-logo {
             font-weight: 800;
             font-size: 1.2rem;
             letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         .nav-links button {
@@ -75,33 +73,24 @@
             margin-left: 30px;
             cursor: pointer;
             transition: color 0.3s;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         .nav-links button:hover { color: #fff; }
 
-        /* [공통 컨텐츠 영역] */
-        .content-wrapper {
-            flex: 1; /* 남은 공간 모두 차지 */
-            position: relative;
-            overflow: hidden; /* 내부 스크롤을 위해 숨김 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* 세로 중앙 정렬 */
-        }
-
-        /* [메인 화면] */
-        .main-container {
+        /* [메인 페이지] */
+        #mainPage {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            display: flex;
+            height: 100%;
+            display: flex; /* 보이기/숨기기 토글 대상 */
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            text-align: center;
             transition: opacity 0.4s ease;
-            position: absolute; /* 겹치게 배치 */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            z-index: 10;
         }
 
         .main-logo {
@@ -112,7 +101,6 @@
             animation: fadeInDown 1s ease-out;
         }
 
-        /* 버튼 디자인 */
         .btn-group {
             display: flex;
             gap: 20px;
@@ -132,28 +120,38 @@
         }
 
         .btn-primary { background-color: white; color: #000; border-color: white; }
-        .btn-primary:hover { background-color: #ddd; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .btn-primary:hover { background-color: #ddd; transform: translateY(-3px); }
 
         .btn-secondary { background-color: rgba(0, 0, 0, 0.6); color: white; }
         .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.2); border-color: white; transform: translateY(-3px); }
 
-        /* [소식/패치노트 화면] */
-        .news-container {
-            display: none; /* 초기엔 숨김 */
+
+        /* [뉴스 페이지] */
+        #newsPage {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 100%; /* 부모 높이 꽉 채움 */
-            max-width: 1000px;
-            margin: 0 auto;
+            height: 100%;
+            display: none; /* 기본적으로 숨김 */
+            flex-direction: column;
+            align-items: center;
             opacity: 0;
             transition: opacity 0.4s ease;
+            z-index: 20;
             
-            /* 내부 스크롤 설정 */
+            /* 중요: 헤더와 겹치지 않게 상단 여백 확보 + 하단 푸터 여백 */
+            padding-top: 120px; 
+            padding-bottom: 150px; 
+            
+            /* 스크롤 설정 */
             overflow-y: auto; 
-            padding: 40px 20px;
-            
-            /* 스크롤바 디자인 */
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+
+        .news-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            padding: 0 20px;
         }
 
         .news-header {
@@ -163,11 +161,6 @@
             margin-bottom: 30px;
             border-bottom: 1px solid rgba(255,255,255,0.3);
             padding-bottom: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            /* 헤더 배경이 없으면 글자가 겹치므로 살짝 어둡게 처리 */
-            /* text-shadow로 가독성 확보 */
         }
 
         .news-title {
@@ -180,7 +173,7 @@
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.4);
             color: white;
-            padding: 8px 20px;
+            padding: 8px 25px;
             border-radius: 30px;
             cursor: pointer;
             transition: 0.3s;
@@ -188,7 +181,6 @@
         }
         .close-btn:hover { background: white; color: black; }
 
-        /* 패치노트 카드 */
         .patch-note {
             background: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -203,18 +195,25 @@
         .patch-date { color: #aaa; font-size: 0.9rem; margin-bottom: 8px; display: block; }
         .patch-version { color: #4facfe; font-weight: bold; margin-right: 10px; font-size: 1.1rem; }
         .patch-content ul { list-style-position: inside; margin-top: 15px; color: #e0e0e0; line-height: 1.7; }
-        .patch-content li { margin-bottom: 5px; }
 
-        /* [푸터] */
+        /* [푸터 - 바닥 고정] */
         footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
             text-align: center;
-            padding: 40px 20px 30px 20px;
+            padding: 50px 20px 30px 20px;
             color: rgba(255, 255, 255, 0.9);
-            flex-shrink: 0; /* 크기 줄어듦 방지 */
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 60%, transparent 100%);
-            z-index: 50;
+            z-index: 100;
+            
+            /* 글자가 잘 보이도록 아래에서 위로 은은한 그림자 */
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+            pointer-events: none; /* 푸터 배경이 버튼 클릭을 방해하지 않도록 설정 */
         }
+        
+        /* 텍스트는 선택 가능하게 */
+        footer * { pointer-events: auto; }
 
         footer h3 { font-size: 1.3rem; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
         footer p { font-size: 0.9rem; margin-bottom: 4px; text-shadow: 0 1px 3px rgba(0,0,0,1); opacity: 0.9; }
@@ -227,7 +226,7 @@
 
         /* 스크롤바 커스텀 */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0); }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6); }
 
@@ -247,17 +246,16 @@
         </nav>
     </header>
 
-    <div class="content-wrapper">
-        
-        <main id="mainPage" class="main-container">
-            <img src="logo.png" alt="고래시티 로고" class="main-logo">
-            <div class="btn-group">
-                <a href="https://www.notion.so/ko-kr" target="_blank" class="btn btn-primary">서버 가이드</a>
-                <button onclick="showNews()" class="btn btn-secondary">소식 / 패치노트</button>
-            </div>
-        </main>
+    <div id="mainPage">
+        <img src="logo.png" alt="고래시티 로고" class="main-logo">
+        <div class="btn-group">
+            <a href="https://www.notion.so/ko-kr" target="_blank" class="btn btn-primary">서버 가이드</a>
+            <button onclick="showNews()" class="btn btn-secondary">소식 / 패치노트</button>
+        </div>
+    </div>
 
-        <section id="newsPage" class="news-container">
+    <div id="newsPage">
+        <div class="news-wrapper">
             <div class="news-header">
                 <h2 class="news-title">패치 노트</h2>
                 <button class="close-btn" onclick="showMain()">돌아가기</button>
@@ -284,7 +282,6 @@
                         <li>편의점 및 주유소 아르바이트 수익 상향 조정</li>
                         <li>고급 세단 차량 가격 변동</li>
                         <li>낚시 컨텐츠 어종 추가 및 확률 조정</li>
-                        <li>일부 구역 텍스처 깨짐 현상 수정</li>
                     </ul>
                 </div>
             </article>
@@ -297,14 +294,10 @@
                         <li>고래시티 서버 정식 오픈!</li>
                         <li>초기 정착 지원금 이벤트 (~1/31)</li>
                         <li>디스코드 연동 화이트리스트 시스템 적용</li>
-                        <li>뉴비존 튜토리얼 퀘스트 추가</li>
                     </ul>
                 </div>
             </article>
-
-            <div style="height: 20px;"></div>
-        </section>
-
+        </div>
     </div>
 
     <footer>
@@ -318,18 +311,19 @@
     </footer>
 
     <script>
-        // 화면 전환 스크립트
+        // 페이지 전환 스크립트
         function showNews() {
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
 
-            // 메인 숨기기
+            // 메인 페이지 페이드 아웃
             mainPage.style.opacity = '0';
             
             setTimeout(() => {
-                mainPage.style.display = 'none';
-                newsPage.style.display = 'block';
-                // 약간의 딜레이 후 등장
+                mainPage.style.display = 'none'; // 메인 숨김
+                newsPage.style.display = 'flex'; // 뉴스 표시
+                
+                // 약간의 시간 차를 두고 페이드 인
                 setTimeout(() => {
                     newsPage.style.opacity = '1';
                 }, 50);
@@ -340,13 +334,14 @@
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
 
-            // 뉴스 숨기기
+            // 뉴스 페이지 페이드 아웃
             newsPage.style.opacity = '0';
 
             setTimeout(() => {
-                newsPage.style.display = 'none';
-                mainPage.style.display = 'flex';
-                // 약간의 딜레이 후 등장
+                newsPage.style.display = 'none'; // 뉴스 숨김
+                mainPage.style.display = 'flex'; // 메인 표시
+                
+                // 페이드 인
                 setTimeout(() => {
                     mainPage.style.opacity = '1';
                 }, 50);
