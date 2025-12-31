@@ -18,9 +18,12 @@
             background-color: #111;
             color: white;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* 배경 이미지 설정 (업로드해주신 1번 사진) */
+        /* 배경 이미지 설정 */
         .bg-container {
             position: fixed;
             top: 0;
@@ -28,23 +31,23 @@
             width: 100%;
             height: 100vh;
             z-index: -1;
-            /* 파일명을 실제 저장된 이름으로 변경하거나, 파일 이름을 아래와 같이 맞춰주세요 */
-            background-image: url('background.jpg'); 
+            /* 파일명을 실제 저장된 이름으로 변경해주세요 */
+            background-image: url('중첩_시퀀스_89.00_00_07_45.스틸_001.jpg'); 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
 
-        /* 배경 어둡게 처리 (글자 가독성을 위해) */
+        /* 배경 어둡게 처리 */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.4); /* 0.4 수치를 조절하여 밝기 조절 가능 */
+            background: rgba(0, 0, 0, 0.4);
             z-index: -1;
-            backdrop-filter: blur(2px); /* 배경 살짝 흐리게 */
+            backdrop-filter: blur(2px);
         }
 
         /* 네비게이션 바 */
@@ -82,18 +85,20 @@
 
         /* 메인 컨텐츠 영역 */
         .main-container {
-            height: 100vh;
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
             transition: opacity 0.5s ease;
+            padding-top: 80px; /* 헤더 높이만큼 여백 */
+            padding-bottom: 40px; /* 푸터 위 여백 */
         }
 
-        /* 로고 스타일 (업로드해주신 2번 사진) */
+        /* 로고 스타일 */
         .main-logo {
-            max-width: 600px; /* 로고 크기 조절 */
+            max-width: 600px;
             width: 80%;
             margin-bottom: 40px;
             filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
@@ -119,7 +124,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* 메인 액션 버튼 (가이드) */
         .btn-primary {
             background-color: white;
             color: #000;
@@ -132,7 +136,6 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        /* 보조 액션 버튼 (소식) */
         .btn-secondary {
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
@@ -144,16 +147,18 @@
             transform: translateY(-3px);
         }
 
-        /* 소식 페이지 (초기엔 숨김) */
+        /* 소식 페이지 */
         .news-container {
-            display: none; /* JS로 토글 */
+            display: none;
+            flex: 1;
             padding-top: 100px;
             max-width: 1000px;
+            width: 100%;
             margin: 0 auto;
             opacity: 0;
             transition: opacity 0.5s ease;
-            height: 100vh;
             overflow-y: auto;
+            padding-bottom: 40px; /* 푸터 위 여백 */
         }
 
         .news-header {
@@ -185,7 +190,6 @@
             color: black;
         }
 
-        /* 패치노트 카드 스타일 */
         .patch-note {
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -213,6 +217,41 @@
             margin-top: 15px;
             color: #ddd;
             line-height: 1.6;
+        }
+
+        /* 푸터 스타일 */
+        footer {
+            background-color: #1a2b4c; /* 이미지와 유사한 어두운 파란색 배경 */
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        footer h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+
+        .developer-info {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            opacity: 0.6;
         }
 
         /* 애니메이션 정의 */
@@ -273,58 +312,42 @@
             <div class="patch-content">
                 <ul>
                     <li>고래시티 서버가 정식으로 오픈되었습니다.</li>
-                    <li>기본 직업군(경찰, 의료, 정비) 시스템 구현 완료</li>
-                    <li>하우징 시스템 및 차량 튜닝 샵 추가</li>
-                    <li>초기 정착 지원금 이벤트 진행 중</li>
-                </ul>
-            </div>
-        </article>
-
-        <article class="patch-note">
-            <span class="patch-date">2024.12.25</span>
-            <h3><span class="patch-version">Beta</span> 베타 테스트 진행</h3>
-            <div class="patch-content">
-                <ul>
-                    <li>서버 안정화 테스트 진행</li>
-                    <li>디스코드 연동 시스템 점검</li>
+                    <li>기본 직업군 시스템 구현 완료</li>
                 </ul>
             </div>
         </article>
     </section>
 
+    <footer>
+        <h3>고래상사</h3>
+        <p>Los Santos Maze Bank Tower 74~81F</p>
+        <p>전화: 02-1234-5678 | 이메일: whale@gorae.co.kr</p>
+        <div class="developer-info">
+            Developed by [개발자 이름 또는 팀명을 입력하세요]
+        </div>
+        <p class="copyright">© 2025 GORAECORP. All Rights Reserved.</p>
+    </footer>
+
     <script>
-        // 페이지 전환 스크립트
         function showNews() {
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
-
-            // 메인 페이지 숨김 효과
             mainPage.style.opacity = '0';
-            
             setTimeout(() => {
                 mainPage.style.display = 'none';
-                newsPage.style.display = 'block';
-                // 약간의 지연 후 등장 효과
-                setTimeout(() => {
-                    newsPage.style.opacity = '1';
-                }, 50);
-            }, 500); // 0.5초 뒤 전환
+                newsPage.style.display = 'flex'; /* flex로 변경하여 중앙 정렬 유지 */
+                setTimeout(() => { newsPage.style.opacity = '1'; }, 50);
+            }, 500);
         }
 
         function showMain() {
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
-
-            // 뉴스 페이지 숨김 효과
             newsPage.style.opacity = '0';
-
             setTimeout(() => {
                 newsPage.style.display = 'none';
                 mainPage.style.display = 'flex';
-                // 약간의 지연 후 등장 효과
-                setTimeout(() => {
-                    mainPage.style.opacity = '1';
-                }, 50);
+                setTimeout(() => { mainPage.style.opacity = '1'; }, 50);
             }, 500);
         }
     </script>
