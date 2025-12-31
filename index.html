@@ -17,7 +17,7 @@
         body {
             background-color: #111;
             color: white;
-            overflow: hidden; /* 전체 페이지 스크롤 방지 (앱 스타일) */
+            overflow: hidden; /* 전체 페이지 스크롤 방지 */
             height: 100vh;
         }
 
@@ -45,7 +45,7 @@
             z-index: -1;
         }
 
-        /* [헤더 - 상단 고정] */
+        /* [메인 헤더 - 최상단 고정] */
         header {
             position: fixed;
             top: 0;
@@ -55,7 +55,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000; /* 제일 위에 표시 */
+            z-index: 1000;
         }
 
         .nav-logo {
@@ -78,14 +78,14 @@
 
         .nav-links button:hover { color: #fff; }
 
-        /* [메인 페이지] */
+        /* [1. 메인 페이지 컨텐츠] */
         #mainPage {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex; /* 보이기/숨기기 토글 대상 */
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -126,39 +126,38 @@
         .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.2); border-color: white; transform: translateY(-3px); }
 
 
-        /* [뉴스 페이지] */
+        /* [2. 뉴스 페이지 레이아웃 - 중요!] */
         #newsPage {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: none; /* 기본적으로 숨김 */
-            flex-direction: column;
+            display: none; /* JS로 토글 */
+            flex-direction: column; /* 세로 정렬 */
             align-items: center;
             opacity: 0;
             transition: opacity 0.4s ease;
             z-index: 20;
-            
-            /* 중요: 헤더와 겹치지 않게 상단 여백 확보 + 하단 푸터 여백 */
-            padding-top: 120px; 
-            padding-bottom: 150px; 
-            
-            /* 스크롤 설정 */
-            overflow-y: auto; 
+            padding-top: 100px; /* 메인 헤더 높이만큼 띄움 */
         }
 
         .news-wrapper {
             width: 100%;
             max-width: 1000px;
+            height: 100%; /* 전체 높이 사용 */
+            display: flex;
+            flex-direction: column; /* 헤더와 리스트를 세로로 배치 */
             padding: 0 20px;
         }
 
+        /* 고정된 제목 영역 */
         .news-header {
+            flex-shrink: 0; /* 크기 줄어들지 않음 (고정) */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.3);
             padding-bottom: 20px;
         }
@@ -180,6 +179,14 @@
             backdrop-filter: blur(5px);
         }
         .close-btn:hover { background: white; color: black; }
+
+        /* 스크롤되는 내용 영역 */
+        .patch-list {
+            flex: 1; /* 남은 공간 모두 차지 */
+            overflow-y: auto; /* 내용 넘치면 여기서만 스크롤 */
+            padding-right: 10px; /* 스크롤바 공간 */
+            padding-bottom: 150px; /* 푸터에 가려지지 않게 여백 */
+        }
 
         .patch-note {
             background: rgba(0, 0, 0, 0.75);
@@ -206,13 +213,9 @@
             padding: 50px 20px 30px 20px;
             color: rgba(255, 255, 255, 0.9);
             z-index: 100;
-            
-            /* 글자가 잘 보이도록 아래에서 위로 은은한 그림자 */
             background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
-            pointer-events: none; /* 푸터 배경이 버튼 클릭을 방해하지 않도록 설정 */
+            pointer-events: none;
         }
-        
-        /* 텍스트는 선택 가능하게 */
         footer * { pointer-events: auto; }
 
         footer h3 { font-size: 1.3rem; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
@@ -224,11 +227,11 @@
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 스크롤바 커스텀 */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6); }
+        /* 스크롤바 디자인 */
+        .patch-list::-webkit-scrollbar { width: 6px; }
+        .patch-list::-webkit-scrollbar-track { background: transparent; }
+        .patch-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        .patch-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
 
     </style>
 </head>
@@ -256,47 +259,61 @@
 
     <div id="newsPage">
         <div class="news-wrapper">
+            
             <div class="news-header">
                 <h2 class="news-title">패치 노트</h2>
                 <button class="close-btn" onclick="showMain()">돌아가기</button>
             </div>
 
-            <article class="patch-note">
-                <span class="patch-date">2025.01.15</span>
-                <h3><span class="patch-version">v1.1.0</span> 대규모 콘텐츠 업데이트</h3>
-                <div class="patch-content">
-                    <ul>
-                        <li>신규 직업 '해양 경찰' 및 전용 보트 추가</li>
-                        <li>카지노 시스템 오픈 (다이아몬드 카지노)</li>
-                        <li>차량 핸들링 현실성 패치 적용</li>
-                        <li>서버 최적화 및 간헐적 튕김 현상 수정</li>
-                    </ul>
-                </div>
-            </article>
+            <div class="patch-list">
+                <article class="patch-note">
+                    <span class="patch-date">2025.01.15</span>
+                    <h3><span class="patch-version">v1.1.0</span> 대규모 콘텐츠 업데이트</h3>
+                    <div class="patch-content">
+                        <ul>
+                            <li>신규 직업 '해양 경찰' 및 전용 보트 추가</li>
+                            <li>카지노 시스템 오픈 (다이아몬드 카지노)</li>
+                            <li>차량 핸들링 현실성 패치 적용</li>
+                            <li>서버 최적화 및 간헐적 튕김 현상 수정</li>
+                        </ul>
+                    </div>
+                </article>
 
-            <article class="patch-note">
-                <span class="patch-date">2025.01.08</span>
-                <h3><span class="patch-version">v1.0.5</span> 경제 밸런스 패치</h3>
-                <div class="patch-content">
-                    <ul>
-                        <li>편의점 및 주유소 아르바이트 수익 상향 조정</li>
-                        <li>고급 세단 차량 가격 변동</li>
-                        <li>낚시 컨텐츠 어종 추가 및 확률 조정</li>
-                    </ul>
-                </div>
-            </article>
+                <article class="patch-note">
+                    <span class="patch-date">2025.01.08</span>
+                    <h3><span class="patch-version">v1.0.5</span> 경제 밸런스 패치</h3>
+                    <div class="patch-content">
+                        <ul>
+                            <li>편의점 및 주유소 아르바이트 수익 상향 조정</li>
+                            <li>고급 세단 차량 가격 변동</li>
+                            <li>낚시 컨텐츠 어종 추가 및 확률 조정</li>
+                        </ul>
+                    </div>
+                </article>
 
-            <article class="patch-note">
-                <span class="patch-date">2025.01.01</span>
-                <h3><span class="patch-version">v1.0.0</span> 고래시티 그랜드 오픈</h3>
-                <div class="patch-content">
-                    <ul>
-                        <li>고래시티 서버 정식 오픈!</li>
-                        <li>초기 정착 지원금 이벤트 (~1/31)</li>
-                        <li>디스코드 연동 화이트리스트 시스템 적용</li>
-                    </ul>
-                </div>
-            </article>
+                <article class="patch-note">
+                    <span class="patch-date">2025.01.01</span>
+                    <h3><span class="patch-version">v1.0.0</span> 고래시티 그랜드 오픈</h3>
+                    <div class="patch-content">
+                        <ul>
+                            <li>고래시티 서버 정식 오픈!</li>
+                            <li>초기 정착 지원금 이벤트 (~1/31)</li>
+                            <li>디스코드 연동 화이트리스트 시스템 적용</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="patch-note">
+                    <span class="patch-date">2024.12.25</span>
+                    <h3><span class="patch-version">Beta</span> 클로즈 베타 테스트</h3>
+                    <div class="patch-content">
+                        <ul>
+                            <li>서버 안정성 테스트 진행</li>
+                            <li>관리자 기능 점검</li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
         </div>
     </div>
 
@@ -311,22 +328,15 @@
     </footer>
 
     <script>
-        // 페이지 전환 스크립트
         function showNews() {
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
-
-            // 메인 페이지 페이드 아웃
-            mainPage.style.opacity = '0';
             
+            mainPage.style.opacity = '0';
             setTimeout(() => {
-                mainPage.style.display = 'none'; // 메인 숨김
-                newsPage.style.display = 'flex'; // 뉴스 표시
-                
-                // 약간의 시간 차를 두고 페이드 인
-                setTimeout(() => {
-                    newsPage.style.opacity = '1';
-                }, 50);
+                mainPage.style.display = 'none';
+                newsPage.style.display = 'flex'; // block 대신 flex 사용 (레이아웃 유지)
+                setTimeout(() => { newsPage.style.opacity = '1'; }, 50);
             }, 400);
         }
 
@@ -334,17 +344,11 @@
             const mainPage = document.getElementById('mainPage');
             const newsPage = document.getElementById('newsPage');
 
-            // 뉴스 페이지 페이드 아웃
             newsPage.style.opacity = '0';
-
             setTimeout(() => {
-                newsPage.style.display = 'none'; // 뉴스 숨김
-                mainPage.style.display = 'flex'; // 메인 표시
-                
-                // 페이드 인
-                setTimeout(() => {
-                    mainPage.style.opacity = '1';
-                }, 50);
+                newsPage.style.display = 'none';
+                mainPage.style.display = 'flex';
+                setTimeout(() => { mainPage.style.opacity = '1'; }, 50);
             }, 400);
         }
     </script>
