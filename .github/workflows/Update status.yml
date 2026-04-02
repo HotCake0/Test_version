@@ -1,0 +1,29 @@
+name: Update Gorae City Live Status
+
+on:
+  # cron-job.org에서 외부 트리거 (고래상사와 동일한 방식)
+  workflow_dispatch:
+
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install firebase-admin aiohttp
+
+      - name: Run update_status.py
+        env:
+          # GitHub Secrets에 등록한 키 이름과 일치해야 함
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GORAECITY }}
+        run: |
+          python update_status.py
