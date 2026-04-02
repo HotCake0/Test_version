@@ -14,7 +14,7 @@ def initialize_firebase():
         cred = credentials.Certificate(key_json)
         firebase_admin.initialize_app(cred, {
             # ★ Sir가 Firebase Console에서 확인 후 교체
-            'databaseURL': 'https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app/'
+            'databaseURL': 'https://goraecity-default-rtdb.asia-southeast1.firebasedatabase.app/'
         })
 
 # ─────────────────────────────────────────
