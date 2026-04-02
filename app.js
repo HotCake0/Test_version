@@ -1,5 +1,5 @@
 // ★ Sir가 Firebase Console에서 확인 후 교체
-const FIREBASE_URL = 'https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FIREBASE_URL = 'https://goraecity-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
 // ─────────────────────────────────────────
 // 상태
