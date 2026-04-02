@@ -1,44 +1,61 @@
 /**
- * 뉴스(패치노트) 페이지 표시
+ * 뉴스 섹션으로 스크롤
  */
-function showNews() {
-    const mainPage = document.getElementById('mainPage');
-    const newsPage = document.getElementById('newsPage');
-    
-    // 메인 사라짐
-    mainPage.style.opacity = '0';
-    setTimeout(() => {
-        mainPage.style.display = 'none';
-        
-        // 뉴스 나타남
-        newsPage.style.display = 'flex';
-        setTimeout(() => {
-            newsPage.style.opacity = '1';
-        }, 50);
-    }, 400);
+function scrollToNews() {
+    const newsSection = document.getElementById('newsSection');
+    newsSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 /**
- * 메인 페이지 표시
+ * 최상단으로 스크롤
  */
-function showMain() {
-    const mainPage = document.getElementById('mainPage');
-    const newsPage = document.getElementById('newsPage');
-
-    // 뉴스 사라짐
-    newsPage.style.opacity = '0';
-    setTimeout(() => {
-        newsPage.style.display = 'none';
-        
-        // 메인 나타남
-        mainPage.style.display = 'flex';
-        setTimeout(() => {
-            mainPage.style.opacity = '1';
-        }, 50);
-    }, 400);
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 윈도우 로드 시 애니메이션 효과 (선택사항)
-window.onload = () => {
-    document.getElementById('mainPage').style.opacity = '1';
-};
+/**
+ * 더보기 / 접기 토글
+ */
+function toggleMore() {
+    const extra = document.getElementById('patchExtra');
+    const arrow = document.getElementById('moreArrow');
+    const text = document.getElementById('moreBtnText');
+
+    if (extra.classList.contains('hidden')) {
+        extra.classList.remove('hidden');
+        extra.classList.add('visible');
+        arrow.classList.add('rotated');
+        text.textContent = '접기';
+    } else {
+        extra.classList.remove('visible');
+        extra.classList.add('hidden');
+        arrow.classList.remove('rotated');
+        text.textContent = '더보기';
+    }
+}
+
+/**
+ * 스크롤 시 헤더 스타일 변경
+ */
+window.addEventListener('scroll', () => {
+    const header = document.querySelector('header');
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+});
+
+/**
+ * 패치노트가 3개 이하면 더보기 버튼 숨김
+ */
+window.addEventListener('DOMContentLoaded', () => {
+    const extra = document.getElementById('patchExtra');
+    const moreBtnWrap = document.getElementById('moreBtnWrap');
+
+    // patchExtra 안에 patch-note가 없으면 더보기 버튼 숨김
+    const extraNotes = extra.querySelectorAll('.patch-note');
+    if (extraNotes.length === 0) {
+        moreBtnWrap.style.display = 'none';
+    }
+});

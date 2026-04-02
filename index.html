@@ -15,29 +15,35 @@
     <header>
         <div class="nav-logo">GORAE CITY</div>
         <nav class="nav-links">
-            <button onclick="showMain()" class="nav-item">홈</button>
-            <button onclick="showNews()" class="nav-item">업데이트</button>
+            <button onclick="scrollToTop()" class="nav-item">홈</button>
+            <button onclick="scrollToNews()" class="nav-item">업데이트</button>
             <a href="guide.html" class="nav-item">가이드</a>
             <a href="multiview.html" class="nav-item">멀티뷰</a>
         </nav>
     </header>
 
-    <main id="mainPage">
+    <!-- 히어로 섹션 -->
+    <section id="heroSection">
         <img src="logo.png" alt="고래시티 로고" class="main-logo">
         <div class="btn-group">
             <a href="guide.html" class="btn btn-primary">서버 가이드</a>
-            <button onclick="showNews()" class="btn btn-secondary">소식 / 패치노트</button>
+            <button onclick="scrollToNews()" class="btn btn-secondary">소식 / 패치노트</button>
         </div>
-    </main>
+        <div class="scroll-hint" onclick="scrollToNews()">
+            <span>최신 업데이트 보기</span>
+            <div class="scroll-arrow">↓</div>
+        </div>
+    </section>
 
-    <section id="newsPage">
+    <!-- 패치노트 섹션 -->
+    <section id="newsSection">
         <div class="news-wrapper">
             <div class="news-header">
                 <h2 class="news-title">패치 노트</h2>
-                <button class="close-btn" onclick="showMain()">돌아가기</button>
             </div>
 
-            <div class="patch-list">
+            <!-- 미리보기 3개 -->
+            <div class="patch-list" id="patchPreview">
                 <article class="patch-note">
                     <span class="patch-date">2025.12.26</span>
                     <h3><span class="patch-version">v1.0.0</span>GTA 고래전쟁: 깃발 / 점령전</h3>
@@ -49,7 +55,32 @@
                         </ul>
                     </div>
                 </article>
-                </div>
+
+                <!-- 패치노트 추가 시 여기에 article 삽입 (미리보기는 최대 3개) -->
+            </div>
+
+            <!-- 더보기 이후 숨겨진 나머지 패치노트 -->
+            <div class="patch-list patch-extra hidden" id="patchExtra">
+                <!-- 4번째 패치노트부터 여기에 추가 -->
+                <!-- 예시:
+                <article class="patch-note">
+                    <span class="patch-date">2025.12.10</span>
+                    <h3><span class="patch-version">v0.9.0</span>서버 오픈 준비</h3>
+                    <div class="patch-content">
+                        <ul>
+                            <li>초기 설정 완료</li>
+                        </ul>
+                    </div>
+                </article>
+                -->
+            </div>
+
+            <div class="more-btn-wrap" id="moreBtnWrap">
+                <button class="btn-more" id="moreBtn" onclick="toggleMore()">
+                    <span id="moreBtnText">더보기</span>
+                    <span class="more-arrow" id="moreArrow">↓</span>
+                </button>
+            </div>
         </div>
     </section>
 

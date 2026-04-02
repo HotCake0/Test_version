@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고래시티 - 멀티뷰</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 헤더 */
+        header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .nav-logo {
+            font-weight: 900;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 2px;
+            background: #4facfe;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { color: #fff; }
+        .nav-item:hover::after { width: 100%; }
+        .nav-item.active { color: #4facfe; }
+        .nav-item.active::after { width: 100%; }
+
+        /* 레이아웃 선택 툴바 */
+        .toolbar {
+            position: fixed;
+            top: 64px; left: 0; width: 100%;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            z-index: 999;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .layout-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .layout-btn {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.6);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .layout-btn:hover {
+            background: rgba(79,172,254,0.15);
+            border-color: #4facfe;
+            color: #fff;
+        }
+
+        .layout-btn.active {
+            background: #4facfe;
+            border-color: #4facfe;
+            color: #000;
+        }
+
+        .layout-icon {
+            display: grid;
+            gap: 2px;
+        }
+
+        .layout-icon.icon-1x1 { grid-template-columns: 1fr; }
+        .layout-icon.icon-1x2 { grid-template-columns: 1fr 1fr; }
+        .layout-icon.icon-2x2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .layout-icon.icon-2x3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+        .layout-icon span {
+            display: block;
+            width: 8px; height: 7px;
+            background: currentColor;
+            border-radius: 1px;
+            opacity: 0.9;
+        }
+
+        .divider {
+            width: 1px; height: 24px;
+            background: rgba(255,255,255,0.12);
+            margin: 0 4px;
+        }
+
+        /* 스트림 추가 버튼 */
+        .add-stream-btn {
+            background: rgba(79,172,254,0.1);
+            border: 1px solid rgba(79,172,254,0.3);
+            color: #4facfe;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: auto;
+        }
+
+        .add-stream-btn:hover {
+            background: rgba(79,172,254,0.2);
+            border-color: #4facfe;
+        }
+
+        /* 멀티뷰 그리드 */
+        .multiview-container {
+            padding-top: 112px;
+            height: 100vh;
+            display: grid;
+            gap: 3px;
+            background: #111;
+            transition: grid-template-columns 0.3s, grid-template-rows 0.3s;
+        }
+
+        /* 레이아웃별 그리드 */
+        .multiview-container.layout-1 {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+        }
+        .multiview-container.layout-2 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr;
+        }
+        .multiview-container.layout-4 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+        .multiview-container.layout-6 {
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+
+        /* 개별 스트림 셀 */
+        .stream-cell {
+            position: relative;
+            background: #111;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 스트림 없을 때 빈 상태 */
+        .stream-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .stream-empty:hover {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(79,172,254,0.4);
+            color: rgba(79,172,254,0.7);
+        }
+
+        .stream-empty-icon {
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        .stream-empty-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Twitch iframe */
+        .stream-cell iframe {
+            width: 100%;
+            flex: 1;
+            border: none;
+            display: block;
+        }
+
+        /* 스트림 오버레이 (호버 시 컨트롤) */
+        .stream-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 10px 14px;
+            background: linear-gradient(rgba(0,0,0,0.7), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .stream-cell:hover .stream-overlay {
+            opacity: 1;
+        }
+
+        .stream-channel-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-badge {
+            background: #e91916;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .stream-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .stream-ctrl-btn {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.8);
+            width: 28px; height: 28px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .stream-ctrl-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
+        .stream-ctrl-btn.danger:hover {
+            background: rgba(220,38,38,0.5);
+            border-color: #ef4444;
+            color: #fff;
+        }
+
+        /* 스트림 입력 모달 */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 32px;
+            width: min(480px, 90vw);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.95) translateY(10px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .modal h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .modal p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 24px;
+        }
+
+        .modal-input-wrap {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 4px 4px 4px 16px;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input-wrap:focus-within {
+            border-color: #4facfe;
+        }
+
+        .modal-prefix {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.35);
+            white-space: nowrap;
+        }
+
+        .modal-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            padding: 10px 0;
+        }
+
+        .modal-input::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.6);
+        }
+
+        .modal-btn.cancel:hover {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+        }
+
+        .modal-btn.confirm {
+            background: #4facfe;
+            border: 1px solid #4facfe;
+            color: #000;
+        }
+
+        .modal-btn.confirm:hover {
+            background: #7ec8ff;
+        }
+
+        /* 레이아웃 초과 셀 숨김 */
+        .stream-cell.hidden-cell {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="nav-logo">GORAE CITY</a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item">홈</a>
+            <a href="guide.html" class="nav-item">가이드</a>
+            <a href="multiview.html" class="nav-item active">멀티뷰</a>
+        </nav>
+    </header>
+
+    <div class="toolbar">
+        <span class="toolbar-label">레이아웃</span>
+        <div class="layout-btns">
+            <button class="layout-btn" data-layout="1" onclick="setLayout(1)">
+                <span class="layout-icon icon-1x1"><span></span></span>
+                1화면
+            </button>
+            <button class="layout-btn" data-layout="2" onclick="setLayout(2)">
+                <span class="layout-icon icon-1x2"><span></span><span></span></span>
+                2화면
+            </button>
+            <button class="layout-btn active" data-layout="4" onclick="setLayout(4)">
+                <span class="layout-icon icon-2x2"><span></span><span></span><span></span><span></span></span>
+                4화면
+            </button>
+            <button class="layout-btn" data-layout="6" onclick="setLayout(6)">
+                <span class="layout-icon icon-2x3"><span></span><span></span><span></span><span></span><span></span><span></span></span>
+                6화면
+            </button>
+        </div>
+    </div>
+
+    <!-- 멀티뷰 그리드 (최대 6칸) -->
+    <div class="multiview-container layout-4" id="multiviewGrid">
+        <!-- 셀 1 ~ 6 JS로 생성 -->
+    </div>
+
+    <!-- 스트림 입력 모달 -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal">
+            <h3>스트림 추가</h3>
+            <p>트위치 채널명을 입력하면 해당 방송이 표시됩니다.</p>
+            <div class="modal-input-wrap">
+                <span class="modal-prefix">twitch.tv /</span>
+                <input class="modal-input" id="channelInput" type="text" placeholder="채널명 입력" autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="modal-btns">
+                <button class="modal-btn cancel" onclick="closeModal()">취소</button>
+                <button class="modal-btn confirm" onclick="confirmStream()">추가</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLayout = 4;
+        let targetCell = null;
+
+        // 스트림 상태 저장 (채널명)
+        const streams = Array(6).fill(null);
+
+        /**
+         * 초기 셀 생성
+         */
+        function buildGrid() {
+            const grid = document.getElementById('multiviewGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'stream-cell';
+                cell.id = `cell-${i}`;
+                cell.innerHTML = renderCell(i);
+                grid.appendChild(cell);
+            }
+            applyLayoutVisibility();
+        }
+
+        function renderCell(i) {
+            if (streams[i]) {
+                return `
+                    <div class="stream-overlay">
+                        <span class="stream-channel-name">
+                            <span class="live-badge">LIVE</span>
+                            ${streams[i]}
+                        </span>
+                        <div class="stream-controls">
+                            <button class="stream-ctrl-btn" onclick="openModal(${i})" title="채널 변경">✎</button>
+                            <button class="stream-ctrl-btn danger" onclick="removeStream(${i})" title="스트림 제거">✕</button>
+                        </div>
+                    </div>
+                    <iframe
+                        src="https://player.twitch.tv/?channel=${streams[i]}&parent=${location.hostname}&autoplay=true&muted=true"
+                        allowfullscreen
+                    ></iframe>
+                `;
+            } else {
+                return `
+                    <div class="stream-empty" onclick="openModal(${i})">
+                        <span class="stream-empty-icon">＋</span>
+                        <span class="stream-empty-text">스트림 추가</span>
+                    </div>
+                `;
+            }
+        }
+
+        function refreshCell(i) {
+            const cell = document.getElementById(`cell-${i}`);
+            if (cell) cell.innerHTML = renderCell(i);
+        }
+
+        /**
+         * 레이아웃 설정
+         */
+        function setLayout(n) {
+            currentLayout = n;
+            const grid = document.getElementById('multiviewGrid');
+            grid.className = `multiview-container layout-${n}`;
+
+            document.querySelectorAll('.layout-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.layout) === n);
+            });
+
+            applyLayoutVisibility();
+        }
+
+        function applyLayoutVisibility() {
+            for (let i = 0; i < 6; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                if (!cell) continue;
+                if (i < currentLayout) {
+                    cell.classList.remove('hidden-cell');
+                } else {
+                    cell.classList.add('hidden-cell');
+                }
+            }
+        }
+
+        /**
+         * 모달 열기/닫기
+         */
+        function openModal(cellIndex) {
+            targetCell = cellIndex;
+            const input = document.getElementById('channelInput');
+            input.value = streams[cellIndex] || '';
+            document.getElementById('modalBackdrop').classList.add('open');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeModal() {
+            document.getElementById('modalBackdrop').classList.remove('open');
+            targetCell = null;
+        }
+
+        function confirmStream() {
+            const val = document.getElementById('channelInput').value.trim();
+            if (!val) return;
+            if (targetCell === null) return;
+
+            streams[targetCell] = val;
+            refreshCell(targetCell);
+            closeModal();
+        }
+
+        function removeStream(i) {
+            streams[i] = null;
+            refreshCell(i);
+        }
+
+        // 엔터키로 확인
+        document.getElementById('channelInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') confirmStream();
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // 백드롭 클릭 시 닫기
+        document.getElementById('modalBackdrop').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // 초기화
+        buildGrid();
+    </script>
+</body>
+</html>
