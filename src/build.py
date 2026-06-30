@@ -43,9 +43,29 @@ BTN_VARIANT = {"primary": "primary", "secondary": "secondary",
                "danger": "danger", "chip": "chip"}
 
 
+# 본문 맨 위 흰색 굵은 제목 노드 id — EN 헤더가 대체하므로 렌더 시 건너뜀
+SKIP_TEXT_IDS = set()
+
+
+def first_text_id(nodes, nid):
+    """DOM 순서상 첫 비어있지 않은 text 노드의 id."""
+    n = nodes.get(nid)
+    if not n:
+        return None
+    if n.get("type") == "text" and (n.get("label") or "").strip():
+        return nid
+    for c in n.get("childrenIds", []):
+        r = first_text_id(nodes, c)
+        if r:
+            return r
+    return None
+
+
 def render(node_id, nodes, pages_index):
     n = nodes.get(node_id)
     if not n:
+        return ""
+    if node_id in SKIP_TEXT_IDS:
         return ""
     t = n.get("type")
     children = n.get("childrenIds", [])
@@ -62,7 +82,8 @@ def render(node_id, nodes, pages_index):
     if action and action.get("type") == "navigate":
         tgt = action.get("targetPageNodeId")
         if tgt:
-            href = f"{tgt}.html"
+            # 메인 홈(n2) 타깃은 실제 완성 메인 페이지로 연결
+            href = "../index.html" if tgt == "n2" else f"{tgt}.html"
 
     if t == "page":
         return kids()
@@ -147,6 +168,23 @@ GROUPS = [
 # 08 관리자 그룹 pid — 권한 보유 계정만 노출/접근
 ADMIN_PIDS = {pid for title, pids in GROUPS if title == "관리자" for pid in pids}
 
+# 그룹별 섹션 정체성 — (EN 윤곽선 타이틀, 국문 eyebrow). 메인 페이지 BUSINESS 헤더 패턴.
+GROUP_META = {
+    "메인 · 소식": ("HOME", "고래상사 메인"),
+    "크루 · 멤버": ("CREW", "고래상사의 사람들"),
+    "아카이브": ("ARCHIVE", "콘텐츠 아카이브"),
+    "클립": ("CLIPS", "베스트 클립"),
+    "방송 일정": ("SCHEDULE", "방송 일정"),
+    "멀티뷰": ("MULTIVIEW", "동시 시청"),
+    "공지": ("NOTICE", "공지사항"),
+    "관리자": ("ADMIN", "관리자 전용"),
+}
+# pid -> (EN, eyebrow)
+PAGE_HEAD = {
+    pid: GROUP_META[title]
+    for title, pids in GROUPS for pid in pids if title in GROUP_META
+}
+
 # 관리자 권한 페이지 접근 가드 (n44~n48) — sessionStorage.soop_user 의 role 확인
 ADMIN_GUARD_JS = (
     "<script>(function(){var u=null;"
@@ -172,6 +210,38 @@ DRAWER_JS = (
     "document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});"
     "})();</script>"
 )
+
+# 배경 깊이 — 플로팅 오브 + 도트 그리드
+BG_HTML = ('<div class="wf-bg" aria-hidden="true">'
+           '<span class="orb o1"></span><span class="orb o2"></span></div>')
+
+# 스크롤 리빌 — wf-body 직계 블록을 순차로 떠오르게 (메인 페이지 모션 재현)
+REVEAL_JS = (
+    "<script>(function(){"
+    "var PRM=matchMedia('(prefers-reduced-motion:reduce)').matches;"
+    "var els=[].slice.call(document.querySelectorAll('.wf-pagehead,.wf-body>*'));"
+    "els.forEach(function(el,i){el.classList.add('wf-reveal');"
+    "el.style.transitionDelay=(Math.min(i,8)*0.08)+'s';});"
+    "if(PRM){els.forEach(function(el){el.classList.add('wf-in');});return;}"
+    "function run(){var wt=scrollY+innerHeight;"
+    "els.forEach(function(el){var it=el.getBoundingClientRect().top+scrollY;"
+    "if(wt>it+70)el.classList.add('wf-in');});}"
+    "run();addEventListener('scroll',run,{passive:true});addEventListener('load',run);"
+    "})();</script>"
+)
+
+
+def page_head(pid, pname):
+    """그룹 EN 윤곽선 헤더 + 국문 eyebrow + 페이지명 서브."""
+    meta = PAGE_HEAD.get(pid)
+    if not meta:
+        return ""
+    en, eyebrow = meta
+    return ('<header class="wf-pagehead">'
+            f'<span class="wf-eyebrow">{esc(eyebrow)}</span>'
+            f'<h1 class="wf-en">{esc(en)}</h1>'
+            f'<p class="wf-pagesub">{esc(pname)}</p>'
+            '</header>')
 
 
 def page_nav(pages_index, current):
@@ -236,6 +306,11 @@ def build():
 
     for d in pages:
         pid = d["pageNodeId"]
+        # 본문 맨 위 흰색 제목 1개만 숨김 (EN 헤더가 대체)
+        SKIP_TEXT_IDS.clear()
+        tid = first_text_id(d["nodes"], d["rootId"])
+        if tid:
+            SKIP_TEXT_IDS.add(tid)
         body = render(d["rootId"], d["nodes"], pages_index)
         guard = ADMIN_GUARD_JS if pid in ADMIN_PIDS else ""
         doc = f"""<!DOCTYPE html>
@@ -244,8 +319,10 @@ def build():
 <title>{esc(d['pageName'])} · 고래상사 와이어프레임</title>
 <link rel="stylesheet" href="wireframe.css">
 {guard}</head><body>
+{BG_HTML}
 {page_nav(pages_index, pid)}
-<div class="wf-canvas">{body}</div>
+<div class="wf-canvas">{page_head(pid, d['pageName'])}{body}</div>
+{REVEAL_JS}
 </body></html>"""
         with open(os.path.join(OUT, f"{pid}.html"), "w", encoding="utf-8") as fh:
             fh.write(doc)
@@ -262,6 +339,7 @@ def build():
 <title>고래상사 와이어프레임 — 전체 페이지</title>
 <link rel="stylesheet" href="wireframe.css">
 </head><body>
+{BG_HTML}
 <div class="idx-wrap">
 <h1>고래상사 공식 홈페이지 — 와이어프레임
   <a class="idx-main-link" href="../index.html">← 메인 페이지</a>

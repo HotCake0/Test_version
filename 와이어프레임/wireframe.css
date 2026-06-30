@@ -191,6 +191,39 @@ body::before {
 }
 .wf-drawer-btm a:hover { color: var(--ink); }
 
+/* ─── 페이지 섹션 헤더 (메인 BUSINESS 윤곽선 패턴) ─── */
+.wf-pagehead {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 64px) 0 clamp(20px, 3vw, 40px);
+  position: relative;
+}
+.wf-eyebrow {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  color: var(--brand);
+  margin-bottom: 14px;
+}
+.wf-en {
+  margin: 0 0 14px;
+  font-size: clamp(44px, 8vw, 110px);
+  font-weight: 900;
+  letter-spacing: -.04em;
+  line-height: .9;
+  color: transparent;
+  -webkit-text-stroke: 1.6px rgba(255,255,255,.20);
+  text-stroke: 1.6px rgba(255,255,255,.20);
+  word-break: keep-all;
+}
+.wf-pagesub {
+  margin: 0;
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
 /* ─── 캔버스 — 사이드바 제거, 전체폭 ─── */
 .wf-canvas {
   margin-left: 0;
@@ -199,11 +232,11 @@ body::before {
   z-index: 1;
 }
 .wf-body {
-  max-width: 1080px;
+  max-width: 1160px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: clamp(28px, 3.6vw, 52px);
 }
 
 /* ─── 레이아웃 프리미티브 ─── */
@@ -228,18 +261,30 @@ body::before {
 .wf-text { color: var(--ink); }
 
 .t-xl {
-  font-size: 28px;
+  font-size: clamp(30px, 4.4vw, 50px);
   font-weight: 900;
-  letter-spacing: -.035em;
+  letter-spacing: -.04em;
   color: var(--ink);
-  line-height: 1.2;
+  line-height: 1.12;
 }
 .t-lg {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  margin-top: 4px;
+  font-size: clamp(20px, 2.6vw, 30px);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  margin-top: 10px;
   color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* 섹션 제목 좌측 브랜드 마커 */
+.t-lg::before {
+  content: "";
+  width: 4px;
+  height: 1em;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--brand), var(--accent));
+  flex-shrink: 0;
 }
 .t-md {
   font-size: 15px;
@@ -257,8 +302,7 @@ body::before {
   color: var(--ink-2);
   letter-spacing: .01em;
 }
-.wf-text.t-xs:empty::after { content: "·····"; color: var(--line-2); }
-.wf-text.t-sm:empty::after { content: "·····"; color: var(--line-2); }
+.wf-text:empty { display: none; }
 
 /* ─── 버튼 ─── */
 .wf-btn {
@@ -346,55 +390,77 @@ body::before {
 /* ─── 스페이서 ─── */
 .wf-spacer { flex: 1 1 auto; }
 
-/* ─── 이미지 플레이스홀더 ─── */
+/* ─── 이미지 → 부서 그라데이션 카드 (디자인 시스템) ─── */
 .wf-image {
   width: 100%;
   min-height: 120px;
-  background:
-    repeating-linear-gradient(
-      135deg,
-      rgba(255,255,255,.025) 0 10px,
-      rgba(255,255,255,.045) 10px 20px
-    );
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  /* 기본: 임원 블루 그라데이션 */
+  background: linear-gradient(135deg, #0b2e8f, #2f6bff 60%, #0a44cc);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  align-items: flex-end;
+  justify-content: flex-start;
+  text-align: left;
   position: relative;
   overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+}
+/* 상단 광택 + 하단 스크림 (텍스트 가독성) */
+.wf-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 12% 6%, rgba(255,255,255,.22), transparent 46%),
+    linear-gradient(to top, rgba(2,5,18,.62), transparent 58%);
+  pointer-events: none;
 }
 .wf-image > span {
-  font-size: 11.5px;
-  color: var(--ink-2);
-  padding: 8px;
-  font-weight: 600;
-  letter-spacing: .08em;
+  font-size: 11px;
+  color: rgba(255,255,255,.92);
+  padding: 10px 12px;
+  font-weight: 800;
+  letter-spacing: .12em;
   text-transform: uppercase;
   position: relative;
   z-index: 1;
+  text-shadow: 0 1px 8px rgba(0,0,0,.5);
 }
 .wf-image.round {
   border-radius: 50%;
   min-height: 0;
+  align-items: center;
+  justify-content: center;
 }
+.wf-image.round > span { text-align: center; padding: 6px; }
+
+/* 행/열 안에서 카드마다 부서 그라데이션 순환 → 들쭉날쭉한 리듬 */
+.wf-row > *:nth-child(5n+2) .wf-image,
+.wf-col > *:nth-child(5n+2) .wf-image { background: linear-gradient(135deg, #06564a, #10e0a6 60%, #067a5e); }
+.wf-row > *:nth-child(5n+3) .wf-image,
+.wf-col > *:nth-child(5n+3) .wf-image { background: linear-gradient(135deg, #3a0fa6, #9333ff 60%, #5a14c0); }
+.wf-row > *:nth-child(5n+4) .wf-image,
+.wf-col > *:nth-child(5n+4) .wf-image { background: linear-gradient(135deg, #7a4a00, #ffb220 60%, #9a3800); }
+.wf-row > *:nth-child(5n+5) .wf-image,
+.wf-col > *:nth-child(5n+5) .wf-image { background: linear-gradient(135deg, #7a0a3c, #ff3d92 60%, #a80a44); }
 
 /* ─── 박스 / 카드 ─── */
 .wf-box {
-  background: var(--surface);
+  background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  padding: 16px;
+  padding: clamp(18px, 2vw, 26px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  gap: 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
 }
 .wf-box.outlined {
   border: 1px solid var(--line-2);
-  background: transparent;
+  background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
 }
 a.wf-box {
   text-decoration: none;
@@ -535,22 +601,12 @@ a.wf-box.clickable:hover {
 
 /* ─── 오버레이(모달) ─── */
 .wf-overlay {
-  border: 1px dashed var(--line-2);
-  border-radius: 14px;
-  background: rgba(3,6,14,.55);
-  padding: 8px;
+  border-radius: 18px;
+  background: rgba(3,6,14,.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: clamp(14px, 3vw, 28px);
   margin-top: 8px;
-}
-.wf-overlay::before {
-  content: "⬚ overlay";
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink-2);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  padding: 2px 6px 4px;
-  opacity: .6;
 }
 .wf-overlay-inner {
   background: var(--surface);
@@ -647,9 +703,48 @@ a.wf-box.clickable:hover {
   letter-spacing: -.01em;
 }
 
+/* ─── 배경 깊이: 플로팅 오브 + 도트 그리드 (메인 페이지 시그니처) ─── */
+.wf-bg {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; overflow: hidden;
+}
+.wf-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: linear-gradient(120deg, transparent, #000 42%, transparent 88%);
+  mask-image: linear-gradient(120deg, transparent, #000 42%, transparent 88%);
+}
+.orb { position: absolute; border-radius: 50%; filter: blur(60px); }
+.orb.o1 {
+  width: clamp(320px,40vw,560px); height: clamp(320px,40vw,560px);
+  top: -160px; right: -120px;
+  background: radial-gradient(circle, rgba(15,181,176,.5), transparent 70%);
+  animation: orb1 16s ease-in-out infinite;
+}
+.orb.o2 {
+  width: clamp(340px,42vw,600px); height: clamp(340px,42vw,600px);
+  bottom: -220px; left: -150px;
+  background: radial-gradient(circle, rgba(47,99,255,.46), transparent 70%);
+  animation: orb2 21s ease-in-out infinite;
+}
+@keyframes orb1 { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(-42px,32px,0) scale(1.14)} }
+@keyframes orb2 { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(52px,-30px,0) scale(1.1)} }
+
+/* ─── 스크롤 리빌 (메인 페이지 img-ani 재현) ─── */
+.wf-reveal {
+  opacity: 0;
+  transform: translateY(46px);
+  transition: opacity 1s cubic-bezier(0,.72,.44,.99), transform 1s cubic-bezier(0,.72,.44,.99);
+  will-change: opacity, transform;
+}
+.wf-reveal.wf-in { opacity: 1; transform: none; }
+
 /* ─── 모션 줄이기 접근성 ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
+  .wf-reveal { opacity: 1 !important; transform: none !important; }
+  .orb { animation: none !important; }
 }
 
 /* ─── 반응형 ─── */
