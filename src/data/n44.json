@@ -1,0 +1,19 @@
+{
+  "pageNodeId": "n44",
+  "pageName": "관리자 페이지",
+  "rootId": "w-018c7b",
+  "nodes": {
+    "w-018c7b": {"id":"w-018c7b","type":"page","parentId":null,"childrenIds":["w-018c7c"],"label":"관리자 페이지","attributes":{"layout":"app"}},
+    "w-018c7c": {"id":"w-018c7c","type":"body","parentId":"w-018c7b","childrenIds":["w-018c7d","w-018c80"]},
+    "w-018c7d": {"id":"w-018c7d","type":"column","parentId":"w-018c7c","childrenIds":["w-018c7e","w-018c7f"],"layout":{"gap":8,"align":"center"}},
+    "w-018c7e": {"id":"w-018c7e","type":"text","parentId":"w-018c7d","childrenIds":[],"label":"관리자 인증","size":"md"},
+    "w-018c7f": {"id":"w-018c7f","type":"text","parentId":"w-018c7d","childrenIds":[],"label":"고래상사 운영 시스템에 접근하려면 관리자 자격 증명을 입력하세요.","size":"sm"},
+    "w-018c80": {"id":"w-018c80","type":"box","parentId":"w-018c7c","childrenIds":["w-018c81"],"attributes":{"outlined":""}},
+    "w-018c81": {"id":"w-018c81","type":"column","parentId":"w-018c80","childrenIds":["w-018c82","w-018c83","w-018c84","w-018c85"],"layout":{"gap":16}},
+    "w-018c82": {"id":"w-018c82","type":"input","parentId":"w-018c81","childrenIds":[],"label":"관리자 아이디"},
+    "w-018c83": {"id":"w-018c83","type":"input","parentId":"w-018c81","childrenIds":[],"label":"비밀번호","inputType":"password"},
+    "w-018c84": {"id":"w-018c84","type":"button","parentId":"w-018c81","childrenIds":[],"label":"관리자 로그인","variant":"primary"},
+    "w-018c85": {"id":"w-018c85","type":"row","parentId":"w-018c81","childrenIds":["w-018c86"],"layout":{"justify":"center"}},
+    "w-018c86": {"id":"w-018c86","type":"button","parentId":"w-018c85","childrenIds":[],"label":"일반 로그인 페이지로","action":{"type":"navigate","targetPageNodeId":"n45"}}
+  }
+}

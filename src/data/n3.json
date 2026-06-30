@@ -1,0 +1,27 @@
+{
+  "pageNodeId": "n3",
+  "pageName": "최신 소식 배너",
+  "rootId": "w-01879a",
+  "nodes": {
+    "w-01879a": {"id":"w-01879a","type":"page","parentId":null,"childrenIds":["w-01879b"],"label":"최신 소식 배너","attributes":{"layout":"website"}},
+    "w-01879b": {"id":"w-01879b","type":"body","parentId":"w-01879a","childrenIds":["w-01879c","w-01879d","w-0187a2","w-0187a7","w-0187ac"]},
+    "w-01879c": {"id":"w-01879c","type":"text","parentId":"w-01879b","childrenIds":[],"label":"최신 소식","size":"md"},
+    "w-01879d": {"id":"w-01879d","type":"box","parentId":"w-01879b","childrenIds":["w-01879e","w-01879f","w-0187a0","w-0187a1"],"attributes":{"outlined":""}},
+    "w-01879e": {"id":"w-01879e","type":"text","parentId":"w-01879d","childrenIds":[],"label":"주요 공지","size":"lg"},
+    "w-01879f": {"id":"w-01879f","type":"text","parentId":"w-01879d","childrenIds":[],"label":"새로운 크루원 영입 완료","size":"md"},
+    "w-0187a0": {"id":"w-0187a0","type":"text","parentId":"w-01879d","childrenIds":[],"label":"2024년 첫 번째 정기 멤버십 업데이트가 진행되었습니다.","size":"sm"},
+    "w-0187a1": {"id":"w-0187a1","type":"button","parentId":"w-01879d","childrenIds":[],"label":"자세히 보기","variant":"primary","action":{"type":"navigate","targetPageNodeId":"n42"}},
+    "w-0187a2": {"id":"w-0187a2","type":"box","parentId":"w-01879b","childrenIds":["w-0187a3","w-0187a4","w-0187a5","w-0187a6"],"attributes":{"outlined":""}},
+    "w-0187a3": {"id":"w-0187a3","type":"text","parentId":"w-0187a2","childrenIds":[],"label":"업데이트 소식","size":"lg"},
+    "w-0187a4": {"id":"w-0187a4","type":"text","parentId":"w-0187a2","childrenIds":[],"label":"플랫폼 기능 개선 안내","size":"md"},
+    "w-0187a5": {"id":"w-0187a5","type":"text","parentId":"w-0187a2","childrenIds":[],"label":"검색 기능이 강화되어 원하는 콘텐츠를 더 빠르게 찾을 수 있습니다.","size":"sm"},
+    "w-0187a6": {"id":"w-0187a6","type":"button","parentId":"w-0187a2","childrenIds":[],"label":"자세히 보기","variant":"primary","action":{"type":"navigate","targetPageNodeId":"n42"}},
+    "w-0187a7": {"id":"w-0187a7","type":"box","parentId":"w-01879b","childrenIds":["w-0187a8","w-0187a9","w-0187aa","w-0187ab"],"attributes":{"outlined":""}},
+    "w-0187a8": {"id":"w-0187a8","type":"text","parentId":"w-0187a7","childrenIds":[],"label":"예정된 일정","size":"lg"},
+    "w-0187a9": {"id":"w-0187a9","type":"text","parentId":"w-0187a7","childrenIds":[],"label":"크루 라이브 방송","size":"md"},
+    "w-0187aa": {"id":"w-0187aa","type":"text","parentId":"w-0187a7","childrenIds":[],"label":"2024년 1월 15일 오후 8시 / 모든 크루원이 함께하는 특별 라이브","size":"sm"},
+    "w-0187ab": {"id":"w-0187ab","type":"button","parentId":"w-0187a7","childrenIds":[],"label":"자세히 보기","variant":"primary","action":{"type":"navigate","targetPageNodeId":"n42"}},
+    "w-0187ac": {"id":"w-0187ac","type":"row","parentId":"w-01879b","childrenIds":["w-0187ad"],"layout":{"justify":"center"}},
+    "w-0187ad": {"id":"w-0187ad","type":"button","parentId":"w-0187ac","childrenIds":[],"label":"홈으로","action":{"type":"navigate","targetPageNodeId":"n2"}}
+  }
+}

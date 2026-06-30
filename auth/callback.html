@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>로그인 중... | 고래상사</title>
+  <style>
+    body { background:#070a14; color:#eef2fb; display:flex; align-items:center;
+           justify-content:center; height:100vh; margin:0;
+           font-family:'Pretendard',system-ui,sans-serif; }
+    .msg { text-align:center; }
+    .msg p { margin-top:12px; opacity:.65; font-size:14px; }
+  </style>
+</head>
+<body>
+<div class="msg">
+  <div id="status">🔐 로그인 처리 중...</div>
+  <p id="detail"></p>
+</div>
+<script>
+/* 운영본 auth/callback.html과 동일한 흐름 — 단 복귀 지점만 리워크 메인 */
+const WORKER_URL = "https://whale-status-worker.kyefyx.workers.dev";
+const FIREBASE   = "https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const code   = params.get("code");
+
+  if (!code) {
+    document.getElementById("status").textContent = "❌ 인증 코드가 없습니다.";
+    return;
+  }
+
+  try {
+    // 1. code → access_token
+    const tokenRes  = await fetch(`${WORKER_URL}/auth/token`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ code }),
+    });
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) {
+      document.getElementById("status").textContent = "❌ 토큰 발급 실패";
+      document.getElementById("detail").textContent = JSON.stringify(tokenData);
+      return;
+    }
+
+    // 2. access_token → 유저 정보(닉네임)
+    const meRes  = await fetch(`${WORKER_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const meData = await meRes.json();
+    if (!meData.nickname) {
+      document.getElementById("status").textContent = "❌ 유저 정보 조회 실패";
+      document.getElementById("detail").textContent = JSON.stringify(meData);
+      return;
+    }
+
+    // 3. Firebase 권한 확인 (숲 닉네임을 키로) → "admin" | "editor" | null
+    const nickKey  = encodeURIComponent(meData.nickname);
+    const permRes  = await fetch(`${FIREBASE}/permissions/${nickKey}.json`);
+    const permData = await permRes.json();
+
+    // 4. sessionStorage 저장 후 원래 보던 페이지로 복귀
+    const validRoles = ["admin", "editor"];
+    const role = validRoles.includes(permData) ? permData : "none";
+    sessionStorage.setItem("soop_user", JSON.stringify({ nickname: meData.nickname, role }));
+
+    document.getElementById("status").textContent = `✅ ${meData.nickname}님 로그인 완료`;
+    const back = sessionStorage.getItem("soop_return") || "../index.html";
+    setTimeout(() => { location.replace(back); }, 800);
+
+  } catch (e) {
+    document.getElementById("status").textContent = "❌ 오류 발생";
+    document.getElementById("detail").textContent = e.message;
+  }
+})();
+</script>
+</body>
+</html>

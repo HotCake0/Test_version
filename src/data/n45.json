@@ -1,0 +1,26 @@
+{
+  "pageNodeId": "n45",
+  "pageName": "로그인 페이지",
+  "rootId": "w-018c87",
+  "nodes": {
+    "w-018c87": {"id":"w-018c87","type":"page","parentId":null,"childrenIds":["w-018c88"],"label":"관리자 로그인","attributes":{"layout":"app"}},
+    "w-018c88": {"id":"w-018c88","type":"body","parentId":"w-018c87","childrenIds":["w-018c89"]},
+    "w-018c89": {"id":"w-018c89","type":"column","parentId":"w-018c88","childrenIds":["w-018c8a","w-018c8b","w-018c90"],"layout":{"gap":32,"align":"center","width":400}},
+    "w-018c8a": {"id":"w-018c8a","type":"text","parentId":"w-018c89","childrenIds":[],"label":"관리자 로그인","size":"md"},
+    "w-018c8b": {"id":"w-018c8b","type":"column","parentId":"w-018c89","childrenIds":["w-018c8c","w-018c8d","w-018c8e","w-018c8f"],"layout":{"gap":16,"align":"stretch"}},
+    "w-018c8c": {"id":"w-018c8c","type":"input","parentId":"w-018c8b","childrenIds":[],"label":"이메일"},
+    "w-018c8d": {"id":"w-018c8d","type":"input","parentId":"w-018c8b","childrenIds":[],"label":"비밀번호"},
+    "w-018c8e": {"id":"w-018c8e","type":"button","parentId":"w-018c8b","childrenIds":[],"label":"로그인","variant":"primary"},
+    "w-018c8f": {"id":"w-018c8f","type":"text","parentId":"w-018c8b","childrenIds":[],"label":"계정이 없으신가요? 관리자 초대를 요청해 주세요.","size":"sm"},
+    "w-018c90": {"id":"w-018c90","type":"column","parentId":"w-018c89","childrenIds":["w-018c91","w-018c94","w-018c97"],"layout":{"gap":12,"align":"stretch"}},
+    "w-018c91": {"id":"w-018c91","type":"box","parentId":"w-018c90","childrenIds":["w-018c92","w-018c93"],"attributes":{"outlined":""}},
+    "w-018c92": {"id":"w-018c92","type":"text","parentId":"w-018c91","childrenIds":[],"label":"클립 관리","size":"md"},
+    "w-018c93": {"id":"w-018c93","type":"button","parentId":"w-018c91","childrenIds":[],"label":"이동","action":{"type":"navigate","targetPageNodeId":"n46"}},
+    "w-018c94": {"id":"w-018c94","type":"box","parentId":"w-018c90","childrenIds":["w-018c95","w-018c96"],"attributes":{"outlined":""}},
+    "w-018c95": {"id":"w-018c95","type":"text","parentId":"w-018c94","childrenIds":[],"label":"공지/일정 관리","size":"md"},
+    "w-018c96": {"id":"w-018c96","type":"button","parentId":"w-018c94","childrenIds":[],"label":"이동","action":{"type":"navigate","targetPageNodeId":"n47"}},
+    "w-018c97": {"id":"w-018c97","type":"box","parentId":"w-018c90","childrenIds":["w-018c98","w-018c99"],"attributes":{"outlined":""}},
+    "w-018c98": {"id":"w-018c98","type":"text","parentId":"w-018c97","childrenIds":[],"label":"멤버/크루 정보 관리","size":"md"},
+    "w-018c99": {"id":"w-018c99","type":"button","parentId":"w-018c97","childrenIds":[],"label":"이동","action":{"type":"navigate","targetPageNodeId":"n48"}}
+  }
+}
