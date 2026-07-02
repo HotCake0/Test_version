@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>멤버 목록 · 고래상사</title>
+<script>if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('js-anim');</script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+.pg-wrap{max-width:var(--maxw);margin:0 auto;padding:calc(72px + clamp(40px,7vw,110px)) var(--pad) clamp(80px,10vw,140px);min-height:70vh}
+.pg-head{margin-bottom:clamp(32px,5vw,64px)}
+.pg-eyebrow{display:block;font-size:12px;font-weight:800;letter-spacing:.2em;color:var(--brand);text-transform:uppercase;margin-bottom:12px}
+.pg-en{margin:0 0 10px;font-size:clamp(40px,6vw,84px);font-weight:900;letter-spacing:-.04em;line-height:1;
+  color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.18)}
+.pg-sub{margin:0;font-size:clamp(15px,1.4vw,18px);color:var(--ink-2)}
+/* 필터 바 */
+.pg-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:clamp(24px,3vw,40px)}
+.chip{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--brand);color:var(--ink)}
+.chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.pg-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+/* 멤버 그리드 */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
+@media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.mgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:440px){.mgrid{grid-template-columns:1fr}}
+.mcard{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;cursor:pointer;
+  background:var(--surface);border:1px solid var(--line);
+  transition:border-color .3s var(--ease),box-shadow .3s var(--ease),transform .3s var(--ease)}
+.mcard:hover{border-color:var(--brand);box-shadow:0 14px 44px rgba(47,99,255,.3);transform:translateY(-4px)}
+.mcard .ava-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:clamp(38px,6vw,64px);font-weight:900;color:rgba(255,255,255,.88)}
+.mcard .ava-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.25) contrast(1.04);transition:transform .5s var(--ease)}
+.mcard:hover .ava-img{transform:scale(1.06)}
+.mcard .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 58%);z-index:1}
+.mcard .card-info{position:absolute;left:0;right:0;bottom:0;padding:14px;z-index:2}
+.mcard .card-name{font-size:17px;font-weight:900;letter-spacing:-.02em}
+.mcard .card-role{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
+.mcard .card-tag{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;background:rgba(255,255,255,.14);padding:3px 9px;border-radius:999px;color:rgba(255,255,255,.82)}
+.mcard.is-live{border-color:var(--hot)}
+.mcard.is-live:hover{box-shadow:0 14px 44px rgba(255,77,77,.32)}
+.mlive{position:absolute;top:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 9px;border-radius:7px;background:var(--hot);color:#fff;
+  box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mlive .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
+.mlive .mv-n{font-weight:700;opacity:.9}
+.mlive:hover{background:#ff1f4b}
+@media(prefers-reduced-motion:reduce){.mlive .d{animation:none}}
+/* 크루 소개 히어로 */
+.crew-hero{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:clamp(48px,7vw,100px)}
+@media(max-width:860px){.crew-hero{grid-template-columns:1fr}}
+.crew-hero h2{font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-.03em;line-height:1.15;margin:0 0 18px;word-break:keep-all}
+.crew-hero h2 em{font-style:normal;color:var(--accent)}
+.crew-hero p{font-size:clamp(15px,1.4vw,18px);color:var(--ink-2);line-height:1.7;margin:0 0 14px;word-break:keep-all}
+.crew-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.crew-metric{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 14px;text-align:center}
+.crew-metric .n{font-size:clamp(24px,3vw,38px);font-weight:900;letter-spacing:-.02em;color:var(--ink)}
+.crew-metric .u{font-size:12px;color:var(--ink-2);margin-top:4px}
+.crew-visual{aspect-ratio:4/5;border-radius:18px;background:linear-gradient(135deg,#0b2e8f,#2f6bff,#0a44cc);position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.crew-visual::after{content:"🐋";position:absolute;right:6%;bottom:2%;font-size:clamp(120px,20vw,240px);opacity:.14;line-height:1}
+/* 부서 리스트 */
+.dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:clamp(28px,4vw,48px)}
+.dept-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px;transition:border-color .25s,transform .25s}
+.dept-card:hover{border-color:var(--line-2);transform:translateY(-3px)}
+.dept-card h3{margin:0 0 6px;font-size:19px;font-weight:900;letter-spacing:-.02em}
+.dept-card .dept-count{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.08em}
+.dept-card .dept-mem{margin-top:12px;font-size:13.5px;color:var(--ink-2);line-height:1.7}
+/* 준비중 스텁 */
+.stub{text-align:center;padding:clamp(48px,10vw,120px) 0;color:var(--ink-2)}
+.stub .big{font-size:clamp(40px,7vw,88px);margin-bottom:18px;opacity:.5}
+.stub h2{font-size:clamp(22px,3vw,32px);font-weight:900;color:var(--ink);margin:0 0 12px;letter-spacing:-.02em}
+.stub p{font-size:15px;line-height:1.7;margin:0 auto;max-width:440px}
+.stub .btn{margin-top:26px}
+/* 멤버 상세 */
+.mdetail{display:grid;grid-template-columns:.9fr 1.3fr;gap:clamp(24px,4vw,56px);align-items:start}
+@media(max-width:820px){.mdetail{grid-template-columns:1fr}}
+.mdetail .portrait{aspect-ratio:3/4;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid var(--line-2)}
+.mdetail .portrait .ava-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:clamp(56px,9vw,120px);font-weight:900;color:rgba(255,255,255,.9)}
+.mdetail .portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mdetail .dept-label{font-size:12px;font-weight:800;letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.mdetail h2{margin:8px 0 6px;font-size:clamp(30px,4.4vw,56px);font-weight:900;letter-spacing:-.03em}
+.mdetail .role{font-size:15px;color:var(--ink-2);margin-bottom:20px}
+.mdetail .bio{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.75;margin-bottom:26px;word-break:keep-all}
+.mdetail .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
+.mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
+.mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
+.mdetail .navrow{display:flex;gap:10px}
+/* 클립 갤러리 대표 섹션 */
+.clips-hero{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(24px,3.6vw,56px);align-items:center;margin-bottom:clamp(40px,6vw,80px)}
+@media(max-width:900px){.clips-hero{grid-template-columns:1fr}}
+.clips-hero-info{padding-top:8px}
+.ch-cat{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+.ch-title{font-size:clamp(18px,2.4vw,30px);font-weight:900;letter-spacing:-.03em;line-height:1.25;margin:0 0 12px;word-break:keep-all}
+.ch-meta{font-size:13px;color:var(--ink-2);margin-bottom:14px;display:flex;gap:12px;flex-wrap:wrap}
+.ch-dur{color:var(--accent);font-weight:700}
+.ch-desc{font-size:14.5px;color:var(--ink-2);line-height:1.7;margin:0 0 20px;word-break:keep-all}
+/* 클립 카드 그리드 */
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,1.8vw,22px);margin-top:clamp(24px,3vw,36px)}
+@media(max-width:1100px){.cgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.cgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.cgrid{grid-template-columns:1fr}}
+.ccard{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;
+  background:var(--surface);border:1px solid var(--line);
+  transition:border-color .3s var(--ease),box-shadow .3s var(--ease),transform .3s var(--ease)}
+.ccard:hover{border-color:var(--brand);box-shadow:0 14px 44px rgba(47,99,255,.3);transform:translateY(-4px)}
+.ccard-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0f1730}
+.ccard-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease)}
+.ccard:hover .ccard-thumb img{transform:scale(1.06)}
+.ccard-grad{position:absolute;inset:0}
+.cplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:42px;height:30px;border-radius:8px;background:#ff0033;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;z-index:2;
+  box-shadow:0 6px 20px rgba(0,0,0,.55);transition:transform .2s var(--ease),background .2s var(--ease)}
+.ccard:hover .cplay{transform:translate(-50%,-50%) scale(1.1);background:#ff1f4b}
+.ccard-info{padding:11px 13px 13px}
+.ccard-title{font-size:13px;font-weight:800;letter-spacing:-.02em;line-height:1.35;
+  word-break:keep-all;margin-bottom:6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ccard-meta{font-size:11.5px;color:var(--ink-2);display:flex;gap:7px;flex-wrap:wrap}
+.ccard-dur{color:var(--accent);font-weight:700}
+/* 클립 상세 */
+.cdetail-player{aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#0f1730;
+  position:relative;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:22px}
+.cm-cat{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:10px}
+.cdetail-title{font-size:clamp(20px,2.8vw,36px);font-weight:900;letter-spacing:-.03em;
+  line-height:1.25;margin:0 0 12px;word-break:keep-all}
+.cdetail-meta{font-size:13px;color:var(--ink-2);display:flex;flex-wrap:wrap;
+  gap:6px 16px;margin-bottom:14px}
+.cdetail-desc{font-size:clamp(15px,1.4vw,17px);color:var(--ink-2);line-height:1.75;
+  margin:0 0 22px;word-break:keep-all}
+.cdetail-nav{display:flex;gap:10px;margin-bottom:36px;flex-wrap:wrap}
+.crelated-head{font-size:15px;font-weight:900;letter-spacing:-.02em;
+  margin:0 0 0;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:0}
+</style></head><body>
+<div class="wavebg" aria-hidden="true"></div>
+<div class="veil" aria-hidden="true"></div><header id="header"><div class="header-in">
+    <a class="h-logo" href="../index.html">고래<span class="lk">상사</span></a>
+    <div class="h-right">
+      <button class="btn-login" id="loginBtn" type="button">로그인</button>
+      <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
+        aria-expanded="false" aria-controls="gnbOverlay"><span></span><span></span><span></span></button>
+    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">01</span>메인 · 소식</div><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">02</span>크루 · 멤버</div><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a class="active" href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">03</span>아카이브</div><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">04</span>클립</div><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">05</span>방송 일정</div><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">06</span>멀티뷰</div><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">07</span>공지</div><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><div class="grp-t" tabindex="0"><span class="mn">08</span>관리자</div><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="../와이어프레임/index.html">와이어프레임</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">고래상사의 사람들</span><h1 class="pg-en">MEMBERS</h1><p class="pg-sub">멤버 목록</p></header><div class="pg-tools img-ani bottom-top"><button class="chip active" data-f="all">전체</button><button class="chip" data-f="임원">임원</button><button class="chip" data-f="게임부">게임부</button><button class="chip" data-f="컨텐츠부">컨텐츠부</button><button class="chip" data-f="영업부">영업부</button><button class="chip" data-f="기획실">기획실</button><button class="chip" data-f="총무부">총무부</button><button class="chip" data-f="방송팀">방송팀</button><button class="chip" data-f="인사부">인사부</button><button class="chip" data-f="개발팀">개발팀</button><button class="chip" data-f="마케팅팀">마케팅팀</button><button class="chip" data-f="비서실">비서실</button><span class="pg-count" id="mCount">전체 16명</span></div><div class="mgrid" id="mGrid"><article class="mcard" data-idx="0" data-soop="bach023" role="button" tabindex="0" aria-label="울산큰고래 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/울산큰고래.png" alt="울산큰고래" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0d1a4a,#2f63ff)">고</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">울산큰고래</div><div class="card-role">대표이사</div><span class="card-tag">임원</span></div></article><article class="mcard" data-idx="1" data-soop="gyeonjahee" role="button" tabindex="0" aria-label="견자희 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/견자희.png" alt="견자희" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a1e20,#0fb5b0)">부</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">견자희</div><div class="card-role">부사장</div><span class="card-tag">임원</span></div></article><article class="mcard" data-idx="2" data-soop="kimmaren77" role="button" tabindex="0" aria-label="김마렌 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/김마렌.png" alt="김마렌" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#2a0a0a,#ff4d4d)">게</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">김마렌</div><div class="card-role">게임부 부장</div><span class="card-tag">게임부</span></div></article><article class="mcard" data-idx="3" data-soop="doki0818" role="button" tabindex="0" aria-label="감자가비 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/감자가비.png" alt="감자가비" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#1a1800,#ffcb45)">컨</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">감자가비</div><div class="card-role">컨텐츠부 부장</div><span class="card-tag">컨텐츠부</span></div></article><article class="mcard" data-idx="4" data-soop="xpdpfv2" role="button" tabindex="0" aria-label="이지수 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/이지수.png" alt="이지수" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#150a30,#8b5cf6)">이</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">이지수</div><div class="card-role">영업부 부장</div><span class="card-tag">영업부</span></div></article><article class="mcard" data-idx="5" data-soop="ducke77" role="button" tabindex="0" aria-label="밀크티냠 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/밀크티냠.png" alt="밀크티냠" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#1a1200,#f59e0b)">밀</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">밀크티냠</div><div class="card-role">기획실장</div><span class="card-tag">기획실</span></div></article><article class="mcard" data-idx="15" data-soop="sellkey" role="button" tabindex="0" aria-label="셀키 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/셀키.png" alt="셀키" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#1a0808,#ef4444)">셀</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">셀키</div><div class="card-role">총무부장</div><span class="card-tag">총무부</span></div></article><article class="mcard" data-idx="6" data-soop="joaras2" role="button" tabindex="0" aria-label="조아라 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/조아라.png" alt="조아라" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a1a10,#10b981)">조</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">조아라</div><div class="card-role">게임부 과장</div><span class="card-tag">게임부</span></div></article><article class="mcard" data-idx="7" data-soop="melodingding" role="button" tabindex="0" aria-label="멜로딩딩 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/멜로딩딩.png" alt="멜로딩딩" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a1025,#3b82f6)">멜</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">멜로딩딩</div><div class="card-role">방송팀장</div><span class="card-tag">방송팀</span></div></article><article class="mcard" data-idx="11" data-soop="chae1hana" role="button" tabindex="0" aria-label="채하나 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/채하나.png" alt="채하나" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#1a0a00,#f97316)">채</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">채하나</div><div class="card-role">인사팀장</div><span class="card-tag">인사부</span></div></article><article class="mcard" data-idx="8" data-soop="soyoung6056" role="button" tabindex="0" aria-label="빡쏘 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/빡쏘.png" alt="빡쏘" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#1a0a18,#ec4899)">빡</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">빡쏘</div><div class="card-role">영업부 대리</div><span class="card-tag">영업부</span></div></article><article class="mcard" data-idx="9" data-soop="nlov555jij" role="button" tabindex="0" aria-label="삐요코 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/삐요코.png" alt="삐요코" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a1a1a,#14b8a6)">삐</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">삐요코</div><div class="card-role">콘텐츠 PD</div><span class="card-tag">컨텐츠부</span></div></article><article class="mcard" data-idx="12" data-soop="poippoi52" role="button" tabindex="0" aria-label="희희덕 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/희희덕.png" alt="희희덕" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a1a0a,#22c55e)">희</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">희희덕</div><div class="card-role">연구개발팀</div><span class="card-tag">개발팀</span></div></article><article class="mcard" data-idx="13" data-soop="peuhaha" role="button" tabindex="0" aria-label="프하 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/프하.png" alt="프하" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#160a22,#a855f7)">프</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">프하</div><div class="card-role">마케팅팀</div><span class="card-tag">마케팅팀</span></div></article><article class="mcard" data-idx="14" data-soop="nororo" role="button" tabindex="0" aria-label="묵아 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/묵아.png" alt="묵아" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a1820,#06b6d4)">묵</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">묵아</div><div class="card-role">비서실</div><span class="card-tag">비서실</span></div></article><article class="mcard" data-idx="10" data-soop="gatgdf" role="button" tabindex="0" aria-label="쏭이 프로필 보기"><a class="mlive" hidden target="_blank" rel="noopener" aria-label="방송 보기"><span class="d"></span>LIVE <b class="mv-n"></b></a><img class="ava-img" src="../img/쏭이.png" alt="쏭이" onerror="this.style.display='none'"><div class="ava-ph" style="background:linear-gradient(135deg,#0a0a22,#6366f1)">쏭</div><div class="card-overlay"></div><div class="card-info"><div class="card-name">쏭이</div><div class="card-role">신입사원</div><span class="card-tag">총무부</span></div></article></div></main><footer class="site-footer">
+  <div class="footer-in">
+    <span class="footer-logo">고래<span class="lk">상사</span></span>
+    <div class="footer-links">
+      <a class="btn sm ghost" href="notices.html">공지사항</a>
+      <a class="btn sm ghost admin-only" href="admin.html">관리자 페이지</a>
+      <a class="btn sm ghost" href="../index.html">메인으로</a>
+    </div>
+  </div>
+  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 역할극 버추얼 크루 · 16인.</div>
+</footer>
+<div class="scroll-topwrp" id="scrollTopWrp">
+  <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="맨 위로 이동">
+    <span class="ar" aria-hidden="true">↑</span>TOP</button>
+</div><div class="member-modal-bg" id="memberModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="memberModalName">
+  <div class="member-modal">
+    <button class="modal-close" id="memberModalClose" type="button" aria-label="닫기">×</button>
+    <div class="modal-ava" id="memberModalAva"></div>
+    <div class="modal-body">
+      <div class="modal-dept" id="memberModalDept"></div>
+      <div class="modal-name" id="memberModalName"></div>
+      <div class="modal-role" id="memberModalRole"></div>
+      <div class="modal-bio"  id="memberModalBio"></div>
+      <div class="modal-stats">
+        <div class="stat"><div class="stat-n" id="mstat0">0</div><div class="stat-u" id="mstat0u">—</div></div>
+        <div class="stat"><div class="stat-n" id="mstat1">0</div><div class="stat-u" id="mstat1u">—</div></div>
+        <div class="stat"><div class="stat-n" id="mstat2">0</div><div class="stat-u" id="mstat2u">—</div></div>
+      </div>
+      <div class="modal-nav-row">
+        <button class="btn sm" id="memberModalPrev" type="button">← 이전</button>
+        <button class="btn sm" id="memberModalNext" type="button">다음 →</button>
+      </div>
+    </div>
+  </div>
+</div><div class="login-modal-bg" id="loginModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="login-modal">
+    <button class="login-close" id="loginClose" type="button" aria-label="닫기">×</button>
+    <h2 id="loginTitle">로그인</h2>
+    <p class="sub">숲(SOOP) 계정으로 로그인합니다. 관리자 권한은 숲 아이디로 확인됩니다.</p>
+    <button class="btn primary login-soop" id="soopLoginBtn" type="button">🔵 숲(SOOP) 계정으로 로그인</button>
+    <p class="login-msg" id="loginMsg" role="status" aria-live="polite"></p>
+    <details class="dev-login">
+      <summary>개발용 로그인 (로컬 테스트)</summary>
+      <form id="devLoginForm" novalidate>
+        <label class="field"><span>숲 닉네임</span>
+          <input type="text" name="nick" placeholder="숲 닉네임으로 권한 조회" autocomplete="off"></label>
+        <button class="btn" type="submit">권한 확인 후 로그인</button>
+      </form>
+      <p class="dev-note">실제 숲 OAuth 없이, 입력한 닉네임의 Firebase 권한만 조회해 로그인합니다. (localhost 테스트용)</p>
+    </details>
+  </div>
+</div>
+<script src="../assets/site.js"></script>
+<script>window.WHALE_MEMBERS=[{"name": "울산큰고래", "role": "대표이사", "dept": "임원", "color": "linear-gradient(135deg,#0d1a4a,#2f63ff)", "initials": "고", "img": "../img/울산큰고래.png", "bio": "고래상사의 수장. 든든한 리더십으로 16인 크루를 이끄는 대표이사. 직원들의 고충을 누구보다 잘 압니다.", "stats": [{"n": 4200, "u": "누적 방송시간(h)"}, {"n": 320, "u": "클립 수"}, {"n": 128000, "u": "누적 시청자"}], "soop": "bach023"}, {"name": "견자희", "role": "부사장", "dept": "임원", "color": "linear-gradient(135deg,#0a1e20,#0fb5b0)", "initials": "부", "img": "../img/견자희.png", "bio": "냉철한 판단력과 탁월한 업무 능력. 대표이사의 오른팔이자 실질적인 회사 운영을 담당합니다.", "stats": [{"n": 3800, "u": "누적 방송시간(h)"}, {"n": 285, "u": "클립 수"}, {"n": 98000, "u": "누적 시청자"}], "soop": "gyeonjahee"}, {"name": "김마렌", "role": "게임부 부장", "dept": "게임부", "color": "linear-gradient(135deg,#2a0a0a,#ff4d4d)", "initials": "게", "img": "../img/김마렌.png", "bio": "게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끕니다.", "stats": [{"n": 5100, "u": "누적 방송시간(h)"}, {"n": 410, "u": "클립 수"}, {"n": 210000, "u": "누적 시청자"}], "soop": "kimmaren77"}, {"name": "감자가비", "role": "컨텐츠부 부장", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a1800,#ffcb45)", "initials": "컨", "img": "../img/감자가비.png", "bio": "창의적인 콘텐츠 아이디어의 원천. 감자처럼 투박하지만 속은 꽉 찬 컨텐츠부의 핵심 인재.", "stats": [{"n": 4600, "u": "누적 방송시간(h)"}, {"n": 380, "u": "클립 수"}, {"n": 175000, "u": "누적 시청자"}], "soop": "doki0818"}, {"name": "이지수", "role": "영업부 부장", "dept": "영업부", "color": "linear-gradient(135deg,#150a30,#8b5cf6)", "initials": "이", "img": "../img/이지수.png", "bio": "거침없는 추진력으로 고래상사의 수익을 책임지는 영업부의 에이스입니다.", "stats": [{"n": 3200, "u": "누적 방송시간(h)"}, {"n": 220, "u": "클립 수"}, {"n": 85000, "u": "누적 시청자"}], "soop": "xpdpfv2"}, {"name": "밀크티냠", "role": "기획실장", "dept": "기획실", "color": "linear-gradient(135deg,#1a1200,#f59e0b)", "initials": "밀", "img": "../img/밀크티냠.png", "bio": "톡톡 튀는 아이디어와 꼼꼼한 기획력으로 고래상사의 모든 기획을 총괄합니다.", "stats": [{"n": 2800, "u": "누적 방송시간(h)"}, {"n": 195, "u": "클립 수"}, {"n": 72000, "u": "누적 시청자"}], "soop": "ducke77"}, {"name": "조아라", "role": "게임부 과장", "dept": "게임부", "color": "linear-gradient(135deg,#0a1a10,#10b981)", "initials": "조", "img": "../img/조아라.png", "bio": "게임부의 든든한 허리. 부장을 보좌하며 팀을 이끄는 열정적인 과장입니다.", "stats": [{"n": 3600, "u": "누적 방송시간(h)"}, {"n": 280, "u": "클립 수"}, {"n": 115000, "u": "누적 시청자"}], "soop": "joaras2"}, {"name": "멜로딩딩", "role": "방송팀장", "dept": "방송팀", "color": "linear-gradient(135deg,#0a1025,#3b82f6)", "initials": "멜", "img": "../img/멜로딩딩.png", "bio": "날카로운 방송 감각으로 라이브 방송의 퀄리티를 책임지는 방송팀의 핵심입니다.", "stats": [{"n": 4100, "u": "누적 방송시간(h)"}, {"n": 350, "u": "클립 수"}, {"n": 140000, "u": "누적 시청자"}], "soop": "melodingding"}, {"name": "빡쏘", "role": "영업부 대리", "dept": "영업부", "color": "linear-gradient(135deg,#1a0a18,#ec4899)", "initials": "빡", "img": "../img/빡쏘.png", "bio": "작지만 강하다! 패기 넘치는 영업력으로 빠르게 성장 중인 영업부의 기대주입니다.", "stats": [{"n": 2200, "u": "누적 방송시간(h)"}, {"n": 160, "u": "클립 수"}, {"n": 58000, "u": "누적 시청자"}], "soop": "soyoung6056"}, {"name": "삐요코", "role": "콘텐츠 PD", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#0a1a1a,#14b8a6)", "initials": "삐", "img": "../img/삐요코.png", "bio": "꼼꼼한 편집과 센스 있는 기획으로 고래상사의 콘텐츠를 완성하는 PD입니다.", "stats": [{"n": 3000, "u": "누적 방송시간(h)"}, {"n": 240, "u": "클립 수"}, {"n": 95000, "u": "누적 시청자"}], "soop": "nlov555jij"}, {"name": "쏭이", "role": "신입사원", "dept": "총무부", "color": "linear-gradient(135deg,#0a0a22,#6366f1)", "initials": "쏭", "img": "../img/쏭이.png", "bio": "무한한 가능성을 지닌 고래상사의 막내. 빠르게 성장하는 신입사원입니다.", "stats": [{"n": 800, "u": "누적 방송시간(h)"}, {"n": 65, "u": "클립 수"}, {"n": 28000, "u": "누적 시청자"}], "soop": "gatgdf"}, {"name": "채하나", "role": "인사팀장", "dept": "인사부", "color": "linear-gradient(135deg,#1a0a00,#f97316)", "initials": "채", "img": "../img/채하나.png", "bio": "친근하고 활발한 성격으로 직원들의 고충을 들어주는 든든한 인사팀장입니다.", "stats": [{"n": 2600, "u": "누적 방송시간(h)"}, {"n": 185, "u": "클립 수"}, {"n": 76000, "u": "누적 시청자"}], "soop": "chae1hana"}, {"name": "희희덕", "role": "연구개발팀", "dept": "개발팀", "color": "linear-gradient(135deg,#0a1a0a,#22c55e)", "initials": "희", "img": "../img/희희덕.png", "bio": "독특한 아이디어와 분석력으로 새로운 콘텐츠를 연구하는 개발팀의 두뇌입니다.", "stats": [{"n": 1900, "u": "누적 방송시간(h)"}, {"n": 140, "u": "클립 수"}, {"n": 52000, "u": "누적 시청자"}], "soop": "poippoi52"}, {"name": "프하", "role": "마케팅팀", "dept": "마케팅팀", "color": "linear-gradient(135deg,#160a22,#a855f7)", "initials": "프", "img": "../img/프하.png", "bio": "변화무쌍한 전략과 SNS 감각으로 고래상사를 세상에 알리는 마케터입니다.", "stats": [{"n": 2100, "u": "누적 방송시간(h)"}, {"n": 155, "u": "클립 수"}, {"n": 63000, "u": "누적 시청자"}], "soop": "peuhaha"}, {"name": "묵아", "role": "비서실", "dept": "비서실", "color": "linear-gradient(135deg,#0a1820,#06b6d4)", "initials": "묵", "img": "../img/묵아.png", "bio": "완벽한 일정 관리로 대표이사를 보좌하는 고래상사의 숨은 일꾼입니다.", "stats": [{"n": 1600, "u": "누적 방송시간(h)"}, {"n": 110, "u": "클립 수"}, {"n": 44000, "u": "누적 시청자"}], "soop": "nororo"}, {"name": "셀키", "role": "총무부장", "dept": "총무부", "color": "linear-gradient(135deg,#1a0808,#ef4444)", "initials": "셀", "img": "../img/셀키.png", "bio": "내부 살림을 빈틈없이 관리하는 총무부의 베테랑. 회사의 안살림 담당입니다.", "stats": [{"n": 3400, "u": "누적 방송시간(h)"}, {"n": 260, "u": "클립 수"}, {"n": 89000, "u": "누적 시청자"}], "soop": "sellkey"}];</script><script>(function(){
+  var chips=[].slice.call(document.querySelectorAll('.chip[data-f]'));
+  var cards=[].slice.call(document.querySelectorAll('#mGrid .mcard'));
+  var count=document.getElementById('mCount');
+  chips.forEach(function(c){c.addEventListener('click',function(){
+    chips.forEach(function(x){x.classList.remove('active')});c.classList.add('active');
+    var f=c.getAttribute('data-f'),n=0;
+    cards.forEach(function(card){
+      var show=f==='all'||card.querySelector('.card-tag').textContent===f;
+      card.style.display=show?'':'none';if(show)n++;});
+    count.textContent=(f==='all'?'전체':f)+' '+n+'명';
+  });});
+})();</script><script>(function(){
+  var URL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
+  var grid=document.getElementById('mGrid');
+  function apply(map){
+    var cards=[].slice.call(grid.querySelectorAll('.mcard'));
+    cards.forEach(function(card){
+      var id=card.getAttribute('data-soop'),s=map[id];
+      var badge=card.querySelector('.mlive');
+      if(s&&s.is_live){
+        card.classList.add('is-live');
+        badge.hidden=false;badge.href=s.live_url||('https://www.sooplive.co.kr/station/'+id);
+        badge.querySelector('.mv-n').textContent=(s.viewers||0).toLocaleString();
+        card.setAttribute('data-live','1');
+      }else{card.classList.remove('is-live');badge.hidden=true;card.removeAttribute('data-live');}
+    });
+    // 방송중 카드를 앞으로
+    cards.sort(function(a,b){return (b.getAttribute('data-live')?1:0)-(a.getAttribute('data-live')?1:0);})
+      .forEach(function(c){grid.appendChild(c);});
+  }
+  // LIVE 뱃지 클릭은 모달 대신 방송으로
+  [].forEach.call(grid.querySelectorAll('.mlive'),function(a){
+    a.addEventListener('click',function(e){e.stopPropagation();});});
+  function load(){fetch(URL+'?v='+Date.now()).then(function(r){return r.json();}).then(function(d){
+    var map={};if(d&&d.members){Object.keys(d.members).forEach(function(k){var m=d.members[k];map[m.id]=m;});}
+    apply(map);}).catch(function(){});}
+  load();setInterval(load,300000);
+})();</script>
+</body></html>
