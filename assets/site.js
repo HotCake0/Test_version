@@ -60,26 +60,41 @@
   var SOOP_AUTH_URL  = 'https://openapi.sooplive.com/auth/code';
   var REDIRECT_URI   = location.origin + '/auth/callback.html';
   var FIREBASE_BASE  = 'https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app';
+  // Firebase 웹 API 키(공개키, 노출 무방) — idToken 만료 시 refresh에 필요
+  var FIREBASE_WEB_API_KEY = 'AIzaSyBZpdQES1EeZLieWiRwo-sNrA2wJQ6vZ9k';
 
   function currentUser() {
     try { return JSON.parse(sessionStorage.getItem('soop_user') || 'null'); }
     catch (e) { return null; }
   }
-  function hasAdmin(u) { u = u || currentUser(); return !!(u && (u.role === 'admin' || u.role === 'editor')); }
+  function isAdmin(u)    { u = u || currentUser(); return !!(u && (u.role === 'admin' || u.role === 'editor')); }
+  function isLoggedIn(u) { u = u || currentUser(); return !!(u && u.role); }
+  // 이 항목을 지금 사용자가 수정/삭제할 수 있는가: 관리자이거나, 본인이 만든 것(soop id 일치).
+  function canEdit(item) {
+    var u = currentUser();
+    if (!u) return false;
+    if (isAdmin(u)) return true;
+    return !!(item && item.ownerId != null && item.ownerId === u.id);
+  }
 
   function applyRole() {
-    var u = currentUser(), admin = hasAdmin(u);
-    $$('.admin-only').forEach(function (el) { el.classList.toggle('is-shown', admin); });
+    var u = currentUser(), admin = isAdmin(u), inUser = isLoggedIn(u);
+    $$('.admin-only').forEach(function (el) { el.classList.toggle('is-shown', admin); });   // 관리자 전용
+    $$('.auth-only').forEach(function (el) { el.classList.toggle('is-shown', inUser); });    // 로그인 사용자 전용
+    document.documentElement.classList.toggle('is-admin', admin);
+    document.documentElement.classList.toggle('is-auth', inUser);
     if (!loginBtn) return;
-    if (admin) {
-      loginBtn.textContent = (u.nickname || '관리자') + ' ⏏';
-      loginBtn.classList.add('is-admin');
-      loginBtn.title = '로그아웃 (' + u.role + ')';
+    if (inUser) {
+      loginBtn.textContent = (u.nickname || '사용자') + ' ⏏';
+      loginBtn.classList.toggle('is-admin', admin);
+      loginBtn.title = '로그아웃 (' + (u.role || '') + ')';
     } else {
       loginBtn.textContent = '로그인';
       loginBtn.classList.remove('is-admin');
       loginBtn.title = '';
     }
+    // 로그인/로그아웃으로 권한이 바뀌면 목록 페이지가 버튼을 다시 그리도록 신호를 보낸다.
+    try { document.dispatchEvent(new CustomEvent('whale:authchange')); } catch (e) {}
   }
 
   function soopLogin() {
@@ -91,13 +106,19 @@
   function closeLogin() { if (loginModalBg) loginModalBg.hidden = true; if (loginMsg) loginMsg.textContent = ''; }
 
   if (loginBtn) loginBtn.addEventListener('click', function () {
-    if (hasAdmin()) { sessionStorage.removeItem('soop_user'); applyRole(); return; }
+    if (isLoggedIn()) {
+      sessionStorage.removeItem('soop_user');
+      sessionStorage.removeItem('soop_fb');   // Firebase idToken도 함께 폐기
+      applyRole(); return;
+    }
     openLogin();
   });
   if (loginClose) loginClose.addEventListener('click', closeLogin);
   if (loginModalBg) loginModalBg.addEventListener('click', function (e) { if (e.target === loginModalBg) closeLogin(); });
   if (soopLoginBtn) soopLoginBtn.addEventListener('click', soopLogin);
 
+  // 개발용 로그인: 실제 OAuth가 불가한 로컬에서 닉네임으로 세션을 흉내낸다.
+  // 권한 계정이면 admin/editor, 아니면 member(로그인만 한 일반)로 세션 생성 → 일반 사용자 CRUD도 테스트 가능.
   if (devLoginForm) devLoginForm.addEventListener('submit', function (e) {
     e.preventDefault();
     var nick = devLoginForm.querySelector('[name="nick"]').value.trim();
@@ -106,9 +127,9 @@
     fetch(FIREBASE_BASE + '/permissions/' + encodeURIComponent(nick) + '.json')
       .then(function (r) { return r.json(); })
       .then(function (perm) {
-        var role = (perm === 'admin' || perm === 'editor') ? perm : 'none';
-        if (role === 'none') { loginMsg.textContent = '"' + nick + '" 계정에는 관리자 권한이 없습니다.'; return; }
-        sessionStorage.setItem('soop_user', JSON.stringify({ nickname: nick, role: role }));
+        var role = (perm === 'admin' || perm === 'editor') ? perm : 'member';
+        // 개발 세션은 실제 soop id가 없으므로 닉 기반 유사 id로 소유권 테스트가 되게 한다.
+        sessionStorage.setItem('soop_user', JSON.stringify({ id: 'dev:' + nick, nickname: nick, role: role }));
         applyRole();
         loginMsg.textContent = nick + '님 (' + role + ') 로그인 완료.';
         setTimeout(closeLogin, 900);
@@ -116,6 +137,82 @@
       .catch(function () { loginMsg.textContent = '권한 조회 실패 (네트워크 오류).'; });
   });
   applyRole();
+
+  /* ---- Firebase /rework/* CRUD 헬퍼 (클립·일정·공지 공용) ----
+     격리 경로: 운영 데이터를 건드리지 않도록 반드시 /rework/ 아래에만 쓴다.
+     ⚠️ Phase A는 보안 규칙/토큰이 없어 클라이언트 신뢰에 의존한다.
+        서버측 강제(soop id 소유권·admin)는 Phase B에서 커스텀 토큰 + RTDB 규칙으로 추가. */
+  var REWORK_BASE = FIREBASE_BASE + '/rework';
+  function jfetch(url, opt) {
+    return fetch(url, opt).then(function (r) {
+      if (!r.ok) throw new Error('Firebase ' + r.status);
+      return (r.status === 204) ? null : r.json();
+    });
+  }
+
+  /* Phase B: 쓰기 요청에 Firebase idToken(?auth=)을 첨부한다.
+     idToken은 auth/callback.html이 커스텀토큰 교환 후 sessionStorage.soop_fb에 저장.
+     만료 1분 전부터는 refreshToken으로 자동 갱신. 토큰이 없으면(dev 로그인 등)
+     auth 없이 보내고, 서버측 RTDB 규칙이 거부하면 그때 에러가 난다. */
+  function fbSession() {
+    try { return JSON.parse(sessionStorage.getItem('soop_fb') || 'null'); }
+    catch (e) { return null; }
+  }
+  function authParam() {
+    var s = fbSession();
+    if (!s || !s.idToken) return Promise.resolve('');
+    if (Date.now() < (s.expiresAt || 0) - 60000) {
+      return Promise.resolve('auth=' + encodeURIComponent(s.idToken));
+    }
+    if (!s.refreshToken) return Promise.resolve('auth=' + encodeURIComponent(s.idToken));
+    return fetch('https://securetoken.googleapis.com/v1/token?key=' + FIREBASE_WEB_API_KEY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(s.refreshToken)
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.id_token) return 'auth=' + encodeURIComponent(s.idToken); // 갱신 실패 → 기존 토큰으로 시도
+      var ns = { idToken: d.id_token,
+                 refreshToken: d.refresh_token || s.refreshToken,
+                 expiresAt: Date.now() + (parseInt(d.expires_in, 10) || 3600) * 1000 };
+      sessionStorage.setItem('soop_fb', JSON.stringify(ns));
+      return 'auth=' + encodeURIComponent(ns.idToken);
+    }).catch(function () { return 'auth=' + encodeURIComponent(s.idToken); });
+  }
+  function writeUrl(path) {
+    return authParam().then(function (a) { return REWORK_BASE + path + (a ? '?' + a : ''); });
+  }
+
+  var WhaleData = {
+    // col: 'clips' | 'schedules' | 'notices'.  각 항목 id = Firebase push 키.
+    list: function (col) {
+      return jfetch(REWORK_BASE + '/' + col + '.json?v=' + Date.now()).then(function (obj) {
+        if (!obj) return [];
+        return Object.keys(obj).map(function (k) { var it = obj[k] || {}; it.id = k; return it; });
+      });
+    },
+    create: function (col, data) {
+      var u = currentUser();
+      if (!u) return Promise.reject(new Error('로그인이 필요합니다.'));
+      data.ownerId = u.id; data.ownerNick = u.nickname;
+      data.createdAt = Date.now(); data.updatedAt = data.createdAt;
+      return writeUrl('/' + col + '.json').then(function (url) {
+        return jfetch(url,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      });
+    },
+    update: function (col, id, patch) {
+      patch.updatedAt = Date.now();
+      return writeUrl('/' + col + '/' + id + '.json').then(function (url) {
+        return jfetch(url,
+          { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) });
+      });
+    },
+    remove: function (col, id) {
+      return writeUrl('/' + col + '/' + id + '.json').then(function (url) {
+        return jfetch(url, { method: 'DELETE' });
+      });
+    }
+  };
 
   /* ---- 스크롤 리빌 (홈과 동일 img-ani 공식) ---- */
   function imgEvent() {
@@ -212,5 +309,7 @@
   });
 
   /* 외부에서 쓸 수 있게 노출 */
-  window.WhaleUI = { openMember: openMember, closeMember: closeMember, applyRole: applyRole };
+  window.WhaleUI = { openMember: openMember, closeMember: closeMember, applyRole: applyRole,
+                     getUser: currentUser, isAdmin: isAdmin, isLoggedIn: isLoggedIn, canEdit: canEdit };
+  window.WhaleData = WhaleData;
 })();

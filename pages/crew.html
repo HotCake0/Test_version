@@ -135,6 +135,44 @@
 .cdetail-nav{display:flex;gap:10px;margin-bottom:36px;flex-wrap:wrap}
 .crelated-head{font-size:15px;font-weight:900;letter-spacing:-.02em;
   margin:0 0 0;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:0}
+
+/* ---- CRUD 공용: 목록 액션 / 행 관리버튼 / 작성-수정 모달 (공지 구현에서 승격, 클립·일정도 공유) ---- */
+.n-actions{display:flex;flex-wrap:wrap;gap:10px;margin:-6px 0 22px}
+.n-row-actions{display:flex;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+.n-btn{font:inherit;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;
+  transition:.15s;flex:0 0 auto}
+.n-btn:hover{border-color:var(--brand);color:var(--ink)}
+.n-btn.pin-on{border-color:var(--warn);color:var(--warn)}
+.n-btn.del:hover{border-color:var(--hot);color:var(--hot)}
+.nlist-msg{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
+@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4}}
+
+.n-modal-bg{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(3,6,14,.8);backdrop-filter:blur(6px)}
+.n-modal-bg[hidden]{display:none}
+.n-modal{width:100%;max-width:540px;max-height:88vh;overflow-y:auto;background:#0e1326;border:1px solid var(--line-2);
+  border-radius:18px;padding:30px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.7);
+  position:relative;animation:modalIn .26s var(--ease)}
+.n-modal h2{margin:0 0 18px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.n-modal-close{position:absolute;top:14px;right:16px;border:none;background:none;
+  font-size:26px;line-height:1;color:var(--ink-2);cursor:pointer;padding:4px}
+.n-modal-close:hover{color:var(--ink)}
+.n-modal .field select,.n-modal .field textarea{width:100%;font:inherit;font-size:15px;padding:11px 13px;
+  border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04);
+  color:var(--ink);transition:border-color .15s,background .15s}
+.n-modal .field select:focus,.n-modal .field textarea:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.07)}
+.n-modal .field textarea{resize:vertical;min-height:130px;line-height:1.6;font-family:inherit}
+.n-modal .field select option{background:#0e1524;color:var(--ink)}
+.n-pin-field{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);cursor:pointer;margin-bottom:14px}
+.n-pin-field input{width:16px;height:16px;accent-color:var(--brand)}
+.n-modal .btn{width:100%;justify-content:center;padding:12px;margin-top:6px}
+.n-modal-msg{margin:12px 0 0;font-size:13px;text-align:center;color:#bdd0ff;min-height:18px}
+/* 클립 카드/히어로 관리 배지·액션 여백 (클립 CRUD 전용) */
+.ccard-actions{padding:0 13px 13px;margin-top:-4px}
+.ccard-feat{position:absolute;top:8px;left:8px;z-index:3;font-size:10px;font-weight:800;letter-spacing:.03em;
+  padding:3px 8px;border-radius:999px;background:var(--warn);color:#1a1400}
+.clips-hero-info .n-row-actions{margin:0 0 14px}
 </style></head><body>
 <div class="wavebg" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div><header id="header"><div class="header-in">

@@ -136,6 +136,44 @@
 .crelated-head{font-size:15px;font-weight:900;letter-spacing:-.02em;
   margin:0 0 0;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:0}
 
+/* ---- CRUD 공용: 목록 액션 / 행 관리버튼 / 작성-수정 모달 (공지 구현에서 승격, 클립·일정도 공유) ---- */
+.n-actions{display:flex;flex-wrap:wrap;gap:10px;margin:-6px 0 22px}
+.n-row-actions{display:flex;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+.n-btn{font:inherit;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;
+  transition:.15s;flex:0 0 auto}
+.n-btn:hover{border-color:var(--brand);color:var(--ink)}
+.n-btn.pin-on{border-color:var(--warn);color:var(--warn)}
+.n-btn.del:hover{border-color:var(--hot);color:var(--hot)}
+.nlist-msg{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
+@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4}}
+
+.n-modal-bg{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(3,6,14,.8);backdrop-filter:blur(6px)}
+.n-modal-bg[hidden]{display:none}
+.n-modal{width:100%;max-width:540px;max-height:88vh;overflow-y:auto;background:#0e1326;border:1px solid var(--line-2);
+  border-radius:18px;padding:30px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.7);
+  position:relative;animation:modalIn .26s var(--ease)}
+.n-modal h2{margin:0 0 18px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.n-modal-close{position:absolute;top:14px;right:16px;border:none;background:none;
+  font-size:26px;line-height:1;color:var(--ink-2);cursor:pointer;padding:4px}
+.n-modal-close:hover{color:var(--ink)}
+.n-modal .field select,.n-modal .field textarea{width:100%;font:inherit;font-size:15px;padding:11px 13px;
+  border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04);
+  color:var(--ink);transition:border-color .15s,background .15s}
+.n-modal .field select:focus,.n-modal .field textarea:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.07)}
+.n-modal .field textarea{resize:vertical;min-height:130px;line-height:1.6;font-family:inherit}
+.n-modal .field select option{background:#0e1524;color:var(--ink)}
+.n-pin-field{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);cursor:pointer;margin-bottom:14px}
+.n-pin-field input{width:16px;height:16px;accent-color:var(--brand)}
+.n-modal .btn{width:100%;justify-content:center;padding:12px;margin-top:6px}
+.n-modal-msg{margin:12px 0 0;font-size:13px;text-align:center;color:#bdd0ff;min-height:18px}
+/* 클립 카드/히어로 관리 배지·액션 여백 (클립 CRUD 전용) */
+.ccard-actions{padding:0 13px 13px;margin-top:-4px}
+.ccard-feat{position:absolute;top:8px;left:8px;z-index:3;font-size:10px;font-weight:800;letter-spacing:.03em;
+  padding:3px 8px;border-radius:999px;background:var(--warn);color:#1a1400}
+.clips-hero-info .n-row-actions{margin:0 0 14px}
+
 /* 아카이브 그리드 — 가로형 2열 (클립 4열 수직카드와 차별화) */
 .agrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.6vw,18px);
   margin-top:clamp(24px,3vw,36px)}
@@ -212,7 +250,28 @@
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
         aria-expanded="false" aria-controls="gnbOverlay"><span></span><span></span><span></span></button>
-    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">01</span>메인 · 소식</div><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">02</span>크루 · 멤버</div><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">03</span>아카이브</div><ul class="gnb-sub"><li><a class="active" href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">04</span>클립</div><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">05</span>방송 일정</div><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">06</span>멀티뷰</div><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">07</span>공지</div><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><div class="grp-t" tabindex="0"><span class="mn">08</span>관리자</div><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="../와이어프레임/index.html">와이어프레임</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">ARCHIVE</h1><p class="pg-sub">크루대전 기록</p></header><div class="pg-tools img-ani bottom-top"><button class="chip active" data-f="all">전체</button><button class="chip" data-f="win">🏆 우승</button><button class="chip" data-f="join">참가</button><span class="pg-count" id="aCount"></span></div><div class="agrid img-ani bottom-top" id="aGrid"><div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div></main><footer class="site-footer">
+    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">01</span>메인 · 소식</div><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">02</span>크루 · 멤버</div><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">03</span>아카이브</div><ul class="gnb-sub"><li><a class="active" href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">04</span>클립</div><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">05</span>방송 일정</div><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">06</span>멀티뷰</div><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><div class="grp-t" tabindex="0"><span class="mn">07</span>공지</div><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><div class="grp-t" tabindex="0"><span class="mn">08</span>관리자</div><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="../와이어프레임/index.html">와이어프레임</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">ARCHIVE</h1><p class="pg-sub">크루대전 기록</p></header><div class="n-actions img-ani bottom-top" id="aActions"></div><div class="pg-tools img-ani bottom-top"><button class="chip active" data-f="all">전체</button><button class="chip" data-f="win">🏆 우승</button><button class="chip" data-f="join">참가</button><span class="pg-count" id="aCount"></span></div><div class="agrid img-ani bottom-top" id="aGrid"><div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div><div class="n-modal-bg" id="acModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="acModalTitle">
+  <div class="n-modal">
+    <button class="n-modal-close" id="acModalClose" type="button" aria-label="닫기">×</button>
+    <h2 id="acModalTitle">기록 추가</h2>
+    <form id="acForm" novalidate>
+      <label class="field"><span>대회명</span><input type="text" name="title" maxlength="120" required></label>
+      <label class="field"><span>날짜</span><input type="text" name="date" maxlength="20" placeholder="예: 2026.06.01"></label>
+      <label class="field"><span>순위 (숫자, 1=우승, 비우면 '참가'로 표시)</span><input type="number" name="rank" min="1" step="1"></label>
+      <label class="field"><span>참여 멤버 (쉼표로 구분)</span><input type="text" name="members" placeholder="예: 울산큰고래, 김마렌"></label>
+      <label class="field"><span>상대 크루 (한 줄에 하나, "이름|승" 또는 "이름|패")</span>
+        <textarea name="opponents" rows="4" placeholder="블랙팀|승
+화이트팀|패"></textarea></label>
+      <label class="field"><span>게임 결과 (한 줄에 하나, "게임명|승" 또는 "게임명|패")</span>
+        <textarea name="games" rows="4" placeholder="족구|승
+줄다리기|패"></textarea></label>
+      <label class="field"><span>영상 (한 줄에 하나, "URL|라벨", http/https만 허용)</span>
+        <textarea name="videos" rows="3" placeholder="https://youtu.be/xxxx|풀영상"></textarea></label>
+      <p class="n-modal-msg" id="acModalMsg" role="status" aria-live="polite"></p>
+      <button class="btn primary" type="submit">저장</button>
+    </form>
+  </div>
+</div></main><footer class="site-footer">
   <div class="footer-in">
     <span class="footer-logo">고래<span class="lk">상사</span></span>
     <div class="footer-links">
@@ -245,23 +304,116 @@
   </div>
 </div>
 <script src="../assets/site.js"></script>
-<script>window.FB="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app";</script><script>(function(){
-  var FB=window.FB,grid=document.getElementById('aGrid'),count=document.getElementById('aCount');
-  var all=[],filt='all';
+<script>(function(){
+  var U=window.WhaleUI, D=window.WhaleData;
   function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  function safeUrl(u){u=(u==null?'':String(u)).trim();return /^https?:\/\//i.test(u)?u:'#';}
   function wl(c){var w=0,l=0,g=c.games||{};Object.keys(g).forEach(function(k){g[k].result?w++:l++;});return {w:w,l:l};}
+  function parseMembers(s){return (s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
+  function parseOpponents(s){
+    return (s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean).map(function(line){
+      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      return {name:name, result: tag==='패'};
+    }).filter(function(o){return o.name;});
+  }
+  function parseGames(s){
+    var lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean), out={};
+    lines.forEach(function(line,i){
+      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      if(!name)return;
+      out['game'+i]={name:name, result: tag==='승'};
+    });
+    return out;
+  }
+  function parseVideos(s){
+    var lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean), out=[];
+    for(var i=0;i<lines.length;i++){
+      var parts=lines[i].split('|'), url=(parts[0]||'').trim(), label=(parts[1]||'').trim();
+      if(!url)continue;
+      if(!/^https?:\/\//i.test(url))return null;
+      out.push({url:url, label: label||'영상'});
+    }
+    return out;
+  }
+  function serializeOpponents(arr){return (arr||[]).map(function(o){return (o.name||'')+'|'+(o.result?'패':'승');}).join('\n');}
+  function serializeGames(obj){
+    var keys=Object.keys(obj||{});
+    return keys.map(function(k){var g=obj[k]||{};return (g.name||'')+'|'+(g.result?'승':'패');}).join('\n');
+  }
+  function serializeVideos(arr){return (arr||[]).map(function(v){return (v.url||'')+'|'+(v.label||'');}).join('\n');}
+
+  var acModalBg=document.getElementById('acModalBg'), acModalTitle=document.getElementById('acModalTitle'),
+      acForm=document.getElementById('acForm'), acModalMsg=document.getElementById('acModalMsg');
+  var acMode='create', acItem=null, acOnSaved=function(){};
+  function acOpenForm(mode,item,cb){
+    if(!U.isAdmin())return;
+    acMode=mode;acItem=item;acOnSaved=cb||function(){};
+    acModalMsg.textContent='';acForm.reset();
+    acModalTitle.textContent=mode==='edit'?'기록 수정':'기록 추가';
+    if(mode==='edit'&&item){
+      acForm.title.value=item.title||'';acForm.date.value=item.date||'';
+      acForm.rank.value=(item.rank!=null?item.rank:'');
+      acForm.members.value=(item.members||[]).join(', ');
+      acForm.opponents.value=serializeOpponents(item.opponents);
+      acForm.games.value=serializeGames(item.games);
+      acForm.videos.value=serializeVideos(item.videos);
+    }
+    acModalBg.hidden=false;
+  }
+  function acCloseForm(){acModalBg.hidden=true;}
+  var acModalCloseBtn=document.getElementById('acModalClose');
+  if(acModalCloseBtn)acModalCloseBtn.addEventListener('click',acCloseForm);
+  if(acModalBg)acModalBg.addEventListener('click',function(e){if(e.target===acModalBg)acCloseForm();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&acModalBg&&!acModalBg.hidden)acCloseForm();});
+  if(acForm)acForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!U.isAdmin()){acModalMsg.textContent='관리자만 저장할 수 있습니다.';return;}
+    var title=acForm.title.value.trim();
+    if(!title){acModalMsg.textContent='대회명을 입력하세요.';return;}
+    var videos=parseVideos(acForm.videos.value);
+    if(videos===null){acModalMsg.textContent='영상 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
+    var rankVal=acForm.rank.value.trim();
+    var payload={
+      title:title, date:acForm.date.value.trim(),
+      rank: rankVal===''?null:parseInt(rankVal,10),
+      members: parseMembers(acForm.members.value),
+      opponents: parseOpponents(acForm.opponents.value),
+      games: parseGames(acForm.games.value),
+      videos: videos
+    };
+    acModalMsg.textContent='저장 중...';
+    var p=(acMode==='edit'&&acItem)?D.update('contests',acItem.id,payload):D.create('contests',payload);
+    p.then(function(){acCloseForm();acOnSaved();}).catch(function(err){acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+  });
+
+  var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
+  var all=[], filt='all';
+  function renderActions(){
+    var html='';
+    if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
+    if(U.isAdmin()&&!all.length)html+='<button type="button" class="btn sm" id="acSeedBtn">불러오기 (운영 기록 이관, 최초 1회)</button>';
+    actionsEl.innerHTML=html;
+    var wb=document.getElementById('acWriteBtn'); if(wb)wb.addEventListener('click',function(){acOpenForm('create',null,reload);});
+    var sb=document.getElementById('acSeedBtn'); if(sb)sb.addEventListener('click',importSeed);
+  }
+  function rowActionsHtml(c){
+    if(!U.isAdmin())return '';
+    return '<div class="n-row-actions" style="margin-top:10px">'
+      +'<button type="button" class="n-btn" data-act="edit" data-id="'+esc(c.id)+'">✏️ 수정</button>'
+      +'<button type="button" class="n-btn del" data-act="del" data-id="'+esc(c.id)+'">🗑 삭제</button></div>';
+  }
   function card(c){
     var r=wl(c),win=c.rank===1;
     var cast=(c.members||[]).slice(0,6).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
     var more=(c.members||[]).length>6?'<span class="ct-chip">+'+((c.members||[]).length-6)+'</span>':'';
-    return '<a class="ct-card" href="archive-detail.html?id='+encodeURIComponent(c._id)+'">'
+    return '<div class="ct-card" data-id="'+esc(c.id)+'" role="button" tabindex="0" aria-label="'+esc(c.title||'대회 기록')+' 상세 보기">'
       +'<div class="ct-top"><span class="ct-rank '+(win?'win':'lose')+'">'
         +(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
       +'<span class="ct-date">'+esc(c.date||'')+'</span></div>'
       +'<div class="ct-title">'+esc(c.title||'제목 없음')+'</div>'
-      +'<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span>'
-      +'<span>'+(c.total_teams?c.total_teams+'팀 참가':'')+'</span></div>'
-      +'<div class="ct-cast">'+cast+more+'</div></a>';
+      +'<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span></div>'
+      +'<div class="ct-cast">'+cast+more+'</div>'
+      +rowActionsHtml(c)+'</div>';
   }
   function render(){
     var arr=all.filter(function(c){
@@ -270,13 +422,62 @@
     count.textContent=arr.length+'개 대회';
     grid.innerHTML=arr.length?arr.map(card).join(''):'<div class="stub" style="grid-column:1/-1"><p>해당 기록이 없습니다.</p></div>';
   }
+  function reload(){
+    return D.list('contests').then(function(items){
+      all=items.slice().sort(function(a,b){return ((a.date||'')<(b.date||'')?1:(a.date||'')>(b.date||'')?-1:0);});
+      renderActions();render();
+    }).catch(function(err){
+      grid.innerHTML='<div class="stub" style="grid-column:1/-1"><p>불러오기 실패: '+esc(err&&err.message||err)+'</p></div>';
+    });
+  }
   [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(c){c.addEventListener('click',function(){
     document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.remove('active')});
     c.classList.add('active');filt=c.getAttribute('data-f');render();});});
-  fetch(FB+'/contests.json?v='+Date.now()).then(function(r){return r.json();}).then(function(d){
-    d=d||{};all=Object.keys(d).map(function(k){var o=d[k];o._id=k;return o;})
-      .sort(function(a,b){return (a.date<b.date?1:a.date>b.date?-1:0);});
-    render();
-  }).catch(function(){grid.innerHTML='<div class="stub" style="grid-column:1/-1"><p>기록을 불러오지 못했습니다.</p></div>';});
+  function removeRecord(item){
+    if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+    D.remove('contests',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+  }
+  grid.addEventListener('click',function(e){
+    var btn=e.target.closest&&e.target.closest('[data-act]');
+    if(btn){
+      e.stopPropagation();
+      var id=btn.getAttribute('data-id'), act=btn.getAttribute('data-act');
+      var item=all.filter(function(x){return x.id===id;})[0];
+      if(!item)return;
+      if(act==='edit')acOpenForm('edit',item,reload);
+      else if(act==='del')removeRecord(item);
+      return;
+    }
+    var card=e.target.closest&&e.target.closest('.ct-card');
+    if(card)location.href='archive-detail.html?id='+encodeURIComponent(card.getAttribute('data-id'));
+  });
+  grid.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var card=e.target.closest&&e.target.closest('.ct-card');
+    if(card&&e.target===card){e.preventDefault();location.href='archive-detail.html?id='+encodeURIComponent(card.getAttribute('data-id'));}
+  });
+  function importSeed(){
+    if(!U.isAdmin())return;
+    if(!confirm('운영 대회 기록을 관리용 저장소로 1회 이관합니다. 계속할까요?'))return;
+    fetch('https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/contests.json?v='+Date.now())
+      .then(function(r){return r.json();}).then(function(d){
+        d=d||{};
+        var keys=Object.keys(d);
+        if(!keys.length){alert('불러올 운영 기록이 없습니다.');return;}
+        var chain=Promise.resolve();
+        keys.forEach(function(k){
+          chain=chain.then(function(){
+            var o=d[k]||{};
+            return D.create('contests',{
+              title:o.title||'', date:o.date||'', rank:(o.rank!=null?o.rank:null),
+              members:o.members||[], opponents:o.opponents||[], games:o.games||{}, videos:o.videos||[]
+            });
+          });
+        });
+        chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
+      }).catch(function(err){alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
+  }
+  document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
+  reload();
 })();</script>
 </body></html>

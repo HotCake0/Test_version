@@ -20,6 +20,8 @@
 /* 운영본 auth/callback.html과 동일한 흐름 — 단 복귀 지점만 리워크 메인 */
 const WORKER_URL = "https://whale-status-worker.kyefyx.workers.dev";
 const FIREBASE   = "https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app";
+// Firebase 웹 API 키(공개키, 노출 무방) — signInWithCustomToken 교환에 필요
+const FIREBASE_WEB_API_KEY = "AIzaSyBZpdQES1EeZLieWiRwo-sNrA2wJQ6vZ9k";
 
 (async () => {
   const params = new URLSearchParams(location.search);
@@ -44,28 +46,44 @@ const FIREBASE   = "https://whaie-corp-default-rtdb.asia-southeast1.firebasedata
       return;
     }
 
-    // 2. access_token → 유저 정보(닉네임)
-    const meRes  = await fetch(`${WORKER_URL}/auth/me`, {
+    // 2. access_token → Firebase 커스텀토큰 + 유저 정보(user_id/nickname/role 포함)
+    //    워커가 SOOP 검증 → /permissions/{닉} 조회 → uid=soop id, admin claim으로 서명해 준다.
+    const fbRes  = await fetch(`${WORKER_URL}/auth/firebase`, {
+      method:  "POST",
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
-    const meData = await meRes.json();
-    if (!meData.nickname) {
+    const fbData = await fbRes.json();
+    if (!fbData.nickname) {
       document.getElementById("status").textContent = "❌ 유저 정보 조회 실패";
-      document.getElementById("detail").textContent = JSON.stringify(meData);
+      document.getElementById("detail").textContent = JSON.stringify(fbData);
       return;
     }
 
-    // 3. Firebase 권한 확인 (숲 닉네임을 키로) → "admin" | "editor" | null
-    const nickKey  = encodeURIComponent(meData.nickname);
-    const permRes  = await fetch(`${FIREBASE}/permissions/${nickKey}.json`);
-    const permData = await permRes.json();
+    // 3. 커스텀토큰 → Firebase idToken 교환 (REST, SDK 불필요)
+    //    실패해도 로그인 자체는 유지 — 쓰기만 RTDB 규칙에서 거부된다.
+    try {
+      const exRes = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${FIREBASE_WEB_API_KEY}`,
+        { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: fbData.firebase_token, returnSecureToken: true }) }
+      );
+      const ex = await exRes.json();
+      if (ex.idToken) {
+        sessionStorage.setItem("soop_fb", JSON.stringify({
+          idToken:      ex.idToken,
+          refreshToken: ex.refreshToken,
+          expiresAt:    Date.now() + (parseInt(ex.expiresIn, 10) || 3600) * 1000,
+        }));
+      }
+    } catch (e) { /* idToken 없이 진행 */ }
 
     // 4. sessionStorage 저장 후 원래 보던 페이지로 복귀
-    const validRoles = ["admin", "editor"];
-    const role = validRoles.includes(permData) ? permData : "none";
-    sessionStorage.setItem("soop_user", JSON.stringify({ nickname: meData.nickname, role }));
+    //    admin/editor면 그 권한, 아니면 로그인만 한 일반 사용자(member).
+    //    소유권(본인 글만 수정/삭제)은 변경 가능한 닉네임이 아닌 고유 soop id로 판별한다.
+    const soopId = fbData.user_id || fbData.nickname;
+    sessionStorage.setItem("soop_user", JSON.stringify({ id: soopId, nickname: fbData.nickname, role: fbData.role }));
 
-    document.getElementById("status").textContent = `✅ ${meData.nickname}님 로그인 완료`;
+    document.getElementById("status").textContent = `✅ ${fbData.nickname}님 로그인 완료`;
     const back = sessionStorage.getItem("soop_return") || "../index.html";
     setTimeout(() => { location.replace(back); }, 800);
 

@@ -316,6 +316,44 @@ PAGE_CSS = """
 .cdetail-nav{display:flex;gap:10px;margin-bottom:36px;flex-wrap:wrap}
 .crelated-head{font-size:15px;font-weight:900;letter-spacing:-.02em;
   margin:0 0 0;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:0}
+
+/* ---- CRUD 공용: 목록 액션 / 행 관리버튼 / 작성-수정 모달 (공지 구현에서 승격, 클립·일정도 공유) ---- */
+.n-actions{display:flex;flex-wrap:wrap;gap:10px;margin:-6px 0 22px}
+.n-row-actions{display:flex;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+.n-btn{font:inherit;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;
+  transition:.15s;flex:0 0 auto}
+.n-btn:hover{border-color:var(--brand);color:var(--ink)}
+.n-btn.pin-on{border-color:var(--warn);color:var(--warn)}
+.n-btn.del:hover{border-color:var(--hot);color:var(--hot)}
+.nlist-msg{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
+@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4}}
+
+.n-modal-bg{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(3,6,14,.8);backdrop-filter:blur(6px)}
+.n-modal-bg[hidden]{display:none}
+.n-modal{width:100%;max-width:540px;max-height:88vh;overflow-y:auto;background:#0e1326;border:1px solid var(--line-2);
+  border-radius:18px;padding:30px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.7);
+  position:relative;animation:modalIn .26s var(--ease)}
+.n-modal h2{margin:0 0 18px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.n-modal-close{position:absolute;top:14px;right:16px;border:none;background:none;
+  font-size:26px;line-height:1;color:var(--ink-2);cursor:pointer;padding:4px}
+.n-modal-close:hover{color:var(--ink)}
+.n-modal .field select,.n-modal .field textarea{width:100%;font:inherit;font-size:15px;padding:11px 13px;
+  border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04);
+  color:var(--ink);transition:border-color .15s,background .15s}
+.n-modal .field select:focus,.n-modal .field textarea:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.07)}
+.n-modal .field textarea{resize:vertical;min-height:130px;line-height:1.6;font-family:inherit}
+.n-modal .field select option{background:#0e1524;color:var(--ink)}
+.n-pin-field{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);cursor:pointer;margin-bottom:14px}
+.n-pin-field input{width:16px;height:16px;accent-color:var(--brand)}
+.n-modal .btn{width:100%;justify-content:center;padding:12px;margin-top:6px}
+.n-modal-msg{margin:12px 0 0;font-size:13px;text-align:center;color:#bdd0ff;min-height:18px}
+/* 클립 카드/히어로 관리 배지·액션 여백 (클립 CRUD 전용) */
+.ccard-actions{padding:0 13px 13px;margin-top:-4px}
+.ccard-feat{position:absolute;top:8px;left:8px;z-index:3;font-size:10px;font-weight:800;letter-spacing:.03em;
+  padding:3px 8px;border-radius:999px;background:var(--warn);color:#1a1400}
+.clips-hero-info .n-row-actions{margin:0 0 14px}
 """
 
 
@@ -493,183 +531,332 @@ def build_member():
           scripts=members_json_script() + render)
 
 
-# ---------- 아키타입: 클립 ----------
+# ---------- 아키타입: 클립 (Firebase 실시간 CRUD, 공지 구현 패턴 그대로 적용) ----------
+
+CLIP_CATEGORIES = ["예능", "합방", "토크", "게임", "대회", "일상"]
+
+
+def clip_form_modal():
+    """클립 작성/수정 공용 모달 (목록·상세 페이지 공통 삽입)."""
+    cat_opts = "".join(f'<option value="{esc(c)}">{esc(c)}</option>' for c in CLIP_CATEGORIES)
+    return f"""<div class="n-modal-bg" id="clModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="clModalTitle">
+  <div class="n-modal">
+    <button class="n-modal-close" id="clModalClose" type="button" aria-label="닫기">×</button>
+    <h2 id="clModalTitle">클립 추가</h2>
+    <form id="clForm" novalidate>
+      <label class="field"><span>카테고리</span>
+        <select name="category">{cat_opts}</select></label>
+      <label class="field"><span>제목</span><input type="text" name="title" maxlength="120" required></label>
+      <label class="field"><span>제작자</span><input type="text" name="creator" maxlength="60" required></label>
+      <label class="field"><span>설명 (선택)</span><textarea name="desc" rows="4"></textarea></label>
+      <label class="field"><span>영상 URL (선택)</span><input type="url" name="url" placeholder="https://..."></label>
+      <label class="field"><span>이미지 URL (선택, 비우면 그라데이션 배경)</span><input type="url" name="img" placeholder="https://..."></label>
+      <label class="n-pin-field" id="clFeatField" style="display:none">
+        <input type="checkbox" name="featured"><span>대표 클립으로 지정 (관리자만, 기존 대표는 자동 해제)</span></label>
+      <p class="n-modal-msg" id="clModalMsg" role="status" aria-live="polite"></p>
+      <button class="btn primary" type="submit">저장</button>
+    </form>
+  </div>
+</div>"""
+
+
+# 목록/상세 양쪽에서 공유하는 CRUD 헬퍼 JS — 공지의 _NOTICE_JS_SHARED와 동일한 구조.
+_CLIP_JS_SHARED = """
+  var U=window.WhaleUI, D=window.WhaleData;
+  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  // href에 넣기 전 스킴 검증: http/https만 허용(javascript:/data:/vbscript: 등 차단).
+  function safeUrl(u){u=(u==null?'':String(u)).trim();return /^https?:\\/\\//i.test(u)?u:'#';}
+  function fmtViews(n){n=n||0;return n>=10000?(n/10000).toFixed(1)+'만':n.toLocaleString();}
+  function bgOf(c){
+    return c.img?'<img src="'+esc(c.img)+'" alt="'+esc(c.title)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display=\\'none\\'">'
+      :'<div style="position:absolute;inset:0;background:'+esc(c.grad||'linear-gradient(135deg,#0f1730,#2f63ff)')+'"></div>';
+  }
+  var clModalBg=document.getElementById('clModalBg'), clModalTitle=document.getElementById('clModalTitle'),
+      clForm=document.getElementById('clForm'), clFeatField=document.getElementById('clFeatField'),
+      clModalMsg=document.getElementById('clModalMsg');
+  var clMode='create', clItem=null, clOnSaved=function(){};
+  function clOpenForm(mode,item,cb){
+    clMode=mode;clItem=item;clOnSaved=cb||function(){};
+    clModalMsg.textContent='';clForm.reset();
+    clModalTitle.textContent=mode==='edit'?'클립 수정':'클립 추가';
+    if(clFeatField)clFeatField.style.display=U.isAdmin()?'flex':'none';
+    if(mode==='edit'&&item){
+      clForm.category.value=item.category||'예능';clForm.title.value=item.title||'';
+      clForm.creator.value=item.creator||'';clForm.desc.value=item.desc||'';
+      clForm.url.value=item.url||'';clForm.img.value=item.img||'';
+      if(clForm.featured)clForm.featured.checked=!!item.featured;
+    } else if(clForm.featured){clForm.featured.checked=false;}
+    clModalBg.hidden=false;
+  }
+  function clCloseForm(){clModalBg.hidden=true;}
+  var clModalCloseBtn=document.getElementById('clModalClose');
+  if(clModalCloseBtn)clModalCloseBtn.addEventListener('click',clCloseForm);
+  if(clModalBg)clModalBg.addEventListener('click',function(e){if(e.target===clModalBg)clCloseForm();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&clModalBg&&!clModalBg.hidden)clCloseForm();});
+  function unsetOtherFeatured(keepId){
+    return D.list('clips').then(function(items){
+      var others=items.filter(function(c){return c.id!==keepId&&c.featured;});
+      var chain=Promise.resolve();
+      others.forEach(function(c){chain=chain.then(function(){return D.update('clips',c.id,{featured:false});});});
+      return chain;
+    });
+  }
+  if(clForm)clForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    var title=clForm.title.value.trim(), creator=clForm.creator.value.trim(), category=clForm.category.value;
+    if(!title||!creator){clModalMsg.textContent='제목·제작자를 입력하세요.';return;}
+    var payload={category:category,title:title,creator:creator,desc:clForm.desc.value.trim(),
+      url:clForm.url.value.trim(),img:clForm.img.value.trim()};
+    if(payload.url&&!/^https?:\\/\\//i.test(payload.url)){clModalMsg.textContent='영상 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
+    if(payload.img&&!/^https?:\\/\\//i.test(payload.img)){clModalMsg.textContent='이미지 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
+    var wantFeatured=!!(clForm.featured&&clForm.featured.checked&&U.isAdmin());
+    if(U.isAdmin())payload.featured=wantFeatured;
+    clModalMsg.textContent='저장 중...';
+    var save=(clMode==='edit'&&clItem)?D.update('clips',clItem.id,payload):D.create('clips',payload);
+    save.then(function(saved){
+      if(!wantFeatured)return null;
+      var myId=(clMode==='edit'&&clItem)?clItem.id:(saved&&saved.name);
+      return unsetOtherFeatured(myId);
+    }).then(function(){clCloseForm();clOnSaved();})
+      .catch(function(err){clModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+  });
+"""
+
 
 def build_clips():
-    """클립 갤러리 (clips). 대표 클립 히어로 + 카테고리 필터 + 16:9 카드 그리드."""
-    # 대표 클립 탐색
-    feat_i, feat = next(
-        ((i, c) for i, c in enumerate(CLIPS) if c.get("featured")),
-        (0, CLIPS[0]))
-
-    # 대표 클립 썸네일 내용
-    if feat.get("img"):
-        feat_bg = (f'<img src="../{esc(feat["img"])}" alt="{esc(feat["title"])}" '
-                   f'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"'
-                   f' onerror="this.style.display=\'none\'">')
-    else:
-        feat_bg = f'<div style="position:absolute;inset:0;background:{esc(feat.get("grad","#0f1730"))}"></div>'
-
-    views_n = feat.get("views", 0)
-    views_feat = f'{views_n/10000:.1f}만' if views_n >= 10000 else f'{views_n:,}'
-
-    feat_html = (
-        '<section class="clips-hero img-ani bottom-top">'
-        f'<a class="orig-feat" href="clip.html?i={feat_i}" aria-label="{esc(feat["title"])} 시청">'
-        + feat_bg +
-        '<div class="orig-play" aria-hidden="true">▶</div></a>'
-        '<div class="clips-hero-info">'
-        f'<div class="ch-cat">{esc(feat["category"])} · 대표 클립</div>'
-        f'<p class="ch-title">{esc(feat["title"])}</p>'
-        '<div class="ch-meta">'
-        f'<span>제작: {esc(feat["creator"])}</span>'
-        f'<span>{esc(feat["date"])}</span>'
-        f'<span class="ch-dur">{esc(feat["duration"])}</span>'
-        f'<span>{views_feat} 조회</span>'
-        '</div>'
-        f'<p class="ch-desc">{esc(feat.get("desc",""))}</p>'
-        f'<a class="btn primary" href="clip.html?i={feat_i}">▶ 클립 시청</a>'
-        '</div></section>')
-
-    # 카테고리 목록
-    cats = []
-    for c in CLIPS:
-        if c["category"] not in cats:
-            cats.append(c["category"])
-    chips = ('<button class="chip active" data-f="all">전체</button>'
-             + "".join(
-                 f'<button class="chip" data-f="{esc(cat)}">{esc(cat)}</button>'
-                 for cat in cats))
-
-    # 카드 그리드
-    def clip_card(c, idx):
-        if c.get("img"):
-            thumb_inner = (
-                f'<img src="../{esc(c["img"])}" alt="{esc(c["title"])}"'
-                f' onerror="this.style.display=\'none\'">')
-        else:
-            thumb_inner = (
-                f'<div class="ccard-grad"'
-                f' style="background:{esc(c.get("grad","#0f1730"))}"></div>')
-        v = c.get("views", 0)
-        v_str = f'{v/10000:.1f}만' if v >= 10000 else f'{v:,}'
-        return (
-            f'<article class="ccard img-ani bottom-top" data-i="{idx}"'
-            f' data-cat="{esc(c["category"])}"'
-            f' role="button" tabindex="0" aria-label="{esc(c["title"])} 클립 시청">'
-            f'<div class="ccard-thumb">{thumb_inner}'
-            f'<div class="cplay" aria-hidden="true">▶</div></div>'
-            f'<div class="ccard-info">'
-            f'<div class="ccard-title">{esc(c["title"])}</div>'
-            f'<div class="ccard-meta">'
-            f'<span>{esc(c["creator"])}</span>'
-            f'<span class="ccard-dur">{esc(c["duration"])}</span>'
-            f'<span>{v_str} 조회</span>'
-            f'</div></div></article>')
-
-    cards = "".join(clip_card(c, i) for i, c in enumerate(CLIPS))
-
+    """클립 갤러리 (clips) — WhaleData.list('clips')로 런타임 로드, Firebase 실시간 CRUD.
+    대표 클립 히어로 + 카테고리 필터 + 카드 그리드는 목록 도착 후 클라이언트에서 렌더."""
     body = (
         page_head_block("CLIPS", "베스트 클립", "베스트 클립")
-        + feat_html
-        + f'<div class="pg-tools img-ani bottom-top">{chips}'
-          f'<span class="pg-count" id="cCount">전체 {len(CLIPS)}개</span></div>'
-        + f'<div class="cgrid" id="cGrid">{cards}</div>')
+        + '<div class="n-actions img-ani bottom-top" id="cActions"></div>'
+        + '<div id="cHero" class="img-ani bottom-top"></div>'
+        + '<div class="pg-tools img-ani bottom-top" id="cChips"></div>'
+        + '<div class="cgrid img-ani bottom-top" id="cGrid">불러오는 중...</div>'
+        + clip_form_modal())
 
-    filt = """<script>(function(){
-  var chips=[].slice.call(document.querySelectorAll('.chip[data-f]'));
-  var cards=[].slice.call(document.querySelectorAll('#cGrid .ccard'));
-  var count=document.getElementById('cCount');
-  chips.forEach(function(c){c.addEventListener('click',function(){
-    chips.forEach(function(x){x.classList.remove('active')});
-    c.classList.add('active');
-    var f=c.getAttribute('data-f'),n=0;
-    cards.forEach(function(card){
-      var show=f==='all'||card.getAttribute('data-cat')===f;
-      card.style.display=show?'':'none';if(show)n++;
+    js = "<script>(function(){" + _CLIP_JS_SHARED + """
+  var hero=document.getElementById('cHero'), grid=document.getElementById('cGrid'),
+      chipsWrap=document.getElementById('cChips'), actionsEl=document.getElementById('cActions');
+  var ALL=[], activeFilter='all';
+
+  function renderActions(){
+    var html='';
+    if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="clWriteBtn">+ 클립 추가</button>';
+    if(U.isAdmin()&&!ALL.length)html+='<button type="button" class="btn sm" id="clSeedBtn">시드 불러오기 (최초 1회)</button>';
+    actionsEl.innerHTML=html;
+    var wb=document.getElementById('clWriteBtn');if(wb)wb.addEventListener('click',function(){clOpenForm('create',null,reload);});
+    var sb=document.getElementById('clSeedBtn');if(sb)sb.addEventListener('click',importSeed);
+  }
+  function heroActionsHtml(c){
+    var h='';
+    if(U.isAdmin())h+='<button type="button" class="n-btn'+(c.featured?' pin-on':'')+'" data-act="feat" data-id="'+esc(c.id)+'">'+(c.featured?'★ 대표 해제':'☆ 대표 지정')+'</button>';
+    if(U.canEdit(c)){
+      h+='<button type="button" class="n-btn" data-act="edit" data-id="'+esc(c.id)+'">✏️ 수정</button>';
+      h+='<button type="button" class="n-btn del" data-act="del" data-id="'+esc(c.id)+'">🗑 삭제</button>';
+    }
+    return h?'<span class="n-row-actions">'+h+'</span>':'';
+  }
+  function renderHero(){
+    if(!ALL.length){hero.innerHTML='';return;}
+    var feat=ALL.filter(function(c){return c.featured;})[0]||ALL[0];
+    hero.innerHTML='<section class="clips-hero">'
+      +'<a class="orig-feat" href="clip.html?id='+encodeURIComponent(feat.id)+'" aria-label="'+esc(feat.title)+' 시청">'
+      +bgOf(feat)+'<div class="orig-play" aria-hidden="true">▶</div></a>'
+      +'<div class="clips-hero-info">'
+      +heroActionsHtml(feat)
+      +'<div class="ch-cat">'+esc(feat.category||'')+' · 대표 클립</div>'
+      +'<p class="ch-title">'+esc(feat.title)+'</p>'
+      +'<div class="ch-meta"><span>제작: '+esc(feat.creator)+'</span>'
+      +(feat.date?'<span>'+esc(feat.date)+'</span>':'')
+      +(feat.duration?'<span class="ch-dur">'+esc(feat.duration)+'</span>':'')
+      +'<span>'+fmtViews(feat.views)+' 조회</span></div>'
+      +(feat.desc?'<p class="ch-desc">'+esc(feat.desc)+'</p>':'')
+      +'<a class="btn primary" href="clip.html?id='+encodeURIComponent(feat.id)+'">▶ 클립 시청</a>'
+      +'</div></section>';
+  }
+  function renderChips(){
+    var cats=[];ALL.forEach(function(c){if(c.category&&cats.indexOf(c.category)<0)cats.push(c.category);});
+    var html='<button type="button" class="chip'+(activeFilter==='all'?' active':'')+'" data-f="all">전체</button>'
+      +cats.map(function(c){return '<button type="button" class="chip'+(activeFilter===c?' active':'')+'" data-f="'+esc(c)+'">'+esc(c)+'</button>';}).join('')
+      +'<span class="pg-count" id="cCount"></span>';
+    chipsWrap.innerHTML=html;
+    [].slice.call(chipsWrap.querySelectorAll('.chip')).forEach(function(c){
+      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');renderChips();renderGrid();});
     });
-    count.textContent=(f==='all'?'전체':f)+' '+n+'개';
-  });});
-  cards.forEach(function(card){
-    card.addEventListener('click',function(){
-      location.href='clip.html?i='+this.getAttribute('data-i');
+  }
+  function cardActionsHtml(c){
+    var h='';
+    if(U.isAdmin())h+='<button type="button" class="n-btn'+(c.featured?' pin-on':'')+'" data-act="feat" data-id="'+esc(c.id)+'">'+(c.featured?'★ 해제':'☆ 대표')+'</button>';
+    if(U.canEdit(c)){
+      h+='<button type="button" class="n-btn" data-act="edit" data-id="'+esc(c.id)+'">✏️</button>';
+      h+='<button type="button" class="n-btn del" data-act="del" data-id="'+esc(c.id)+'">🗑</button>';
+    }
+    return h?'<div class="ccard-actions n-row-actions">'+h+'</div>':'';
+  }
+  function card(c){
+    return '<article class="ccard img-ani bottom-top" data-id="'+esc(c.id)+'" data-cat="'+esc(c.category||'')+'" role="button" tabindex="0" aria-label="'+esc(c.title)+' 클립 시청">'
+      +(c.featured?'<span class="ccard-feat">★ 대표</span>':'')
+      +'<div class="ccard-thumb">'+bgOf(c)+'<div class="cplay" aria-hidden="true">▶</div></div>'
+      +'<div class="ccard-info"><div class="ccard-title">'+esc(c.title)+'</div>'
+      +'<div class="ccard-meta"><span>'+esc(c.creator)+'</span>'
+      +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
+      +'<span>'+fmtViews(c.views)+' 조회</span></div></div>'
+      +cardActionsHtml(c)+'</article>';
+  }
+  function renderGrid(){
+    var filtered=activeFilter==='all'?ALL:ALL.filter(function(c){return c.category===activeFilter;});
+    var count=document.getElementById('cCount');
+    if(count)count.textContent=(activeFilter==='all'?'전체':activeFilter)+' '+filtered.length+'개';
+    grid.innerHTML=filtered.length?filtered.map(card).join(''):'<div class="nlist-msg" style="grid-column:1/-1">'+(ALL.length?'해당 분류의 클립이 없습니다.':'등록된 클립이 없습니다.')+'</div>';
+  }
+  function reload(){
+    return D.list('clips').then(function(items){
+      ALL=items;renderActions();renderHero();renderChips();renderGrid();
+    }).catch(function(err){
+      grid.innerHTML='<div class="nlist-msg" style="grid-column:1/-1">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
     });
-    card.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.key===' ')location.href='clip.html?i='+this.getAttribute('data-i');
-    });
+  }
+  function toggleFeatured(item){
+    var next=!item.featured;
+    var p=next?unsetOtherFeatured(item.id).then(function(){return D.update('clips',item.id,{featured:true});})
+      :D.update('clips',item.id,{featured:false});
+    p.then(reload).catch(function(err){alert('처리 실패: '+(err&&err.message||err));});
+  }
+  function removeClip(item){
+    if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+    D.remove('clips',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+  }
+  function handleAction(e){
+    var btn=e.target.closest&&e.target.closest('[data-act]');
+    if(!btn)return false;
+    e.stopPropagation();
+    var id=btn.getAttribute('data-id'),act=btn.getAttribute('data-act');
+    var item=ALL.filter(function(x){return x.id===id;})[0];
+    if(!item)return true;
+    if(act==='feat')toggleFeatured(item);
+    else if(act==='edit')clOpenForm('edit',item,reload);
+    else if(act==='del')removeClip(item);
+    return true;
+  }
+  hero.addEventListener('click',function(e){handleAction(e);});
+  grid.addEventListener('click',function(e){
+    if(handleAction(e))return;
+    var art=e.target.closest&&e.target.closest('.ccard');
+    if(art)location.href='clip.html?id='+encodeURIComponent(art.getAttribute('data-id'));
   });
+  grid.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var art=e.target.closest&&e.target.closest('.ccard');
+    if(art&&e.target===art)location.href='clip.html?id='+encodeURIComponent(art.getAttribute('data-id'));
+  });
+  function importSeed(){
+    var seed=window.WHALE_CLIPS||[];
+    if(!seed.length){alert('불러올 시드 데이터가 없습니다.');return;}
+    if(!confirm('시드 클립 '+seed.length+'건을 Firebase로 1회 이관합니다. 계속할까요?'))return;
+    var chain=Promise.resolve();
+    seed.forEach(function(c){
+      chain=chain.then(function(){
+        var d={category:c.category,title:c.title,creator:c.creator,desc:c.desc||'',
+          date:c.date||'',duration:c.duration||'',views:c.views||0};
+        if(c.img)d.img=c.img; if(c.grad)d.grad=c.grad; if(c.featured)d.featured=true;
+        return D.create('clips',d);
+      });
+    });
+    chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
+  }
+  document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
+  reload();
 })();</script>"""
 
-    write("clips", "베스트 클립", body, PAGE_CSS, scripts=filt)
+    write("clips", "베스트 클립", body, PAGE_CSS, scripts=clips_json_script() + js)
 
 
 def build_clip():
-    """클립 시청 상세 (clip). ?i=인덱스로 클라이언트 렌더 — build_member() 패턴 모방."""
+    """클립 시청 상세 (clip) — WhaleData.list('clips')로 런타임 로드. ?id=Firebase키, 옛 ?i=인덱스는 폴백."""
     body = (
         page_head_block("CLIPS", "베스트 클립", "클립 시청")
-        + '<div class="cdetail img-ani bottom-top" id="cDetail"></div>')
+        + '<div class="cdetail img-ani bottom-top" id="cDetail"></div>'
+        + clip_form_modal())
 
-    render = """<script>(function(){
-  var C=window.WHALE_CLIPS||[];
-  var i=parseInt(new URLSearchParams(location.search).get('i')||'0',10);
-  if(isNaN(i)||i<0||i>=C.length)i=0;
-  function fmtViews(n){
-    if(!n)return'0';
-    return n>=10000?(n/10000).toFixed(1)+'만':n.toLocaleString();
-  }
-  function escT(x){
-    var d=document.createElement('div');d.textContent=x==null?'':String(x);return d.innerHTML.replace(/"/g,'&quot;');
-  }
-  function render(){
-    var c=C[i];if(!c)return;
-    document.title=c.title+' · 고래상사';
-    var bgInner=c.img
-      ?'<img src="'+escT(c.img)+'" alt="'+escT(c.title)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\\'none\\'">'
-      :'<div style="position:absolute;inset:0;background:'+escT(c.grad||'#0f1730')+'"></div>';
-    var rel=[];
-    C.forEach(function(r,j){if(j!==i&&rel.length<5)rel.push(j);});
-    var relHtml=rel.map(function(j){
-      return '<li><a class="orig-item" href="clip.html?i='+j+'" data-j="'+j+'">'
-        +'<span class="oi-t">'+escT(C[j].title)+'</span>'
-        +'<span class="oi-ar">↗</span></a></li>';
-    }).join('');
-    var el=document.getElementById('cDetail');
-    el.innerHTML=
-      '<div class="cdetail-player">'+bgInner
-        +'<div class="orig-play" aria-hidden="true">▶</div></div>'
-      +'<div class="cm-cat">'+escT(c.category)+'</div>'
-      +'<h2 class="cdetail-title">'+escT(c.title)+'</h2>'
-      +'<div class="cdetail-meta">'
-        +'<span>제작: '+escT(c.creator)+'</span>'
-        +'<span>'+escT(c.date)+'</span>'
-        +'<span class="ccard-dur">'+escT(c.duration)+'</span>'
-        +'<span>'+fmtViews(c.views)+' 조회</span>'
-      +'</div>'
-      +'<p class="cdetail-desc">'+escT(c.desc||'')+'</p>'
-      +'<div class="cdetail-nav">'
-        +'<button class="btn sm" id="cPrev">← 이전 클립</button>'
-        +'<button class="btn sm" id="cNext">다음 클립 →</button>'
-        +'<a class="btn sm primary" href="clips.html">전체 클립</a>'
-      +'</div>'
-      +(rel.length?'<div class="crelated-head">관련 클립</div><ul class="orig-list">'+relHtml+'</ul>':'');
-    document.getElementById('cPrev').onclick=function(){
-      i=(i-1+C.length)%C.length;render();history.replaceState(null,'','?i='+i);
-    };
-    document.getElementById('cNext').onclick=function(){
-      i=(i+1)%C.length;render();history.replaceState(null,'','?i='+i);
-    };
-    [].forEach.call(el.querySelectorAll('.orig-item[data-j]'),function(a){
-      a.onclick=function(e){
-        e.preventDefault();
-        i=parseInt(this.getAttribute('data-j'),10);
-        render();history.replaceState(null,'','?i='+i);
-      };
+    js = "<script>(function(){" + _CLIP_JS_SHARED + """
+  var detail=document.getElementById('cDetail');
+  var qs=new URLSearchParams(location.search), id=qs.get('id'), legacyIdx=qs.get('i');
+  var C=[], idx=0;
+  function load(){
+    return D.list('clips').then(function(items){
+      C=items;
+      if(id){
+        idx=C.findIndex(function(c){return c.id===id;});
+        if(idx<0)idx=0;
+      } else if(legacyIdx!=null&&!isNaN(parseInt(legacyIdx,10))){
+        idx=Math.min(Math.max(parseInt(legacyIdx,10),0),Math.max(C.length-1,0));
+      } else idx=0;
+      render();
+    }).catch(function(err){
+      detail.innerHTML='<div class="nlist-msg">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
     });
   }
-  render();
+  function render(){
+    var c=C[idx];
+    if(!c){
+      detail.innerHTML='<div class="nlist-msg">등록된 클립이 없습니다.<br><a class="btn sm" href="clips.html">전체 클립</a></div>';
+      return;
+    }
+    id=c.id;
+    document.title=c.title+' · 고래상사';
+    if(history.replaceState)history.replaceState(null,'','clip.html?id='+encodeURIComponent(c.id));
+    var rel=[];
+    C.forEach(function(r,j){if(j!==idx&&rel.length<5)rel.push(j);});
+    var relHtml=rel.map(function(j){
+      return '<li><a class="orig-item" href="clip.html?id='+encodeURIComponent(C[j].id)+'" data-j="'+j+'">'
+        +'<span class="oi-t">'+esc(C[j].title)+'</span><span class="oi-ar">↗</span></a></li>';
+    }).join('');
+    var manage='';
+    if(U.isAdmin())manage+='<button class="btn sm'+(c.featured?' primary':'')+'" id="cDetFeat" type="button">'+(c.featured?'★ 대표 해제':'☆ 대표 지정')+'</button>';
+    if(U.canEdit(c)){
+      manage+='<button class="btn sm" id="cDetEdit" type="button">✏️ 수정</button>';
+      manage+='<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
+    }
+    detail.innerHTML=
+      '<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true">▶</div></div>'
+      +'<div class="cm-cat">'+esc(c.category||'')+'</div>'
+      +'<h2 class="cdetail-title">'+esc(c.title)+'</h2>'
+      +'<div class="cdetail-meta"><span>제작: '+esc(c.creator)+'</span>'
+      +(c.date?'<span>'+esc(c.date)+'</span>':'')
+      +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
+      +'<span>'+fmtViews(c.views)+' 조회</span></div>'
+      +(c.desc?'<p class="cdetail-desc">'+esc(c.desc)+'</p>':'')
+      +(c.url?'<div style="margin:0 0 20px"><a class="btn sm primary" href="'+esc(safeUrl(c.url))+'" target="_blank" rel="noopener">▶ 원본 영상 보기</a></div>':'')
+      +'<div class="cdetail-nav"><button class="btn sm" id="cPrev">← 이전 클립</button>'
+      +'<button class="btn sm" id="cNext">다음 클립 →</button>'
+      +manage
+      +'<a class="btn sm primary" href="clips.html">전체 클립</a></div>'
+      +(relHtml?'<div class="crelated-head">관련 클립</div><ul class="orig-list">'+relHtml+'</ul>':'');
+    document.getElementById('cPrev').onclick=function(){idx=(idx-1+C.length)%C.length;render();};
+    document.getElementById('cNext').onclick=function(){idx=(idx+1)%C.length;render();};
+    [].forEach.call(detail.querySelectorAll('.orig-item[data-j]'),function(a){
+      a.onclick=function(e){e.preventDefault();idx=parseInt(this.getAttribute('data-j'),10);render();};
+    });
+    var featBtn=document.getElementById('cDetFeat');
+    if(featBtn)featBtn.onclick=function(){
+      var next=!c.featured;
+      var p=next?unsetOtherFeatured(c.id).then(function(){return D.update('clips',c.id,{featured:true});})
+        :D.update('clips',c.id,{featured:false});
+      p.then(load).catch(function(err){alert('처리 실패: '+(err&&err.message||err));});
+    };
+    var editBtn=document.getElementById('cDetEdit');
+    if(editBtn)editBtn.onclick=function(){clOpenForm('edit',c,load);};
+    var delBtn=document.getElementById('cDetDel');
+    if(delBtn)delBtn.onclick=function(){
+      if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+      D.remove('clips',c.id).then(function(){location.href='clips.html';}).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+    };
+  }
+  document.addEventListener('whale:authchange',load);  // 로그인/로그아웃 시 관리 버튼 재렌더
+  load();
 })();</script>"""
 
-    write("clip", "클립 시청", body, PAGE_CSS, scripts=clips_json_script() + render)
+    write("clip", "클립 시청", body, PAGE_CSS, scripts=clips_json_script() + js)
 
 
 # ---------- 아카이브 추가 CSS (PAGE_CSS 위에 얹는 아카이브 전용 레이아웃) ----------
@@ -760,36 +947,164 @@ def archive_json_script():
             json.dumps(data, ensure_ascii=False) + ';</script>')
 
 
-# ---------- 아카이브: 통합 목록 + 상세 ----------
+# ---------- 아카이브: 통합 목록 + 상세 (Firebase 실시간 CRUD, 클립/일정과 동일 패턴 + isAdmin 게이팅) ----------
+
+def archive_form_modal():
+    """대회 기록 작성/수정 공용 모달 (목록·상세 페이지 공통 삽입). 관리자 전용."""
+    return """<div class="n-modal-bg" id="acModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="acModalTitle">
+  <div class="n-modal">
+    <button class="n-modal-close" id="acModalClose" type="button" aria-label="닫기">×</button>
+    <h2 id="acModalTitle">기록 추가</h2>
+    <form id="acForm" novalidate>
+      <label class="field"><span>대회명</span><input type="text" name="title" maxlength="120" required></label>
+      <label class="field"><span>날짜</span><input type="text" name="date" maxlength="20" placeholder="예: 2026.06.01"></label>
+      <label class="field"><span>순위 (숫자, 1=우승, 비우면 '참가'로 표시)</span><input type="number" name="rank" min="1" step="1"></label>
+      <label class="field"><span>참여 멤버 (쉼표로 구분)</span><input type="text" name="members" placeholder="예: 울산큰고래, 김마렌"></label>
+      <label class="field"><span>상대 크루 (한 줄에 하나, "이름|승" 또는 "이름|패")</span>
+        <textarea name="opponents" rows="4" placeholder="블랙팀|승
+화이트팀|패"></textarea></label>
+      <label class="field"><span>게임 결과 (한 줄에 하나, "게임명|승" 또는 "게임명|패")</span>
+        <textarea name="games" rows="4" placeholder="족구|승
+줄다리기|패"></textarea></label>
+      <label class="field"><span>영상 (한 줄에 하나, "URL|라벨", http/https만 허용)</span>
+        <textarea name="videos" rows="3" placeholder="https://youtu.be/xxxx|풀영상"></textarea></label>
+      <p class="n-modal-msg" id="acModalMsg" role="status" aria-live="polite"></p>
+      <button class="btn primary" type="submit">저장</button>
+    </form>
+  </div>
+</div>"""
+
+
+# 목록/상세 양쪽에서 공유하는 CRUD 헬퍼 JS — 클립/일정의 _..._JS_SHARED와 동일 구조.
+# 아카이브는 canEdit(본인 여부)이 아니라 isAdmin() 하나로만 게이팅한다(요구사항).
+# opponents.result: 렌더 규칙상 true=='패'(우리가 짐), false=='승'(우리가 이김) — 기존 archive-detail 렌더 로직 그대로 유지.
+# games.result: 렌더 규칙상 true=='승', false=='패' — 기존 렌더 로직(wl 집계·cd-res 클래스) 그대로 유지.
+_ARCHIVE_JS_SHARED = r"""
+  var U=window.WhaleUI, D=window.WhaleData;
+  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  function safeUrl(u){u=(u==null?'':String(u)).trim();return /^https?:\/\//i.test(u)?u:'#';}
+  function wl(c){var w=0,l=0,g=c.games||{};Object.keys(g).forEach(function(k){g[k].result?w++:l++;});return {w:w,l:l};}
+  function parseMembers(s){return (s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
+  function parseOpponents(s){
+    return (s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean).map(function(line){
+      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      return {name:name, result: tag==='패'};
+    }).filter(function(o){return o.name;});
+  }
+  function parseGames(s){
+    var lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean), out={};
+    lines.forEach(function(line,i){
+      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      if(!name)return;
+      out['game'+i]={name:name, result: tag==='승'};
+    });
+    return out;
+  }
+  function parseVideos(s){
+    var lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean), out=[];
+    for(var i=0;i<lines.length;i++){
+      var parts=lines[i].split('|'), url=(parts[0]||'').trim(), label=(parts[1]||'').trim();
+      if(!url)continue;
+      if(!/^https?:\/\//i.test(url))return null;
+      out.push({url:url, label: label||'영상'});
+    }
+    return out;
+  }
+  function serializeOpponents(arr){return (arr||[]).map(function(o){return (o.name||'')+'|'+(o.result?'패':'승');}).join('\n');}
+  function serializeGames(obj){
+    var keys=Object.keys(obj||{});
+    return keys.map(function(k){var g=obj[k]||{};return (g.name||'')+'|'+(g.result?'승':'패');}).join('\n');
+  }
+  function serializeVideos(arr){return (arr||[]).map(function(v){return (v.url||'')+'|'+(v.label||'');}).join('\n');}
+
+  var acModalBg=document.getElementById('acModalBg'), acModalTitle=document.getElementById('acModalTitle'),
+      acForm=document.getElementById('acForm'), acModalMsg=document.getElementById('acModalMsg');
+  var acMode='create', acItem=null, acOnSaved=function(){};
+  function acOpenForm(mode,item,cb){
+    if(!U.isAdmin())return;
+    acMode=mode;acItem=item;acOnSaved=cb||function(){};
+    acModalMsg.textContent='';acForm.reset();
+    acModalTitle.textContent=mode==='edit'?'기록 수정':'기록 추가';
+    if(mode==='edit'&&item){
+      acForm.title.value=item.title||'';acForm.date.value=item.date||'';
+      acForm.rank.value=(item.rank!=null?item.rank:'');
+      acForm.members.value=(item.members||[]).join(', ');
+      acForm.opponents.value=serializeOpponents(item.opponents);
+      acForm.games.value=serializeGames(item.games);
+      acForm.videos.value=serializeVideos(item.videos);
+    }
+    acModalBg.hidden=false;
+  }
+  function acCloseForm(){acModalBg.hidden=true;}
+  var acModalCloseBtn=document.getElementById('acModalClose');
+  if(acModalCloseBtn)acModalCloseBtn.addEventListener('click',acCloseForm);
+  if(acModalBg)acModalBg.addEventListener('click',function(e){if(e.target===acModalBg)acCloseForm();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&acModalBg&&!acModalBg.hidden)acCloseForm();});
+  if(acForm)acForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!U.isAdmin()){acModalMsg.textContent='관리자만 저장할 수 있습니다.';return;}
+    var title=acForm.title.value.trim();
+    if(!title){acModalMsg.textContent='대회명을 입력하세요.';return;}
+    var videos=parseVideos(acForm.videos.value);
+    if(videos===null){acModalMsg.textContent='영상 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
+    var rankVal=acForm.rank.value.trim();
+    var payload={
+      title:title, date:acForm.date.value.trim(),
+      rank: rankVal===''?null:parseInt(rankVal,10),
+      members: parseMembers(acForm.members.value),
+      opponents: parseOpponents(acForm.opponents.value),
+      games: parseGames(acForm.games.value),
+      videos: videos
+    };
+    acModalMsg.textContent='저장 중...';
+    var p=(acMode==='edit'&&acItem)?D.update('contests',acItem.id,payload):D.create('contests',payload);
+    p.then(function(){acCloseForm();acOnSaved();}).catch(function(err){acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+  });
+"""
+
 
 def build_archive():
-    """크루대전 기록 아카이브 — 라이브 Firebase /contests.json 실시간 로드."""
-    inject = ('<script>window.FB="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app";</script>')
+    """크루대전 기록 아카이브 — WhaleData.list('contests')로 /rework/contests 실시간 로드.
+    관리자는 +기록 추가/수정/삭제 가능, 비어있을 때 운영 /contests.json에서 1회 이관하는 '불러오기' 버튼도 제공."""
     body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "크루대전 기록")
+            + '<div class="n-actions img-ani bottom-top" id="aActions"></div>'
             + '<div class="pg-tools img-ani bottom-top">'
               '<button class="chip active" data-f="all">전체</button>'
               '<button class="chip" data-f="win">🏆 우승</button>'
               '<button class="chip" data-f="join">참가</button>'
               '<span class="pg-count" id="aCount"></span></div>'
             + '<div class="agrid img-ani bottom-top" id="aGrid">'
-              '<div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div>')
-    js = r"""<script>(function(){
-  var FB=window.FB,grid=document.getElementById('aGrid'),count=document.getElementById('aCount');
-  var all=[],filt='all';
-  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
-  function wl(c){var w=0,l=0,g=c.games||{};Object.keys(g).forEach(function(k){g[k].result?w++:l++;});return {w:w,l:l};}
+              '<div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div>'
+            + archive_form_modal())
+    js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
+  var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
+  var all=[], filt='all';
+  function renderActions(){
+    var html='';
+    if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
+    if(U.isAdmin()&&!all.length)html+='<button type="button" class="btn sm" id="acSeedBtn">불러오기 (운영 기록 이관, 최초 1회)</button>';
+    actionsEl.innerHTML=html;
+    var wb=document.getElementById('acWriteBtn'); if(wb)wb.addEventListener('click',function(){acOpenForm('create',null,reload);});
+    var sb=document.getElementById('acSeedBtn'); if(sb)sb.addEventListener('click',importSeed);
+  }
+  function rowActionsHtml(c){
+    if(!U.isAdmin())return '';
+    return '<div class="n-row-actions" style="margin-top:10px">'
+      +'<button type="button" class="n-btn" data-act="edit" data-id="'+esc(c.id)+'">✏️ 수정</button>'
+      +'<button type="button" class="n-btn del" data-act="del" data-id="'+esc(c.id)+'">🗑 삭제</button></div>';
+  }
   function card(c){
     var r=wl(c),win=c.rank===1;
     var cast=(c.members||[]).slice(0,6).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
     var more=(c.members||[]).length>6?'<span class="ct-chip">+'+((c.members||[]).length-6)+'</span>':'';
-    return '<a class="ct-card" href="archive-detail.html?id='+encodeURIComponent(c._id)+'">'
+    return '<div class="ct-card" data-id="'+esc(c.id)+'" role="button" tabindex="0" aria-label="'+esc(c.title||'대회 기록')+' 상세 보기">'
       +'<div class="ct-top"><span class="ct-rank '+(win?'win':'lose')+'">'
         +(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
       +'<span class="ct-date">'+esc(c.date||'')+'</span></div>'
       +'<div class="ct-title">'+esc(c.title||'제목 없음')+'</div>'
-      +'<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span>'
-      +'<span>'+(c.total_teams?c.total_teams+'팀 참가':'')+'</span></div>'
-      +'<div class="ct-cast">'+cast+more+'</div></a>';
+      +'<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span></div>'
+      +'<div class="ct-cast">'+cast+more+'</div>'
+      +rowActionsHtml(c)+'</div>';
   }
   function render(){
     var arr=all.filter(function(c){
@@ -798,50 +1113,122 @@ def build_archive():
     count.textContent=arr.length+'개 대회';
     grid.innerHTML=arr.length?arr.map(card).join(''):'<div class="stub" style="grid-column:1/-1"><p>해당 기록이 없습니다.</p></div>';
   }
+  function reload(){
+    return D.list('contests').then(function(items){
+      all=items.slice().sort(function(a,b){return ((a.date||'')<(b.date||'')?1:(a.date||'')>(b.date||'')?-1:0);});
+      renderActions();render();
+    }).catch(function(err){
+      grid.innerHTML='<div class="stub" style="grid-column:1/-1"><p>불러오기 실패: '+esc(err&&err.message||err)+'</p></div>';
+    });
+  }
   [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(c){c.addEventListener('click',function(){
     document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.remove('active')});
     c.classList.add('active');filt=c.getAttribute('data-f');render();});});
-  fetch(FB+'/contests.json?v='+Date.now()).then(function(r){return r.json();}).then(function(d){
-    d=d||{};all=Object.keys(d).map(function(k){var o=d[k];o._id=k;return o;})
-      .sort(function(a,b){return (a.date<b.date?1:a.date>b.date?-1:0);});
-    render();
-  }).catch(function(){grid.innerHTML='<div class="stub" style="grid-column:1/-1"><p>기록을 불러오지 못했습니다.</p></div>';});
+  function removeRecord(item){
+    if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+    D.remove('contests',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+  }
+  grid.addEventListener('click',function(e){
+    var btn=e.target.closest&&e.target.closest('[data-act]');
+    if(btn){
+      e.stopPropagation();
+      var id=btn.getAttribute('data-id'), act=btn.getAttribute('data-act');
+      var item=all.filter(function(x){return x.id===id;})[0];
+      if(!item)return;
+      if(act==='edit')acOpenForm('edit',item,reload);
+      else if(act==='del')removeRecord(item);
+      return;
+    }
+    var card=e.target.closest&&e.target.closest('.ct-card');
+    if(card)location.href='archive-detail.html?id='+encodeURIComponent(card.getAttribute('data-id'));
+  });
+  grid.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var card=e.target.closest&&e.target.closest('.ct-card');
+    if(card&&e.target===card){e.preventDefault();location.href='archive-detail.html?id='+encodeURIComponent(card.getAttribute('data-id'));}
+  });
+  function importSeed(){
+    if(!U.isAdmin())return;
+    if(!confirm('운영 대회 기록을 관리용 저장소로 1회 이관합니다. 계속할까요?'))return;
+    fetch('https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/contests.json?v='+Date.now())
+      .then(function(r){return r.json();}).then(function(d){
+        d=d||{};
+        var keys=Object.keys(d);
+        if(!keys.length){alert('불러올 운영 기록이 없습니다.');return;}
+        var chain=Promise.resolve();
+        keys.forEach(function(k){
+          chain=chain.then(function(){
+            var o=d[k]||{};
+            return D.create('contests',{
+              title:o.title||'', date:o.date||'', rank:(o.rank!=null?o.rank:null),
+              members:o.members||[], opponents:o.opponents||[], games:o.games||{}, videos:o.videos||[]
+            });
+          });
+        });
+        chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
+      }).catch(function(err){alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
+  }
+  document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
+  reload();
 })();</script>"""
-    write("archive", "크루대전 기록", body, ARCHIVE_CSS, scripts=inject + js)
+    write("archive", "크루대전 기록", body, ARCHIVE_CSS, scripts=js)
 
 
 def build_archive_detail():
-    """대회 상세 — ?id=Firebase키 로 /contests/{id}.json 실시간 로드."""
-    inject = ('<script>window.FB="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app";</script>')
+    """대회 상세 — WhaleData.list('contests') 후 ?id=로 find (클립 상세 패턴과 동일)."""
     body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "대회 상세")
-            + '<div class="img-ani bottom-top" id="cDetail"><div class="stub"><p>불러오는 중…</p></div></div>')
-    js = r"""<script>(function(){
-  var FB=window.FB,id=new URLSearchParams(location.search).get('id');
-  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+            + '<div class="img-ani bottom-top" id="cDetail"><div class="stub"><p>불러오는 중…</p></div></div>'
+            + archive_form_modal())
+    js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
   var el=document.getElementById('cDetail');
-  if(!id){el.innerHTML='<div class="stub"><p>잘못된 접근입니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return;}
-  fetch(FB+'/contests/'+encodeURIComponent(id)+'.json?v='+Date.now()).then(function(r){return r.json();}).then(function(c){
-    if(!c){el.innerHTML='<div class="stub"><p>기록을 찾을 수 없습니다.</p></div>';return;}
+  var id=new URLSearchParams(location.search).get('id');
+  var cur=null;
+  function load(){
+    if(!id){el.innerHTML='<div class="stub"><p>잘못된 접근입니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return Promise.resolve();}
+    return D.list('contests').then(function(items){
+      cur=items.filter(function(x){return x.id===id;})[0];
+      render();
+    }).catch(function(err){
+      el.innerHTML='<div class="stub"><p>불러오지 못했습니다: '+esc(err&&err.message||err)+'</p></div>';
+    });
+  }
+  function render(){
+    var c=cur;
+    if(!c){el.innerHTML='<div class="stub"><p>기록을 찾을 수 없습니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return;}
     document.title=(c.title||'대회 상세')+' · 고래상사';
     var win=c.rank===1;
     var g=c.games||{},games=Object.keys(g).map(function(k){var x=g[k];
       return '<div class="cd-game"><span>'+esc(x.name)+'</span><span class="cd-res '+(x.result?'w':'l')+'">'+(x.result?'승':'패')+'</span></div>';}).join('');
     var opp=(c.opponents||[]).map(function(o){return '<span class="op">'+esc(o.name)+(o.result===false?' <span style=color:var(--accent)>승</span>':o.result===true?' <span style=color:var(--hot)>패</span>':'')+'</span>';}).join('');
-    var vids=(c.videos||[]).map(function(v){return '<a class="btn sm primary" href="'+esc(v.url)+'" target="_blank" rel="noopener">▶ '+esc(v.label||'영상')+'</a>';}).join('');
+    var vids=(c.videos||[]).map(function(v){return '<a class="btn sm primary" href="'+esc(safeUrl(v.url))+'" target="_blank" rel="noopener">▶ '+esc(v.label||'영상')+'</a>';}).join('');
     var cast=(c.members||[]).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
+    var manage='';
+    if(U.isAdmin()){
+      manage='<button class="btn sm" id="cDetEdit" type="button">✏️ 수정</button>'
+        +'<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
+    }
     el.innerHTML=
       '<div class="ct-top" style="margin-bottom:14px"><span class="ct-rank '+(win?'win':'lose')+'">'+(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
-        +'<span class="ct-date">'+esc(c.date||'')+(c.total_teams?' · '+c.total_teams+'팀':'')+'</span></div>'
+        +'<span class="ct-date">'+esc(c.date||'')+'</span></div>'
       +'<h2 class="adetail-title">'+esc(c.title||'')+'</h2>'
       +(vids?'<div class="cd-vids">'+vids+'</div>':'')
       +(opp?'<h3 class="cd-h">상대 크루</h3><div class="cd-opp">'+opp+'</div>':'')
       +(games?'<h3 class="cd-h" style="margin-top:22px">경기 결과</h3><div class="cd-games">'+games+'</div>':'')
       +'<h3 class="cd-h">참가 멤버</h3><div class="ct-cast" style="margin-bottom:26px">'+cast+'</div>'
       +(c.notes?'<p class="adetail-desc">'+esc(c.notes)+'</p>':'')
-      +'<div class="adetail-nav"><a class="btn sm primary" href="archive.html">← 전체 기록</a></div>';
-  }).catch(function(){el.innerHTML='<div class="stub"><p>불러오지 못했습니다.</p></div>';});
+      +'<div class="adetail-nav">'+manage+'<a class="btn sm primary" href="archive.html">← 전체 기록</a></div>';
+    var editBtn=document.getElementById('cDetEdit');
+    if(editBtn)editBtn.onclick=function(){acOpenForm('edit',c,load);};
+    var delBtn=document.getElementById('cDetDel');
+    if(delBtn)delBtn.onclick=function(){
+      if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+      D.remove('contests',c.id).then(function(){location.href='archive.html';}).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+    };
+  }
+  document.addEventListener('whale:authchange',load);  // 로그인/로그아웃 시 관리 버튼 재렌더
+  load();
 })();</script>"""
-    write("archive-detail", "대회 상세", body, ARCHIVE_CSS, scripts=inject + js)
+    write("archive-detail", "대회 상세", body, ARCHIVE_CSS, scripts=js)
 
 
 # ---------- 아키타입: 방송 일정 (월 캘린더) ----------
@@ -889,6 +1276,8 @@ TYPE_COLORS = {
 
 
 def schedule_json_script():
+    """운영 데이터가 아닌 '시드 원본' 주입 — 관리자가 최초 1회 Firebase로 이관(불러오기)할 때만 소스로 쓰인다.
+    실제 목록/캘린더/상세는 WhaleData.list('schedules')로 Firebase(/rework/schedules)에서 실시간으로 읽어 렌더한다."""
     data = []
     for i, e in enumerate(SCHEDULE):
         d = dict(e); d["i"] = i
@@ -897,9 +1286,80 @@ def schedule_json_script():
     return ('<script>window.WHALE_SCHEDULE=' + json.dumps(data, ensure_ascii=False) + ';</script>')
 
 
+def schedule_form_modal():
+    """일정 작성/수정 공용 모달 (캘린더·상세 페이지 공통 삽입)."""
+    type_opts = "".join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in TYPE_COLORS)
+    return f"""<div class="n-modal-bg" id="scModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="scModalTitle">
+  <div class="n-modal">
+    <button class="n-modal-close" id="scModalClose" type="button" aria-label="닫기">×</button>
+    <h2 id="scModalTitle">일정 추가</h2>
+    <form id="scForm" novalidate>
+      <label class="field"><span>날짜</span><input type="date" name="date" required></label>
+      <label class="field"><span>시간</span><input type="time" name="time" required></label>
+      <label class="field"><span>제목</span><input type="text" name="title" maxlength="120" required></label>
+      <label class="field"><span>유형</span><select name="type">{type_opts}</select></label>
+      <label class="field"><span>참여 멤버 (쉼표로 구분)</span><input type="text" name="members" placeholder="예: 김마렌, 조아라"></label>
+      <label class="field"><span>설명 (선택)</span><textarea name="desc" rows="4"></textarea></label>
+      <p class="n-modal-msg" id="scModalMsg" role="status" aria-live="polite"></p>
+      <button class="btn primary" type="submit">저장</button>
+    </form>
+  </div>
+</div>"""
+
+
+# 목록/상세 양쪽에서 공유하는 CRUD 헬퍼 JS — 공지의 _NOTICE_JS_SHARED와 동일한 구조.
+# 일정에는 pinned/featured 같은 관리자 전용 플래그가 없다 — canEdit(admin은 항상 true)만으로 충분.
+_SCHEDULE_JS_SHARED = ("""
+  var U=window.WhaleUI, D=window.WhaleData;
+  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  var TC=""" + json.dumps(TYPE_COLORS, ensure_ascii=False) + """;
+  function tcOf(t){return TC[t]||'#2f63ff';}
+  function sortSchedules(arr){
+    return arr.slice().sort(function(a,b){
+      var ka=(a.date||'')+' '+(a.time||''), kb=(b.date||'')+' '+(b.time||'');
+      return ka<kb?-1:(ka>kb?1:0);
+    });
+  }
+  var scModalBg=document.getElementById('scModalBg'), scModalTitle=document.getElementById('scModalTitle'),
+      scForm=document.getElementById('scForm'), scModalMsg=document.getElementById('scModalMsg');
+  var scMode='create', scItem=null, scOnSaved=function(){};
+  function scOpenForm(mode,item,cb){
+    scMode=mode;scItem=item;scOnSaved=cb||function(){};
+    scModalMsg.textContent='';scForm.reset();
+    scModalTitle.textContent=mode==='edit'?'일정 수정':'일정 추가';
+    if(mode==='edit'&&item){
+      scForm.date.value=item.date||'';scForm.time.value=item.time||'';scForm.title.value=item.title||'';
+      scForm.type.value=item.type||'개인방송';scForm.members.value=(item.members||[]).join(', ');
+      scForm.desc.value=item.desc||'';
+    } else {
+      scForm.date.value=new Date().toISOString().slice(0,10);
+    }
+    scModalBg.hidden=false;
+  }
+  function scCloseForm(){scModalBg.hidden=true;}
+  var scModalCloseBtn=document.getElementById('scModalClose');
+  if(scModalCloseBtn)scModalCloseBtn.addEventListener('click',scCloseForm);
+  if(scModalBg)scModalBg.addEventListener('click',function(e){if(e.target===scModalBg)scCloseForm();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&scModalBg&&!scModalBg.hidden)scCloseForm();});
+  if(scForm)scForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    var date=scForm.date.value, time=scForm.time.value, title=scForm.title.value.trim(), type=scForm.type.value;
+    if(!date||!time||!title){scModalMsg.textContent='날짜·시간·제목을 모두 입력하세요.';return;}
+    var members=scForm.members.value.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    var payload={date:date,time:time,title:title,type:type,members:members,desc:scForm.desc.value.trim()};
+    scModalMsg.textContent='저장 중...';
+    var p=(scMode==='edit'&&scItem)?D.update('schedules',scItem.id,payload):D.create('schedules',payload);
+    p.then(function(){scCloseForm();scOnSaved();}).catch(function(err){scModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+  });
+""")
+
+
 def build_schedule():
+    """방송 일정 (schedules) — WhaleData.list('schedules')로 런타임 로드, Firebase 실시간 CRUD.
+    캘린더 셀은 클릭 시 상세로만 이동(편집 버튼 없음), 목록 뷰 각 행에 canEdit이면 수정/삭제 버튼 노출."""
     body = (
         page_head_block("SCHEDULE", "방송 일정", "일정 캘린더")
+        + '<div class="n-actions img-ani bottom-top" id="scActions"></div>'
         + '<div class="pg-tools img-ani bottom-top"><div class="sview">'
           '<button class="chip active" data-v="cal">📅 달력</button>'
           '<button class="chip" data-v="list">☰ 목록</button></div></div>'
@@ -910,22 +1370,32 @@ def build_schedule():
           '<div class="cal-dow"><span>일</span><span>월</span><span>화</span><span>수</span>'
           '<span>목</span><span>금</span><span>토</span></div>'
           '<div class="cal-grid" id="calGrid"></div></div></div>'
-        + '<div id="listView" class="slist img-ani bottom-top" style="display:none"></div>')
+        + '<div id="listView" class="slist img-ani bottom-top" style="display:none"></div>'
+        + schedule_form_modal())
 
-    js = """<script>(function(){
-  var S=window.WHALE_SCHEDULE||[];
-  var byDate={};S.forEach(function(e){(byDate[e.date]=byDate[e.date]||[]).push(e);});
+    js = "<script>(function(){" + _SCHEDULE_JS_SHARED + """
+  var S=[];
+  var actionsEl=document.getElementById('scActions');
   var now=new Date();
   var cur=new Date(now.getFullYear(),now.getMonth(),1);
   var todayISO=(function(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);})();
   var grid=document.getElementById('calGrid'),title=document.getElementById('calTitle');
+  var lv=document.getElementById('listView');
   function iso(y,m,d){return y+'-'+('0'+(m+1)).slice(-2)+'-'+('0'+d).slice(-2);}
-  function evChip(e){
-    return '<div class="cal-ev" style="--tc:'+e.tc+'" role="button" tabindex="0" '
-      +'data-i="'+e.i+'" title="'+esc(e.time)+' '+esc(e.title)+'">'+esc(e.title)+'</div>';
+  function renderActions(){
+    var html='';
+    if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="scWriteBtn">+ 일정 추가</button>';
+    if(U.isAdmin()&&!S.length)html+='<button type="button" class="btn sm" id="scSeedBtn">시드 불러오기 (최초 1회)</button>';
+    actionsEl.innerHTML=html;
+    var wb=document.getElementById('scWriteBtn');if(wb)wb.addEventListener('click',function(){scOpenForm('create',null,reload);});
+    var sb=document.getElementById('scSeedBtn');if(sb)sb.addEventListener('click',importSeed);
   }
-  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
-  function render(){
+  function evChip(e){
+    return '<div class="cal-ev" style="--tc:'+tcOf(e.type)+'" role="button" tabindex="0" '
+      +'data-id="'+esc(e.id)+'" title="'+esc(e.time)+' '+esc(e.title)+'">'+esc(e.title)+'</div>';
+  }
+  function renderCal(){
+    var byDate={};S.forEach(function(e){(byDate[e.date]=byDate[e.date]||[]).push(e);});
     var y=cur.getFullYear(),m=cur.getMonth();
     title.textContent=y+'년 '+(m+1)+'월';
     var first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
@@ -940,33 +1410,70 @@ def build_schedule():
     }
     grid.innerHTML=h;
     [].forEach.call(grid.querySelectorAll('.cal-ev'),function(el){
-      var go=function(){location.href='schedule-detail.html?i='+el.getAttribute('data-i');};
+      var go=function(){location.href='schedule-detail.html?id='+encodeURIComponent(el.getAttribute('data-id'));};
       el.addEventListener('click',go);
       el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
     });
   }
-  document.getElementById('calPrev').onclick=function(){cur.setMonth(cur.getMonth()-1);render();};
-  document.getElementById('calNext').onclick=function(){cur.setMonth(cur.getMonth()+1);render();};
-  render();
-  // 목록 뷰
-  var lv=document.getElementById('listView');
-  var sorted=S.slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
-  var W=['일','월','화','수','목','금','토'];
-  lv.innerHTML=sorted.map(function(e){
-    var dt=new Date(e.date+'T00:00:00');
-    var badge=(e.date.slice(5).replace('-','.'))+' ('+W[dt.getDay()]+')';
-    var cast=(e.members||[]).join(', ');
-    return '<div class="sched-row" data-i="'+e.i+'" role="button" tabindex="0">'
-      +'<span class="day" style="--tc:'+e.tc+';background:'+e.tc+'">'+badge+'</span>'
-      +'<span class="desc"><b>'+e.time+'</b> — '+esc(e.title)
-      +'<span class="stype" style="--tc:'+e.tc+'">'+esc(e.type)+'</span>'
-      +'<br><span style="color:var(--ink-2);font-size:12.5px">'+esc(cast)+'</span></span></div>';
-  }).join('');
-  [].forEach.call(lv.querySelectorAll('.sched-row'),function(el){
-    var go=function(){location.href='schedule-detail.html?i='+el.getAttribute('data-i');};
-    el.addEventListener('click',go);
-    el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}});
+  function rowActionsHtml(e){
+    var h='';
+    if(U.canEdit(e)){
+      h+='<button type="button" class="n-btn" data-act="edit" data-id="'+esc(e.id)+'">✏️ 수정</button>';
+      h+='<button type="button" class="n-btn del" data-act="del" data-id="'+esc(e.id)+'">🗑 삭제</button>';
+    }
+    return h?'<span class="n-row-actions">'+h+'</span>':'';
+  }
+  function renderList(){
+    var sorted=sortSchedules(S);
+    var W=['일','월','화','수','목','금','토'];
+    if(!sorted.length){lv.innerHTML='<div class="nlist-msg">등록된 일정이 없습니다.</div>';return;}
+    lv.innerHTML=sorted.map(function(e){
+      var dt=new Date(e.date+'T00:00:00');
+      var badge=(e.date.slice(5).replace('-','.'))+' ('+W[dt.getDay()]+')';
+      var cast=(e.members||[]).join(', ');
+      return '<div class="sched-row" data-id="'+esc(e.id)+'" role="button" tabindex="0">'
+        +'<span class="day" style="--tc:'+tcOf(e.type)+';background:'+tcOf(e.type)+'">'+badge+'</span>'
+        +'<span class="desc"><b>'+esc(e.time)+'</b> — '+esc(e.title)
+        +'<span class="stype" style="--tc:'+tcOf(e.type)+'">'+esc(e.type)+'</span>'
+        +'<br><span style="color:var(--ink-2);font-size:12.5px">'+esc(cast)+'</span></span>'
+        +rowActionsHtml(e)+'</div>';
+    }).join('');
+  }
+  function reload(){
+    return D.list('schedules').then(function(items){
+      S=items;renderActions();renderCal();renderList();
+    }).catch(function(err){
+      grid.innerHTML='<div class="nlist-msg">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
+      lv.innerHTML='';
+    });
+  }
+  function removeSchedule(item){
+    if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+    D.remove('schedules',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+  }
+  function handleAction(e){
+    var btn=e.target.closest&&e.target.closest('[data-act]');
+    if(!btn)return false;
+    e.stopPropagation();
+    var id=btn.getAttribute('data-id'),act=btn.getAttribute('data-act');
+    var item=S.filter(function(x){return x.id===id;})[0];
+    if(!item)return true;
+    if(act==='edit')scOpenForm('edit',item,reload);
+    else if(act==='del')removeSchedule(item);
+    return true;
+  }
+  lv.addEventListener('click',function(e){
+    if(handleAction(e))return;
+    var row=e.target.closest&&e.target.closest('.sched-row');
+    if(row)location.href='schedule-detail.html?id='+encodeURIComponent(row.getAttribute('data-id'));
   });
+  lv.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var row=e.target.closest&&e.target.closest('.sched-row');
+    if(row&&e.target===row)location.href='schedule-detail.html?id='+encodeURIComponent(row.getAttribute('data-id'));
+  });
+  document.getElementById('calPrev').onclick=function(){cur.setMonth(cur.getMonth()-1);renderCal();};
+  document.getElementById('calNext').onclick=function(){cur.setMonth(cur.getMonth()+1);renderCal();};
   // 뷰 토글
   var chips=[].slice.call(document.querySelectorAll('.sview .chip'));
   chips.forEach(function(c){c.addEventListener('click',function(){
@@ -975,43 +1482,93 @@ def build_schedule():
     document.getElementById('calView').style.display=v==='cal'?'':'none';
     lv.style.display=v==='list'?'':'none';
   });});
+  function importSeed(){
+    var seed=window.WHALE_SCHEDULE||[];
+    if(!seed.length){alert('불러올 시드 데이터가 없습니다.');return;}
+    if(!confirm('시드 일정 '+seed.length+'건을 Firebase로 1회 이관합니다. 계속할까요?'))return;
+    var chain=Promise.resolve();
+    seed.forEach(function(e){
+      chain=chain.then(function(){
+        return D.create('schedules',{date:e.date,time:e.time,title:e.title,type:e.type,members:e.members||[],desc:e.desc||''});
+      });
+    });
+    chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
+  }
+  document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
+  reload();
 })();</script>"""
     write("schedule", "일정 캘린더", body, SCHEDULE_CSS, scripts=schedule_json_script() + js)
 
 
 def build_schedule_detail():
+    """일정 상세 — WhaleData.list('schedules')로 런타임 로드. ?id=Firebase키, 옛 ?i=인덱스는 폴백."""
     body = (page_head_block("SCHEDULE", "방송 일정", "일정 상세")
-            + '<div class="img-ani bottom-top" id="sDetail"></div>')
-    js = """<script>(function(){
-  var S=window.WHALE_SCHEDULE||[];
-  var i=parseInt(new URLSearchParams(location.search).get('i')||'0',10);
-  if(isNaN(i)||i<0||i>=S.length)i=0;
+            + '<div class="img-ani bottom-top" id="sDetail"></div>'
+            + schedule_form_modal())
+    js = "<script>(function(){" + _SCHEDULE_JS_SHARED + """
+  var detail=document.getElementById('sDetail');
+  var qs=new URLSearchParams(location.search), id=qs.get('id'), legacyIdx=qs.get('i');
+  var S=[], idx=0;
   var W=['일','월','화','수','목','금','토'];
-  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  function load(){
+    return D.list('schedules').then(function(items){
+      S=sortSchedules(items);
+      if(id){
+        idx=S.findIndex(function(e){return e.id===id;});
+        if(idx<0)idx=0;
+      } else if(legacyIdx!=null&&!isNaN(parseInt(legacyIdx,10))){
+        idx=Math.min(Math.max(parseInt(legacyIdx,10),0),Math.max(S.length-1,0));
+      } else idx=0;
+      render();
+    }).catch(function(err){
+      detail.innerHTML='<div class="nlist-msg">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
+    });
+  }
   function render(){
-    var e=S[i];if(!e)return;document.title=e.title+' · 고래상사';
+    var e=S[idx];
+    if(!e){
+      detail.innerHTML='<div class="nlist-msg">등록된 일정이 없습니다.<br><a class="btn sm" href="schedule.html">전체 일정</a></div>';
+      return;
+    }
+    id=e.id;
+    document.title=e.title+' · 고래상사';
+    if(history.replaceState)history.replaceState(null,'','schedule-detail.html?id='+encodeURIComponent(e.id));
     var dt=new Date(e.date+'T00:00:00');
     var dateStr=e.date.replace(/-/g,'.')+' ('+W[dt.getDay()]+') '+e.time;
     var cast=(e.members||[]).map(function(m){return '<span class="mchip">'+esc(m)+'</span>';}).join('');
-    var rel=S.filter(function(x){return x.i!==e.i&&(x.type===e.type||x.date===e.date);}).slice(0,4);
+    var rel=S.filter(function(x){return x.id!==e.id&&(x.type===e.type||x.date===e.date);}).slice(0,4);
     var relH=rel.map(function(x){
-      return '<li><a class="orig-item" href="schedule-detail.html?i='+x.i+'">'
+      return '<li><a class="orig-item" href="schedule-detail.html?id='+encodeURIComponent(x.id)+'">'
         +'<span class="oi-t">'+esc(x.date.slice(5).replace('-','.'))+' · '+esc(x.title)+'</span>'
         +'<span class="oi-ar" aria-hidden="true">↗</span></a></li>';}).join('');
+    var manage='';
+    if(U.canEdit(e)){
+      manage+='<button class="btn sm" id="sDetEdit" type="button">✏️ 수정</button>';
+      manage+='<button class="btn sm" id="sDetDel" type="button">🗑 삭제</button>';
+    }
     document.getElementById('sDetail').innerHTML=
-      '<div class="cm-cat" style="color:'+e.tc+'">'+esc(e.type)+'</div>'
+      '<div class="cm-cat" style="color:'+tcOf(e.type)+'">'+esc(e.type)+'</div>'
       +'<h2 class="adetail-title" style="font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-.03em;margin:6px 0 0">'+esc(e.title)+'</h2>'
       +'<div class="sdetail-meta"><span>🗓 '+esc(dateStr)+'</span></div>'
       +'<div class="sdetail-cast">'+cast+'</div>'
-      +'<p class="sdetail-desc">'+esc(e.desc||'')+'</p>'
+      +(e.desc?'<p class="sdetail-desc">'+esc(e.desc)+'</p>':'')
       +'<div class="sdetail-nav"><button class="btn sm" id="sPrev">← 이전 일정</button>'
       +'<button class="btn sm" id="sNext">다음 일정 →</button>'
+      +manage
       +'<a class="btn sm primary" href="schedule.html">전체 일정</a></div>'
       +(relH?'<div class="crelated-head" style="margin-top:40px;font-weight:900;font-size:18px">관련 일정</div><ul class="orig-list">'+relH+'</ul>':'');
-    document.getElementById('sPrev').onclick=function(){i=(i-1+S.length)%S.length;render();};
-    document.getElementById('sNext').onclick=function(){i=(i+1)%S.length;render();};
+    document.getElementById('sPrev').onclick=function(){idx=(idx-1+S.length)%S.length;render();};
+    document.getElementById('sNext').onclick=function(){idx=(idx+1)%S.length;render();};
+    var editBtn=document.getElementById('sDetEdit');
+    if(editBtn)editBtn.onclick=function(){scOpenForm('edit',e,load);};
+    var delBtn=document.getElementById('sDetDel');
+    if(delBtn)delBtn.onclick=function(){
+      if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+      D.remove('schedules',e.id).then(function(){location.href='schedule.html';}).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+    };
   }
-  render();
+  document.addEventListener('whale:authchange',load);  // 로그인/로그아웃 시 관리 버튼 재렌더
+  load();
 })();</script>"""
     write("schedule-detail", "일정 상세", body, SCHEDULE_CSS, scripts=schedule_json_script() + js)
 
@@ -1036,14 +1593,18 @@ NOTICE_CSS = PAGE_CSS + """
 .ndetail-date{font-size:13px;color:var(--ink-2);margin-bottom:28px;font-family:'JetBrains Mono',monospace}
 .ndetail-body{border-top:1px solid var(--line);padding-top:26px}
 .ndetail-body p{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.85;margin:0 0 18px;word-break:keep-all}
-.ndetail-nav{display:flex;gap:10px;margin-top:36px;border-top:1px solid var(--line);padding-top:26px}
+.ndetail-nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px;border-top:1px solid var(--line);padding-top:26px}
 @media(max-width:640px){.nrow{flex-wrap:wrap;gap:8px}.ntitle{flex:1 1 100%;order:3}}
 """
+# (CRUD 공용 모달/액션 버튼 CSS는 PAGE_CSS로 승격됨 — 클립·일정 페이지와 공유)
 
 NOTICE_COLORS = {"공지": "#2f63ff", "이벤트": "#ff3d92", "업데이트": "#0fb5b0", "점검": "#ffcb45"}
 
 
 def notices_json_script():
+    """운영 데이터가 아닌 '시드 원본'을 주입 — 관리자가 최초 1회 Firebase로
+    이관(불러오기)할 때만 소스로 쓰인다. 실제 목록/상세는 WhaleData.list('notices')로
+    Firebase(/rework/notices)에서 실시간으로 읽어 렌더한다."""
     data = []
     for i, n in enumerate(NOTICES):
         d = dict(n); d["i"] = i; d["tc"] = NOTICE_COLORS.get(n.get("cat"), "#2f63ff")
@@ -1051,71 +1612,255 @@ def notices_json_script():
     return '<script>window.WHALE_NOTICES=' + json.dumps(data, ensure_ascii=False) + ';</script>'
 
 
-def build_notices():
-    cats = []
-    for n in NOTICES:
-        if n["cat"] not in cats:
-            cats.append(n["cat"])
-    chips = ('<button class="chip active" data-f="all">전체</button>'
-             + "".join(f'<button class="chip" data-f="{esc(c)}">{esc(c)}</button>' for c in cats))
-    body = (page_head_block("NOTICE", "공지사항", "공지사항")
-            + f'<div class="pg-tools img-ani bottom-top">{chips}'
-              f'<span class="pg-count" id="nCount">전체 {len(NOTICES)}건</span></div>'
-            + '<div class="nlist img-ani bottom-top" id="nList"></div>')
-    js = """<script>(function(){
-  var N=window.WHALE_NOTICES||[];
+def notice_form_modal():
+    """공지 작성/수정 공용 모달 (목록·상세 페이지 공통 삽입)."""
+    return """<div class="n-modal-bg" id="nModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="nModalTitle">
+  <div class="n-modal">
+    <button class="n-modal-close" id="nModalClose" type="button" aria-label="닫기">×</button>
+    <h2 id="nModalTitle">공지 작성</h2>
+    <form id="nForm" novalidate>
+      <label class="field"><span>카테고리</span>
+        <select name="cat">
+          <option value="공지">공지</option>
+          <option value="이벤트">이벤트</option>
+          <option value="업데이트">업데이트</option>
+          <option value="점검">점검</option>
+        </select></label>
+      <label class="field"><span>제목</span><input type="text" name="title" maxlength="120" required></label>
+      <label class="field"><span>날짜</span><input type="date" name="date" required></label>
+      <label class="field"><span>본문 (줄바꿈으로 문단 구분)</span><textarea name="body" rows="6" required></textarea></label>
+      <label class="n-pin-field" id="nPinField" style="display:none">
+        <input type="checkbox" name="pinned"><span>상단 고정 (관리자만 지정 가능)</span></label>
+      <p class="n-modal-msg" id="nModalMsg" role="status" aria-live="polite"></p>
+      <button class="btn primary" type="submit">저장</button>
+    </form>
+  </div>
+</div>"""
+
+
+# 목록/상세 양쪽에서 공유하는 CRUD 헬퍼 JS (esc/색상/정렬/작성폼 로직).
+# window.WhaleUI · window.WhaleData(assets/site.js)를 그대로 사용, Firebase URL은 재하드코딩하지 않는다.
+_NOTICE_JS_SHARED = """
+  var U=window.WhaleUI, D=window.WhaleData;
   function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
-  var sorted=N.slice().sort(function(a,b){
-    if(a.pinned!==b.pinned)return a.pinned?-1:1;return a.date<b.date?1:-1;});
-  var list=document.getElementById('nList');
-  list.innerHTML=sorted.map(function(n){
-    return '<div class="nrow" data-cat="'+esc(n.cat)+'" data-i="'+n.i+'" role="button" tabindex="0">'
-      +(n.pinned?'<span class="npin" title="상단 고정">📌</span>':'')
-      +'<span class="ncat" style="--tc:'+n.tc+'">'+esc(n.cat)+'</span>'
-      +'<span class="ntitle">'+esc(n.title)+'</span>'
-      +'<span class="ndate">'+esc(n.date)+'</span>'
-      +'<span class="narrow" aria-hidden="true">→</span></div>';
-  }).join('');
-  var rows=[].slice.call(list.querySelectorAll('.nrow'));
-  rows.forEach(function(el){
-    var go=function(){location.href='notice.html?i='+el.getAttribute('data-i');};
-    el.addEventListener('click',go);
-    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+  var TC={"공지":"#2f63ff","이벤트":"#ff3d92","업데이트":"#0fb5b0","점검":"#ffcb45"};
+  function tcOf(cat){return TC[cat]||'#2f63ff';}
+  function sortNotices(arr){
+    return arr.slice().sort(function(a,b){
+      if(!!a.pinned!==!!b.pinned)return a.pinned?-1:1;
+      return a.date<b.date?1:(a.date>b.date?-1:0);
+    });
+  }
+  var nModalBg=document.getElementById('nModalBg'), nModalTitle=document.getElementById('nModalTitle'),
+      nForm=document.getElementById('nForm'), nPinField=document.getElementById('nPinField'),
+      nModalMsg=document.getElementById('nModalMsg');
+  var formMode='create', formItem=null, onSaved=function(){};
+  function openForm(mode,item,cb){
+    formMode=mode;formItem=item;onSaved=cb||function(){};
+    nModalMsg.textContent='';nForm.reset();
+    nModalTitle.textContent=mode==='edit'?'공지 수정':'공지 작성';
+    if(nPinField)nPinField.style.display=U.isAdmin()?'flex':'none';
+    if(mode==='edit'&&item){
+      nForm.cat.value=item.cat;nForm.title.value=item.title;nForm.date.value=item.date;
+      nForm.body.value=(item.body||[]).join('\\n');
+      if(nForm.pinned)nForm.pinned.checked=!!item.pinned;
+    } else {
+      nForm.date.value=new Date().toISOString().slice(0,10);
+      if(nForm.pinned)nForm.pinned.checked=false;
+    }
+    nModalBg.hidden=false;
+  }
+  function closeForm(){nModalBg.hidden=true;}
+  var nModalCloseBtn=document.getElementById('nModalClose');
+  if(nModalCloseBtn)nModalCloseBtn.addEventListener('click',closeForm);
+  if(nModalBg)nModalBg.addEventListener('click',function(e){if(e.target===nModalBg)closeForm();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nModalBg&&!nModalBg.hidden)closeForm();});
+  if(nForm)nForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    var title=nForm.title.value.trim(), date=nForm.date.value, cat=nForm.cat.value;
+    var body=nForm.body.value.split('\\n').map(function(s){return s.trim();}).filter(Boolean);
+    if(!title||!date||!body.length){nModalMsg.textContent='제목·날짜·본문을 모두 입력하세요.';return;}
+    var payload={cat:cat,title:title,date:date,body:body};
+    if(U.isAdmin())payload.pinned=!!(nForm.pinned&&nForm.pinned.checked);
+    nModalMsg.textContent='저장 중...';
+    var p=(formMode==='edit'&&formItem)?D.update('notices',formItem.id,payload):D.create('notices',payload);
+    p.then(function(){closeForm();onSaved();}).catch(function(err){nModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
-  var chips=[].slice.call(document.querySelectorAll('.chip[data-f]')),count=document.getElementById('nCount');
-  chips.forEach(function(c){c.addEventListener('click',function(){
-    chips.forEach(function(x){x.classList.remove('active')});c.classList.add('active');
-    var f=c.getAttribute('data-f'),k=0;
-    rows.forEach(function(r){var s=f==='all'||r.getAttribute('data-cat')===f;r.style.display=s?'':'none';if(s)k++;});
-    count.textContent=(f==='all'?'전체':f)+' '+k+'건';
-  });});
+"""
+
+
+def build_notices():
+    body = (page_head_block("NOTICE", "공지사항", "공지사항")
+            + '<div class="pg-tools img-ani bottom-top" id="nChips"></div>'
+            + '<div class="n-actions img-ani bottom-top" id="nActions"></div>'
+            + '<div class="nlist img-ani bottom-top" id="nList">불러오는 중...</div>'
+            + notice_form_modal())
+    js = "<script>(function(){" + _NOTICE_JS_SHARED + """
+  var list=document.getElementById('nList'), chipsWrap=document.getElementById('nChips'),
+      actionsEl=document.getElementById('nActions');
+  var ALL=[], activeFilter='all';
+
+  function renderActions(){
+    var html='';
+    if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="nWriteBtn">+ 공지 작성</button>';
+    if(U.isAdmin()&&!ALL.length)html+='<button type="button" class="btn sm" id="nSeedBtn">시드 불러오기 (최초 1회)</button>';
+    actionsEl.innerHTML=html;
+    var wb=document.getElementById('nWriteBtn');if(wb)wb.addEventListener('click',function(){openForm('create',null,reload);});
+    var sb=document.getElementById('nSeedBtn');if(sb)sb.addEventListener('click',importSeed);
+  }
+  function renderChips(){
+    var cats=[];ALL.forEach(function(n){if(cats.indexOf(n.cat)<0)cats.push(n.cat);});
+    var html='<button type="button" class="chip'+(activeFilter==='all'?' active':'')+'" data-f="all">전체</button>'
+      +cats.map(function(c){return '<button type="button" class="chip'+(activeFilter===c?' active':'')+'" data-f="'+esc(c)+'">'+esc(c)+'</button>';}).join('')
+      +'<span class="pg-count" id="nCount"></span>';
+    chipsWrap.innerHTML=html;
+    [].slice.call(chipsWrap.querySelectorAll('.chip')).forEach(function(c){
+      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');renderChips();renderRows();});
+    });
+  }
+  function rowActionsHtml(n){
+    var h='';
+    if(U.isAdmin())h+='<button type="button" class="n-btn'+(n.pinned?' pin-on':'')+'" data-act="pin" data-id="'+esc(n.id)+'">'+(n.pinned?'📌 해제':'📌 지정')+'</button>';
+    if(U.canEdit(n)){
+      h+='<button type="button" class="n-btn" data-act="edit" data-id="'+esc(n.id)+'">✏️ 수정</button>';
+      h+='<button type="button" class="n-btn del" data-act="del" data-id="'+esc(n.id)+'">🗑 삭제</button>';
+    }
+    return h?'<span class="n-row-actions">'+h+'</span>':'';
+  }
+  function renderRows(){
+    var filtered=activeFilter==='all'?ALL:ALL.filter(function(n){return n.cat===activeFilter;});
+    var sorted=sortNotices(filtered);
+    if(!sorted.length){
+      list.innerHTML='<div class="nlist-msg">'+(ALL.length?'해당 분류의 공지가 없습니다.':'등록된 공지가 없습니다.')+'</div>';
+    } else {
+      list.innerHTML=sorted.map(function(n){
+        return '<div class="nrow" data-cat="'+esc(n.cat)+'" data-id="'+esc(n.id)+'" role="button" tabindex="0">'
+          +(n.pinned?'<span class="npin" title="상단 고정">📌</span>':'')
+          +'<span class="ncat" style="--tc:'+tcOf(n.cat)+'">'+esc(n.cat)+'</span>'
+          +'<span class="ntitle">'+esc(n.title)+'</span>'
+          +'<span class="ndate">'+esc(n.date)+'</span>'
+          +rowActionsHtml(n)
+          +'<span class="narrow" aria-hidden="true">→</span></div>';
+      }).join('');
+    }
+    var count=document.getElementById('nCount');
+    if(count)count.textContent=(activeFilter==='all'?'전체':activeFilter)+' '+sorted.length+'건';
+  }
+  function reload(){
+    return D.list('notices').then(function(items){
+      ALL=items;renderActions();renderChips();renderRows();
+    }).catch(function(err){
+      list.innerHTML='<div class="nlist-msg">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
+    });
+  }
+  list.addEventListener('click',function(e){
+    var btn=e.target.closest&&e.target.closest('[data-act]');
+    if(btn){
+      e.stopPropagation();
+      var id=btn.getAttribute('data-id'),act=btn.getAttribute('data-act');
+      var item=ALL.filter(function(x){return x.id===id;})[0];
+      if(!item)return;
+      if(act==='pin')togglePin(item);
+      else if(act==='edit')openForm('edit',item,reload);
+      else if(act==='del')removeNotice(item);
+      return;
+    }
+    var row=e.target.closest&&e.target.closest('.nrow');
+    if(row)location.href='notice.html?id='+encodeURIComponent(row.getAttribute('data-id'));
+  });
+  list.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var row=e.target.closest&&e.target.closest('.nrow');
+    if(row&&e.target===row){e.preventDefault();location.href='notice.html?id='+encodeURIComponent(row.getAttribute('data-id'));}
+  });
+  function togglePin(item){
+    D.update('notices',item.id,{pinned:!item.pinned}).then(reload).catch(function(err){alert('처리 실패: '+(err&&err.message||err));});
+  }
+  function removeNotice(item){
+    if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+    D.remove('notices',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+  }
+  function importSeed(){
+    var seed=window.WHALE_NOTICES||[];
+    if(!seed.length){alert('불러올 시드 데이터가 없습니다.');return;}
+    if(!confirm('시드 공지 '+seed.length+'건을 Firebase로 1회 이관합니다. 계속할까요?'))return;
+    var chain=Promise.resolve();
+    seed.forEach(function(n){
+      chain=chain.then(function(){
+        return D.create('notices',{cat:n.cat,date:n.date,pinned:!!n.pinned,title:n.title,body:n.body||[]});
+      });
+    });
+    chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
+  }
+  document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
+  reload();
 })();</script>"""
     write("notices", "공지사항", body, NOTICE_CSS, scripts=notices_json_script() + js)
 
 
 def build_notice():
     body = (page_head_block("NOTICE", "공지사항", "공지 상세")
-            + '<article class="img-ani bottom-top" id="nDetail"></article>')
-    js = """<script>(function(){
-  var N=window.WHALE_NOTICES||[];
-  var i=parseInt(new URLSearchParams(location.search).get('i')||'0',10);
-  if(isNaN(i)||i<0||i>=N.length)i=0;
-  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
-  function render(){
-    var n=N[i];if(!n)return;document.title=n.title+' · 고래상사';
-    var paras=(n.body||[]).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
-    document.getElementById('nDetail').innerHTML=
-      '<span class="ndetail-cat" style="--tc:'+n.tc+'">'+esc(n.cat)+'</span>'
-      +'<h2 class="ndetail-title">'+(n.pinned?'📌 ':'')+esc(n.title)+'</h2>'
-      +'<div class="ndetail-date">'+esc(n.date)+'</div>'
-      +'<div class="ndetail-body">'+paras+'</div>'
-      +'<div class="ndetail-nav"><button class="btn sm" id="nPrev">← 이전 글</button>'
-      +'<button class="btn sm" id="nNext">다음 글 →</button>'
-      +'<a class="btn sm primary" href="notices.html">목록으로</a></div>';
-    document.getElementById('nPrev').onclick=function(){i=(i-1+N.length)%N.length;render();};
-    document.getElementById('nNext').onclick=function(){i=(i+1)%N.length;render();};
+            + '<article class="img-ani bottom-top" id="nDetail"></article>'
+            + notice_form_modal())
+    js = "<script>(function(){" + _NOTICE_JS_SHARED + """
+  var detail=document.getElementById('nDetail');
+  var qs=new URLSearchParams(location.search), id=qs.get('id'), legacyIdx=qs.get('i');
+  var N=[], idx=0;
+  function load(){
+    return D.list('notices').then(function(items){
+      N=sortNotices(items);
+      if(id){
+        idx=N.findIndex(function(n){return n.id===id;});
+        if(idx<0)idx=0;
+      } else if(legacyIdx!=null&&!isNaN(parseInt(legacyIdx,10))){
+        idx=Math.min(Math.max(parseInt(legacyIdx,10),0),Math.max(N.length-1,0));
+      } else idx=0;
+      render();
+    }).catch(function(err){
+      detail.innerHTML='<div class="nlist-msg">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
+    });
   }
-  render();
+  function render(){
+    var n=N[idx];
+    if(!n){
+      detail.innerHTML='<div class="nlist-msg">등록된 공지가 없습니다.<br><a class="btn sm" href="notices.html">목록으로</a></div>';
+      return;
+    }
+    id=n.id;
+    document.title=n.title+' · 고래상사';
+    if(history.replaceState)history.replaceState(null,'','notice.html?id='+encodeURIComponent(n.id));
+    var paras=(n.body||[]).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+    var manage='';
+    if(U.isAdmin())manage+='<button class="btn sm" id="nDetPin" type="button">'+(n.pinned?'📌 고정 해제':'📌 상단 고정')+'</button>';
+    if(U.canEdit(n)){
+      manage+='<button class="btn sm" id="nDetEdit" type="button">✏️ 수정</button>';
+      manage+='<button class="btn sm" id="nDetDel" type="button">🗑 삭제</button>';
+    }
+    detail.innerHTML=
+      '<span class="ndetail-cat" style="--tc:'+tcOf(n.cat)+'">'+esc(n.cat)+'</span>'
+      +'<h2 class="ndetail-title">'+(n.pinned?'📌 ':'')+esc(n.title)+'</h2>'
+      +'<div class="ndetail-date">'+esc(n.date)+(n.ownerNick?' · '+esc(n.ownerNick):'')+'</div>'
+      +'<div class="ndetail-body">'+paras+'</div>'
+      +'<div class="ndetail-nav"><button class="btn sm" id="nPrev" type="button">← 이전 글</button>'
+      +'<button class="btn sm" id="nNext" type="button">다음 글 →</button>'
+      +manage
+      +'<a class="btn sm primary" href="notices.html">목록으로</a></div>';
+    document.getElementById('nPrev').onclick=function(){idx=(idx-1+N.length)%N.length;render();};
+    document.getElementById('nNext').onclick=function(){idx=(idx+1)%N.length;render();};
+    var pinBtn=document.getElementById('nDetPin');
+    if(pinBtn)pinBtn.onclick=function(){
+      D.update('notices',n.id,{pinned:!n.pinned}).then(load).catch(function(err){alert('처리 실패: '+(err&&err.message||err));});
+    };
+    var editBtn=document.getElementById('nDetEdit');
+    if(editBtn)editBtn.onclick=function(){openForm('edit',n,load);};
+    var delBtn=document.getElementById('nDetDel');
+    if(delBtn)delBtn.onclick=function(){
+      if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
+      D.remove('notices',n.id).then(function(){location.href='notices.html';}).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
+    };
+  }
+  document.addEventListener('whale:authchange',load);  // 로그인/로그아웃 시 관리 버튼 재렌더
+  load();
 })();</script>"""
     write("notice", "공지 상세", body, NOTICE_CSS, scripts=notices_json_script() + js)
 
