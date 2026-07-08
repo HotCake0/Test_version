@@ -385,16 +385,6 @@ def members_json_script():
             json.dumps(data, ensure_ascii=False) + ';</script>')
 
 
-def clips_json_script():
-    """pages/ 기준 WHALE_CLIPS 주입 (클립 상세 페이지용)."""
-    data = []
-    for c in CLIPS:
-        d = dict(c)
-        if d.get("img"):
-            d["img"] = "../" + d["img"]
-        data.append(d)
-    return ('<script>window.WHALE_CLIPS=' +
-            json.dumps(data, ensure_ascii=False) + ';</script>')
 
 
 # ---------- 아키타입: 크루·멤버 ----------
@@ -550,7 +540,8 @@ def clip_form_modal():
       <label class="field"><span>제작자</span><input type="text" name="creator" maxlength="60" required></label>
       <label class="field"><span>설명 (선택)</span><textarea name="desc" rows="4"></textarea></label>
       <label class="field"><span>영상 URL (선택)</span><input type="url" name="url" placeholder="https://..."></label>
-      <label class="field"><span>이미지 URL (선택, 비우면 그라데이션 배경)</span><input type="url" name="img" placeholder="https://..."></label>
+      <label class="field"><span>이미지 URL (선택, 비우면 영상 링크로 미리보기 · 둘 다 없으면 그라데이션)</span><input type="url" name="img" placeholder="https://..."></label>
+      <label class="field"><span>태그 (쉼표로 구분 · 같은 태그의 아카이브 상세에 이 클립이 표시됨)</span><input type="text" name="tags" placeholder="예: 크루대전, 여름특집"></label>
       <label class="n-pin-field" id="clFeatField" style="display:none">
         <input type="checkbox" name="featured"><span>대표 클립으로 지정 (관리자만, 기존 대표는 자동 해제)</span></label>
       <p class="n-modal-msg" id="clModalMsg" role="status" aria-live="polite"></p>
@@ -567,6 +558,8 @@ _CLIP_JS_SHARED = """
   // href에 넣기 전 스킴 검증: http/https만 허용(javascript:/data:/vbscript: 등 차단).
   function safeUrl(u){u=(u==null?'':String(u)).trim();return /^https?:\\/\\//i.test(u)?u:'#';}
   function fmtViews(n){n=n||0;return n>=10000?(n/10000).toFixed(1)+'만':n.toLocaleString();}
+  // 쉼표 구분 문자열 <-> 태그 배열 (아카이브와 연결하는 키. 대소문자 무시 매칭은 소비측에서 처리)
+  function parseTags(s){return (s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
   function bgOf(c){
     return c.img?'<img src="'+esc(c.img)+'" alt="'+esc(c.title)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display=\\'none\\'">'
       :'<div style="position:absolute;inset:0;background:'+esc(c.grad||'linear-gradient(135deg,#0f1730,#2f63ff)')+'"></div>';
@@ -584,6 +577,7 @@ _CLIP_JS_SHARED = """
       clForm.category.value=item.category||'예능';clForm.title.value=item.title||'';
       clForm.creator.value=item.creator||'';clForm.desc.value=item.desc||'';
       clForm.url.value=item.url||'';clForm.img.value=item.img||'';
+      clForm.tags.value=(item.tags||[]).join(', ');
       if(clForm.featured)clForm.featured.checked=!!item.featured;
     } else if(clForm.featured){clForm.featured.checked=false;}
     clModalBg.hidden=false;
@@ -606,7 +600,7 @@ _CLIP_JS_SHARED = """
     var title=clForm.title.value.trim(), creator=clForm.creator.value.trim(), category=clForm.category.value;
     if(!title||!creator){clModalMsg.textContent='제목·제작자를 입력하세요.';return;}
     var payload={category:category,title:title,creator:creator,desc:clForm.desc.value.trim(),
-      url:clForm.url.value.trim(),img:clForm.img.value.trim()};
+      url:clForm.url.value.trim(),img:clForm.img.value.trim(),tags:parseTags(clForm.tags.value)};
     if(payload.url&&!/^https?:\\/\\//i.test(payload.url)){clModalMsg.textContent='영상 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
     if(payload.img&&!/^https?:\\/\\//i.test(payload.img)){clModalMsg.textContent='이미지 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
     var wantFeatured=!!(clForm.featured&&clForm.featured.checked&&U.isAdmin());
@@ -642,10 +636,8 @@ def build_clips():
   function renderActions(){
     var html='';
     if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="clWriteBtn">+ 클립 추가</button>';
-    if(U.isAdmin()&&!ALL.length)html+='<button type="button" class="btn sm" id="clSeedBtn">시드 불러오기 (최초 1회)</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('clWriteBtn');if(wb)wb.addEventListener('click',function(){clOpenForm('create',null,reload);});
-    var sb=document.getElementById('clSeedBtn');if(sb)sb.addEventListener('click',importSeed);
   }
   function heroActionsHtml(c){
     var h='';
@@ -749,26 +741,11 @@ def build_clips():
     var art=e.target.closest&&e.target.closest('.ccard');
     if(art&&e.target===art)location.href='clip.html?id='+encodeURIComponent(art.getAttribute('data-id'));
   });
-  function importSeed(){
-    var seed=window.WHALE_CLIPS||[];
-    if(!seed.length){alert('불러올 시드 데이터가 없습니다.');return;}
-    if(!confirm('시드 클립 '+seed.length+'건을 Firebase로 1회 이관합니다. 계속할까요?'))return;
-    var chain=Promise.resolve();
-    seed.forEach(function(c){
-      chain=chain.then(function(){
-        var d={category:c.category,title:c.title,creator:c.creator,desc:c.desc||'',
-          date:c.date||'',duration:c.duration||'',views:c.views||0};
-        if(c.img)d.img=c.img; if(c.grad)d.grad=c.grad; if(c.featured)d.featured=true;
-        return D.create('clips',d);
-      });
-    });
-    chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
-  }
   document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
   reload();
 })();</script>"""
 
-    write("clips", "베스트 클립", body, PAGE_CSS, scripts=clips_json_script() + js)
+    write("clips", "베스트 클립", body, PAGE_CSS, scripts=js)
 
 
 def build_clip():
@@ -856,7 +833,7 @@ def build_clip():
   load();
 })();</script>"""
 
-    write("clip", "클립 시청", body, PAGE_CSS, scripts=clips_json_script() + js)
+    write("clip", "클립 시청", body, PAGE_CSS, scripts=js)
 
 
 # ---------- 아카이브 추가 CSS (PAGE_CSS 위에 얹는 아카이브 전용 레이아웃) ----------
@@ -913,6 +890,8 @@ ARCHIVE_CSS = PAGE_CSS + """
 .ct-rank{font-size:12px;font-weight:900;padding:4px 10px;border-radius:999px;letter-spacing:.02em}
 .ct-rank.win{background:color-mix(in srgb,var(--warn) 90%,#000);color:#1a1400}
 .ct-rank.lose{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line-2)}
+.ct-cat{font-size:12px;font-weight:900;padding:4px 10px;border-radius:999px;letter-spacing:.02em;
+  background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);border:1px solid rgba(15,181,176,.35)}
 .ct-date{font-size:12.5px;color:var(--ink-2);font-family:'JetBrains Mono',monospace;margin-left:auto}
 .ct-title{font-size:clamp(16px,1.8vw,20px);font-weight:800;letter-spacing:-.02em;line-height:1.35;word-break:keep-all;margin-bottom:12px}
 .ct-meta{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12.5px;color:var(--ink-2)}
@@ -930,6 +909,24 @@ ARCHIVE_CSS = PAGE_CSS + """
 .cd-opp{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
 .cd-opp .op{font-size:13px;font-weight:700;padding:6px 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2)}
 .cd-h{font-size:16px;font-weight:900;margin:0 0 12px;letter-spacing:-.01em}
+/* 관련 클립 (태그 매칭) — 아카이브 상세에 임베드 미리보기 그리드 */
+.rc-count{font-size:12px;font-weight:800;color:var(--ink-2);vertical-align:middle;margin-left:4px}
+.rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin:6px 0 30px}
+.rc-card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;transition:border-color .25s,transform .25s,box-shadow .25s}
+.rc-card:hover{border-color:var(--brand);transform:translateY(-3px);box-shadow:0 10px 28px rgba(47,99,255,.22)}
+.rc-media{position:relative;aspect-ratio:16/9;background:#0f1730;display:block}
+.rc-media iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.rc-static{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rc-static img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease)}
+.rc-card:hover .rc-static img{transform:scale(1.06)}
+.rc-play{width:34px;height:24px;border-radius:6px;background:#ff0033;color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:11px;z-index:1}
+.rc-t{font-size:13px;font-weight:800;letter-spacing:-.02em;line-height:1.35;word-break:keep-all;
+  padding:0 12px;margin-top:4px;color:var(--ink);text-decoration:none;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rc-t:hover{color:var(--brand)}
+.rc-by{font-size:11.5px;color:var(--ink-2);padding:0 12px 12px}
 """
 
 
@@ -956,18 +953,22 @@ def archive_form_modal():
     <button class="n-modal-close" id="acModalClose" type="button" aria-label="닫기">×</button>
     <h2 id="acModalTitle">기록 추가</h2>
     <form id="acForm" novalidate>
-      <label class="field"><span>대회명</span><input type="text" name="title" maxlength="120" required></label>
+      <label class="field"><span>분류</span>
+        <select name="category"><option value="크루대전">크루대전</option><option value="컨텐츠">컨텐츠</option></select></label>
+      <label class="field"><span>제목</span><input type="text" name="title" maxlength="120" required></label>
       <label class="field"><span>날짜</span><input type="text" name="date" maxlength="20" placeholder="예: 2026.06.01"></label>
-      <label class="field"><span>순위 (숫자, 1=우승, 비우면 '참가'로 표시)</span><input type="number" name="rank" min="1" step="1"></label>
+      <label class="field crewonly"><span>순위 (숫자, 1=우승, 비우면 '참가'로 표시)</span><input type="number" name="rank" min="1" step="1"></label>
       <label class="field"><span>참여 멤버 (쉼표로 구분)</span><input type="text" name="members" placeholder="예: 울산큰고래, 김마렌"></label>
-      <label class="field"><span>상대 크루 (한 줄에 하나, "이름|승" 또는 "이름|패")</span>
+      <label class="field crewonly"><span>상대 크루 (한 줄에 하나, "이름|승" 또는 "이름|패")</span>
         <textarea name="opponents" rows="4" placeholder="블랙팀|승
 화이트팀|패"></textarea></label>
-      <label class="field"><span>게임 결과 (한 줄에 하나, "게임명|승" 또는 "게임명|패")</span>
+      <label class="field crewonly"><span>게임 결과 (한 줄에 하나, "게임명|승" 또는 "게임명|패")</span>
         <textarea name="games" rows="4" placeholder="족구|승
 줄다리기|패"></textarea></label>
       <label class="field"><span>영상 (한 줄에 하나, "URL|라벨", http/https만 허용)</span>
         <textarea name="videos" rows="3" placeholder="https://youtu.be/xxxx|풀영상"></textarea></label>
+      <label class="field"><span>태그 (쉼표로 구분 · 같은 태그를 가진 클립이 이 상세에 '관련 클립'으로 표시됨)</span>
+        <input type="text" name="tags" placeholder="예: 크루대전, 여름특집"></label>
       <p class="n-modal-msg" id="acModalMsg" role="status" aria-live="polite"></p>
       <button class="btn primary" type="submit">저장</button>
     </form>
@@ -1020,19 +1021,28 @@ _ARCHIVE_JS_SHARED = r"""
   var acModalBg=document.getElementById('acModalBg'), acModalTitle=document.getElementById('acModalTitle'),
       acForm=document.getElementById('acForm'), acModalMsg=document.getElementById('acModalMsg');
   var acMode='create', acItem=null, acOnSaved=function(){};
+  // 분류=컨텐츠면 크루대전 전용 필드(순위/상대/게임)를 숨긴다.
+  function toggleCrew(){
+    var isCrew=(acForm.category.value||'크루대전')==='크루대전';
+    [].forEach.call(acForm.querySelectorAll('.crewonly'),function(el){el.style.display=isCrew?'':'none';});
+  }
+  if(acForm)acForm.category.addEventListener('change',toggleCrew);
   function acOpenForm(mode,item,cb){
     if(!U.isAdmin())return;
     acMode=mode;acItem=item;acOnSaved=cb||function(){};
     acModalMsg.textContent='';acForm.reset();
     acModalTitle.textContent=mode==='edit'?'기록 수정':'기록 추가';
     if(mode==='edit'&&item){
+      acForm.category.value=item.category||'크루대전';
       acForm.title.value=item.title||'';acForm.date.value=item.date||'';
       acForm.rank.value=(item.rank!=null?item.rank:'');
       acForm.members.value=(item.members||[]).join(', ');
       acForm.opponents.value=serializeOpponents(item.opponents);
       acForm.games.value=serializeGames(item.games);
       acForm.videos.value=serializeVideos(item.videos);
+      acForm.tags.value=(item.tags||[]).join(', ');
     }
+    toggleCrew();
     acModalBg.hidden=false;
   }
   function acCloseForm(){acModalBg.hidden=true;}
@@ -1047,14 +1057,18 @@ _ARCHIVE_JS_SHARED = r"""
     if(!title){acModalMsg.textContent='대회명을 입력하세요.';return;}
     var videos=parseVideos(acForm.videos.value);
     if(videos===null){acModalMsg.textContent='영상 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
+    var category=acForm.category.value||'크루대전';
+    var isCrew=category==='크루대전';
     var rankVal=acForm.rank.value.trim();
     var payload={
+      category:category,
       title:title, date:acForm.date.value.trim(),
-      rank: rankVal===''?null:parseInt(rankVal,10),
+      rank: (isCrew&&rankVal!=='')?parseInt(rankVal,10):null,
       members: parseMembers(acForm.members.value),
-      opponents: parseOpponents(acForm.opponents.value),
-      games: parseGames(acForm.games.value),
-      videos: videos
+      opponents: isCrew?parseOpponents(acForm.opponents.value):[],
+      games: isCrew?parseGames(acForm.games.value):{},
+      videos: videos,
+      tags: parseMembers(acForm.tags.value)
     };
     acModalMsg.textContent='저장 중...';
     var p=(acMode==='edit'&&acItem)?D.update('contests',acItem.id,payload):D.create('contests',payload);
@@ -1064,14 +1078,15 @@ _ARCHIVE_JS_SHARED = r"""
 
 
 def build_archive():
-    """크루대전 기록 아카이브 — WhaleData.list('contests')로 /rework/contests 실시간 로드.
+    """통합 아카이브 — WhaleData.list('contests')로 /rework/contests 실시간 로드.
+    분류(category=크루대전|컨텐츠) 칩으로 필터. 크루대전은 순위/전적, 컨텐츠는 순위·전적 없이 표시.
     관리자는 +기록 추가/수정/삭제 가능, 비어있을 때 운영 /contests.json에서 1회 이관하는 '불러오기' 버튼도 제공."""
-    body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "크루대전 기록")
+    body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "통합 아카이브")
             + '<div class="n-actions img-ani bottom-top" id="aActions"></div>'
             + '<div class="pg-tools img-ani bottom-top">'
               '<button class="chip active" data-f="all">전체</button>'
-              '<button class="chip" data-f="win">🏆 우승</button>'
-              '<button class="chip" data-f="join">참가</button>'
+              '<button class="chip" data-f="크루대전">🏆 크루대전</button>'
+              '<button class="chip" data-f="컨텐츠">🎬 컨텐츠</button>'
               '<span class="pg-count" id="aCount"></span></div>'
             + '<div class="agrid img-ani bottom-top" id="aGrid">'
               '<div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div>'
@@ -1094,23 +1109,29 @@ def build_archive():
       +'<button type="button" class="n-btn del" data-act="del" data-id="'+esc(c.id)+'">🗑 삭제</button></div>';
   }
   function card(c){
+    var isCrew=(c.category||'크루대전')==='크루대전';
     var r=wl(c),win=c.rank===1;
     var cast=(c.members||[]).slice(0,6).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
     var more=(c.members||[]).length>6?'<span class="ct-chip">+'+((c.members||[]).length-6)+'</span>':'';
-    return '<div class="ct-card" data-id="'+esc(c.id)+'" role="button" tabindex="0" aria-label="'+esc(c.title||'대회 기록')+' 상세 보기">'
-      +'<div class="ct-top"><span class="ct-rank '+(win?'win':'lose')+'">'
-        +(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
+    var badge=isCrew
+      ? '<span class="ct-rank '+(win?'win':'lose')+'">'+(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
+      : '<span class="ct-cat">🎬 컨텐츠</span>';
+    var meta=isCrew
+      ? '<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span></div>'
+      : '';
+    return '<div class="ct-card" data-id="'+esc(c.id)+'" role="button" tabindex="0" aria-label="'+esc(c.title||'기록')+' 상세 보기">'
+      +'<div class="ct-top">'+badge
       +'<span class="ct-date">'+esc(c.date||'')+'</span></div>'
       +'<div class="ct-title">'+esc(c.title||'제목 없음')+'</div>'
-      +'<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span></div>'
+      +meta
       +'<div class="ct-cast">'+cast+more+'</div>'
       +rowActionsHtml(c)+'</div>';
   }
   function render(){
     var arr=all.filter(function(c){
-      if(filt==='win')return c.rank===1;
-      if(filt==='join')return c.rank!==1;return true;});
-    count.textContent=arr.length+'개 대회';
+      if(filt==='all')return true;
+      return (c.category||'크루대전')===filt;});
+    count.textContent=arr.length+'건';
     grid.innerHTML=arr.length?arr.map(card).join(''):'<div class="stub" style="grid-column:1/-1"><p>해당 기록이 없습니다.</p></div>';
   }
   function reload(){
@@ -1175,17 +1196,70 @@ def build_archive():
 
 
 def build_archive_detail():
-    """대회 상세 — WhaleData.list('contests') 후 ?id=로 find (클립 상세 패턴과 동일)."""
-    body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "대회 상세")
+    """기록 상세 (크루대전/컨텐츠 공용) — WhaleData.list('contests') 후 ?id=로 find (클립 상세 패턴과 동일).
+    분류=컨텐츠면 순위·상대·게임 섹션은 표시하지 않음. 태그가 겹치는 클립을 '관련 클립'으로 임베드."""
+    body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "기록 상세")
             + '<div class="img-ani bottom-top" id="cDetail"><div class="stub"><p>불러오는 중…</p></div></div>'
             + archive_form_modal())
     js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
   var el=document.getElementById('cDetail');
   var id=new URLSearchParams(location.search).get('id');
-  var cur=null;
+  var cur=null, allClips=[];
+  // 영상 URL -> 임베드(미리보기) URL. 운영본 contest.js getEmbedUrl 규칙 이식.
+  // ⚠️보안: 부분일치(indexOf)는 evil.com/sooplive.com 류 우회가 되므로 new URL로 호스트를
+  // 엄격 검증(정확일치 또는 .접미사)하고, 원본을 그대로 넘기지 않고 검증된 조각으로 재조립한다.
+  function hostMatch(h,d){return h===d||h.slice(-(d.length+1))==='.'+d;}
+  function embedUrlOf(u){
+    var pu;
+    try{pu=new URL((u==null?'':String(u)).trim());}catch(e){return null;}
+    if(pu.protocol!=='https:'&&pu.protocol!=='http:')return null;
+    var host=pu.hostname.toLowerCase();
+    // YouTube — 검증된 videoId(문자/숫자/-/_)로만 재조립
+    if(hostMatch(host,'youtu.be')){
+      var sid=pu.pathname.replace(/^\/+/,'').split('/')[0];
+      return /^[\w-]{6,}$/.test(sid)?'https://www.youtube.com/embed/'+sid:null;
+    }
+    if(hostMatch(host,'youtube.com')||hostMatch(host,'youtube-nocookie.com')){
+      var vid=pu.searchParams.get('v');
+      if(!vid){var me=pu.pathname.match(/^\/embed\/([\w-]{6,})/);if(me)vid=me[1];}
+      return (vid&&/^[\w-]{6,}$/.test(vid))?'https://www.youtube.com/embed/'+vid:null;
+    }
+    // SOOP VOD — 숫자 player id로만 재조립(원본 패스스루 금지)
+    if(hostMatch(host,'sooplive.com')||hostMatch(host,'sooplive.co.kr')){
+      var pm=pu.pathname.match(/\/player\/(\d+)/);
+      if(pm)return 'https://'+host+'/player/'+pm[1]+'/embed';
+      if(/\/embed(\/|$)/.test(pu.pathname))return 'https://'+host+pu.pathname;
+    }
+    return null;
+  }
+  function tagsOf(x){return (x&&x.tags)||[];}
+  function relatedOf(contest){
+    var ct=tagsOf(contest).map(function(t){return String(t).toLowerCase();});
+    if(!ct.length)return [];
+    return allClips.filter(function(cl){
+      return tagsOf(cl).some(function(t){return ct.indexOf(String(t).toLowerCase())>=0;});
+    });
+  }
+  function renderRelated(){
+    var rel=relatedOf(cur);
+    if(!rel.length)return '';
+    var cards=rel.map(function(cl){
+      var emb=embedUrlOf(cl.url);
+      var media = emb
+        ? '<div class="rc-media"><iframe src="'+esc(emb)+'" loading="lazy" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" title="'+esc(cl.title||'클립')+'"></iframe></div>'
+        : '<a class="rc-media rc-static" href="clip.html?id='+encodeURIComponent(cl.id)+'">'
+            +(cl.img?'<img src="'+esc(safeUrl(cl.img))+'" alt="'+esc(cl.title||'')+'" loading="lazy" onerror="this.style.display=\'none\'">':'<span class="rc-play">▶</span>')
+          +'</a>';
+      return '<div class="rc-card">'+media
+        +'<a class="rc-t" href="clip.html?id='+encodeURIComponent(cl.id)+'">'+esc(cl.title||'클립')+'</a>'
+        +(cl.creator?'<span class="rc-by">'+esc(cl.creator)+'</span>':'')+'</div>';
+    }).join('');
+    return '<h3 class="cd-h" style="margin-top:26px">관련 클립 <span class="rc-count">'+rel.length+'</span></h3><div class="rc-grid">'+cards+'</div>';
+  }
   function load(){
     if(!id){el.innerHTML='<div class="stub"><p>잘못된 접근입니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return Promise.resolve();}
-    return D.list('contests').then(function(items){
+    return Promise.all([D.list('contests'), D.list('clips').catch(function(){return [];})]).then(function(res){
+      var items=res[0]||[]; allClips=res[1]||[];
       cur=items.filter(function(x){return x.id===id;})[0];
       render();
     }).catch(function(err){
@@ -1195,7 +1269,8 @@ def build_archive_detail():
   function render(){
     var c=cur;
     if(!c){el.innerHTML='<div class="stub"><p>기록을 찾을 수 없습니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return;}
-    document.title=(c.title||'대회 상세')+' · 고래상사';
+    document.title=(c.title||'기록 상세')+' · 고래상사';
+    var isCrew=(c.category||'크루대전')==='크루대전';
     var win=c.rank===1;
     var g=c.games||{},games=Object.keys(g).map(function(k){var x=g[k];
       return '<div class="cd-game"><span>'+esc(x.name)+'</span><span class="cd-res '+(x.result?'w':'l')+'">'+(x.result?'승':'패')+'</span></div>';}).join('');
@@ -1208,7 +1283,8 @@ def build_archive_detail():
         +'<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
     }
     el.innerHTML=
-      '<div class="ct-top" style="margin-bottom:14px"><span class="ct-rank '+(win?'win':'lose')+'">'+(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
+      '<div class="ct-top" style="margin-bottom:14px">'
+        +(isCrew?'<span class="ct-rank '+(win?'win':'lose')+'">'+(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>':'<span class="ct-cat">🎬 컨텐츠</span>')
         +'<span class="ct-date">'+esc(c.date||'')+'</span></div>'
       +'<h2 class="adetail-title">'+esc(c.title||'')+'</h2>'
       +(vids?'<div class="cd-vids">'+vids+'</div>':'')
@@ -1216,6 +1292,7 @@ def build_archive_detail():
       +(games?'<h3 class="cd-h" style="margin-top:22px">경기 결과</h3><div class="cd-games">'+games+'</div>':'')
       +'<h3 class="cd-h">참가 멤버</h3><div class="ct-cast" style="margin-bottom:26px">'+cast+'</div>'
       +(c.notes?'<p class="adetail-desc">'+esc(c.notes)+'</p>':'')
+      +renderRelated()
       +'<div class="adetail-nav">'+manage+'<a class="btn sm primary" href="archive.html">← 전체 기록</a></div>';
     var editBtn=document.getElementById('cDetEdit');
     if(editBtn)editBtn.onclick=function(){acOpenForm('edit',c,load);};
@@ -1275,15 +1352,6 @@ TYPE_COLORS = {
 }
 
 
-def schedule_json_script():
-    """운영 데이터가 아닌 '시드 원본' 주입 — 관리자가 최초 1회 Firebase로 이관(불러오기)할 때만 소스로 쓰인다.
-    실제 목록/캘린더/상세는 WhaleData.list('schedules')로 Firebase(/rework/schedules)에서 실시간으로 읽어 렌더한다."""
-    data = []
-    for i, e in enumerate(SCHEDULE):
-        d = dict(e); d["i"] = i
-        d["tc"] = TYPE_COLORS.get(e.get("type"), "#2f63ff")
-        data.append(d)
-    return ('<script>window.WHALE_SCHEDULE=' + json.dumps(data, ensure_ascii=False) + ';</script>')
 
 
 def schedule_form_modal():
@@ -1385,10 +1453,8 @@ def build_schedule():
   function renderActions(){
     var html='';
     if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="scWriteBtn">+ 일정 추가</button>';
-    if(U.isAdmin()&&!S.length)html+='<button type="button" class="btn sm" id="scSeedBtn">시드 불러오기 (최초 1회)</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('scWriteBtn');if(wb)wb.addEventListener('click',function(){scOpenForm('create',null,reload);});
-    var sb=document.getElementById('scSeedBtn');if(sb)sb.addEventListener('click',importSeed);
   }
   function evChip(e){
     return '<div class="cal-ev" style="--tc:'+tcOf(e.type)+'" role="button" tabindex="0" '
@@ -1482,22 +1548,10 @@ def build_schedule():
     document.getElementById('calView').style.display=v==='cal'?'':'none';
     lv.style.display=v==='list'?'':'none';
   });});
-  function importSeed(){
-    var seed=window.WHALE_SCHEDULE||[];
-    if(!seed.length){alert('불러올 시드 데이터가 없습니다.');return;}
-    if(!confirm('시드 일정 '+seed.length+'건을 Firebase로 1회 이관합니다. 계속할까요?'))return;
-    var chain=Promise.resolve();
-    seed.forEach(function(e){
-      chain=chain.then(function(){
-        return D.create('schedules',{date:e.date,time:e.time,title:e.title,type:e.type,members:e.members||[],desc:e.desc||''});
-      });
-    });
-    chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
-  }
   document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
   reload();
 })();</script>"""
-    write("schedule", "일정 캘린더", body, SCHEDULE_CSS, scripts=schedule_json_script() + js)
+    write("schedule", "일정 캘린더", body, SCHEDULE_CSS, scripts=js)
 
 
 def build_schedule_detail():
@@ -1570,7 +1624,7 @@ def build_schedule_detail():
   document.addEventListener('whale:authchange',load);  // 로그인/로그아웃 시 관리 버튼 재렌더
   load();
 })();</script>"""
-    write("schedule-detail", "일정 상세", body, SCHEDULE_CSS, scripts=schedule_json_script() + js)
+    write("schedule-detail", "일정 상세", body, SCHEDULE_CSS, scripts=js)
 
 
 # ---------- 아키타입: 공지 ----------
@@ -1601,15 +1655,6 @@ NOTICE_CSS = PAGE_CSS + """
 NOTICE_COLORS = {"공지": "#2f63ff", "이벤트": "#ff3d92", "업데이트": "#0fb5b0", "점검": "#ffcb45"}
 
 
-def notices_json_script():
-    """운영 데이터가 아닌 '시드 원본'을 주입 — 관리자가 최초 1회 Firebase로
-    이관(불러오기)할 때만 소스로 쓰인다. 실제 목록/상세는 WhaleData.list('notices')로
-    Firebase(/rework/notices)에서 실시간으로 읽어 렌더한다."""
-    data = []
-    for i, n in enumerate(NOTICES):
-        d = dict(n); d["i"] = i; d["tc"] = NOTICE_COLORS.get(n.get("cat"), "#2f63ff")
-        data.append(d)
-    return '<script>window.WHALE_NOTICES=' + json.dumps(data, ensure_ascii=False) + ';</script>'
 
 
 def notice_form_modal():
@@ -1703,10 +1748,8 @@ def build_notices():
   function renderActions(){
     var html='';
     if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="nWriteBtn">+ 공지 작성</button>';
-    if(U.isAdmin()&&!ALL.length)html+='<button type="button" class="btn sm" id="nSeedBtn">시드 불러오기 (최초 1회)</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('nWriteBtn');if(wb)wb.addEventListener('click',function(){openForm('create',null,reload);});
-    var sb=document.getElementById('nSeedBtn');if(sb)sb.addEventListener('click',importSeed);
   }
   function renderChips(){
     var cats=[];ALL.forEach(function(n){if(cats.indexOf(n.cat)<0)cats.push(n.cat);});
@@ -1780,22 +1823,10 @@ def build_notices():
     if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
     D.remove('notices',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
   }
-  function importSeed(){
-    var seed=window.WHALE_NOTICES||[];
-    if(!seed.length){alert('불러올 시드 데이터가 없습니다.');return;}
-    if(!confirm('시드 공지 '+seed.length+'건을 Firebase로 1회 이관합니다. 계속할까요?'))return;
-    var chain=Promise.resolve();
-    seed.forEach(function(n){
-      chain=chain.then(function(){
-        return D.create('notices',{cat:n.cat,date:n.date,pinned:!!n.pinned,title:n.title,body:n.body||[]});
-      });
-    });
-    chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
-  }
   document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
   reload();
 })();</script>"""
-    write("notices", "공지사항", body, NOTICE_CSS, scripts=notices_json_script() + js)
+    write("notices", "공지사항", body, NOTICE_CSS, scripts=js)
 
 
 def build_notice():
@@ -1862,7 +1893,7 @@ def build_notice():
   document.addEventListener('whale:authchange',load);  // 로그인/로그아웃 시 관리 버튼 재렌더
   load();
 })();</script>"""
-    write("notice", "공지 상세", body, NOTICE_CSS, scripts=notices_json_script() + js)
+    write("notice", "공지 상세", body, NOTICE_CSS, scripts=js)
 
 
 # ---------- 아키타입: 멀티뷰 (라이브 그리드) ----------

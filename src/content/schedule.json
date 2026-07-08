@@ -1,5 +1,5 @@
 {
-  "_comment": "방송 일정 시드 (2026-07 중심). date=ISO, members=실제 멤버명 배열, type=개인방송/합방/대회/특집/공지방송. build.py가 WHALE_SCHEDULE로 주입, 캘린더/목록 클라이언트 렌더.",
+  "_comment": "방송 일정 정적 시드 (2026-07 중심) — 관리자 데모·뉴스 피드(news) 미리보기 전용. ⚠️실 일정 페이지(schedule)는 Firebase(WhaleData.list('schedules'))에서 렌더하며 이 파일을 쓰지 않음(WHALE_SCHEDULE 주입·시드 불러오기 제거됨). date=ISO, members=실제 멤버명 배열, type=개인방송/합방/대회/특집/공지방송.",
   "schedule": [
     { "date": "2026-06-29", "time": "20:00", "title": "월요 게임부 랭크 도전", "members": ["김마렌"], "type": "개인방송", "desc": "한 주의 시작, 게임부 부장의 랭크 등반 방송." },
     { "date": "2026-07-01", "time": "21:00", "title": "상반기 결산 전사 공지 방송", "members": ["고래상사 전체"], "type": "공지방송", "desc": "대표이사와 함께하는 상반기 결산 및 하반기 계획 발표." },

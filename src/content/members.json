@@ -1,16 +1,16 @@
 {
-  "_comment": "고래상사 16인 단일 소스. 메인 홈 index.html의 MEMBERS 배열에서 이관. rank=직급 정렬키(낮을수록 상위). img는 리워크 루트 기준 경로.",
+  "_comment": "고래상사 16인 단일 소스. 직급/부서/순서는 운영본 index.html 조직도(#org)가 권위 데이터 — 2026-06-08 진급 반영본 기준으로 동기화(2026-07-08). rank=직급 정렬키(임원0~/부장10~/사원20~/인턴30~, 낮을수록 상위). dept∈{임원,비서부,게임부,컨텐츠부}. img는 리워크 루트 기준 경로. stats는 실측 부재로 기존 placeholder 유지.",
   "members": [
     {
       "slug": "ulsanwhale",
       "name": "울산큰고래",
-      "role": "대표이사",
+      "role": "사장",
       "dept": "임원",
       "rank": 0,
       "color": "linear-gradient(135deg,#0d1a4a,#2f63ff)",
       "initials": "고",
       "img": "img/울산큰고래.png",
-      "bio": "고래상사의 수장. 든든한 리더십으로 16인 크루를 이끄는 대표이사. 직원들의 고충을 누구보다 잘 압니다.",
+      "bio": "고래상사를 세운 수장. 든든한 리더십과 특유의 허당미로 16인 크루를 이끄는 대표입니다. 직원들의 고충을 누구보다 잘 압니다.",
       "stats": [
         {
           "n": 4200,
@@ -36,7 +36,7 @@
       "color": "linear-gradient(135deg,#0a1e20,#0fb5b0)",
       "initials": "부",
       "img": "img/견자희.png",
-      "bio": "냉철한 판단력과 탁월한 업무 능력. 대표이사의 오른팔이자 실질적인 회사 운영을 담당합니다.",
+      "bio": "냉철한 판단력과 탁월한 업무 능력으로 회사를 실질 운영하는 오른팔. 사장님의 폭주를 막는 든든한 억제기입니다.",
       "stats": [
         {
           "n": 3800,
@@ -54,15 +54,41 @@
       "soop": "gyeonjahee"
     },
     {
+      "slug": "melodingding",
+      "name": "멜로딩딩",
+      "role": "비서부 부장",
+      "dept": "비서부",
+      "rank": 10,
+      "color": "linear-gradient(135deg,#0a1025,#3b82f6)",
+      "initials": "멜",
+      "img": "img/멜로딩딩.png",
+      "bio": "비서부를 이끄는 부장. 꼼꼼한 일정·의전 관리로 대표진을 지근거리에서 보좌하는 회사의 핵심입니다.",
+      "stats": [
+        {
+          "n": 4100,
+          "u": "누적 방송시간(h)"
+        },
+        {
+          "n": 350,
+          "u": "클립 수"
+        },
+        {
+          "n": 140000,
+          "u": "누적 시청자"
+        }
+      ],
+      "soop": "melodingding"
+    },
+    {
       "slug": "kimmaren",
       "name": "김마렌",
       "role": "게임부 부장",
       "dept": "게임부",
-      "rank": 2,
+      "rank": 11,
       "color": "linear-gradient(135deg,#2a0a0a,#ff4d4d)",
       "initials": "게",
       "img": "img/김마렌.png",
-      "bio": "게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끕니다.",
+      "bio": "게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끄는 부장입니다.",
       "stats": [
         {
           "n": 5100,
@@ -84,11 +110,11 @@
       "name": "감자가비",
       "role": "컨텐츠부 부장",
       "dept": "컨텐츠부",
-      "rank": 2,
+      "rank": 12,
       "color": "linear-gradient(135deg,#1a1800,#ffcb45)",
       "initials": "컨",
       "img": "img/감자가비.png",
-      "bio": "창의적인 콘텐츠 아이디어의 원천. 감자처럼 투박하지만 속은 꽉 찬 컨텐츠부의 핵심 인재.",
+      "bio": "컨텐츠부를 총괄하는 아이디어의 원천. 투박해 보이지만 속은 꽉 찬, 콘텐츠 기획의 핵심 인재입니다.",
       "stats": [
         {
           "n": 4600,
@@ -108,13 +134,13 @@
     {
       "slug": "leejisu",
       "name": "이지수",
-      "role": "영업부 부장",
-      "dept": "영업부",
-      "rank": 2,
+      "role": "게임부 사원",
+      "dept": "게임부",
+      "rank": 20,
       "color": "linear-gradient(135deg,#150a30,#8b5cf6)",
       "initials": "이",
       "img": "img/이지수.png",
-      "bio": "거침없는 추진력으로 고래상사의 수익을 책임지는 영업부의 에이스입니다.",
+      "bio": "게임부의 분위기 메이커. 승부욕과 순발력으로 팀에 활력을 불어넣는 사원입니다.",
       "stats": [
         {
           "n": 3200,
@@ -132,145 +158,15 @@
       "soop": "xpdpfv2"
     },
     {
-      "slug": "milktea",
-      "name": "밀크티냠",
-      "role": "기획실장",
-      "dept": "기획실",
-      "rank": 2,
-      "color": "linear-gradient(135deg,#1a1200,#f59e0b)",
-      "initials": "밀",
-      "img": "img/밀크티냠.png",
-      "bio": "톡톡 튀는 아이디어와 꼼꼼한 기획력으로 고래상사의 모든 기획을 총괄합니다.",
-      "stats": [
-        {
-          "n": 2800,
-          "u": "누적 방송시간(h)"
-        },
-        {
-          "n": 195,
-          "u": "클립 수"
-        },
-        {
-          "n": 72000,
-          "u": "누적 시청자"
-        }
-      ],
-      "soop": "ducke77"
-    },
-    {
-      "slug": "joara",
-      "name": "조아라",
-      "role": "게임부 과장",
-      "dept": "게임부",
-      "rank": 3,
-      "color": "linear-gradient(135deg,#0a1a10,#10b981)",
-      "initials": "조",
-      "img": "img/조아라.png",
-      "bio": "게임부의 든든한 허리. 부장을 보좌하며 팀을 이끄는 열정적인 과장입니다.",
-      "stats": [
-        {
-          "n": 3600,
-          "u": "누적 방송시간(h)"
-        },
-        {
-          "n": 280,
-          "u": "클립 수"
-        },
-        {
-          "n": 115000,
-          "u": "누적 시청자"
-        }
-      ],
-      "soop": "joaras2"
-    },
-    {
-      "slug": "melodingding",
-      "name": "멜로딩딩",
-      "role": "방송팀장",
-      "dept": "방송팀",
-      "rank": 3,
-      "color": "linear-gradient(135deg,#0a1025,#3b82f6)",
-      "initials": "멜",
-      "img": "img/멜로딩딩.png",
-      "bio": "날카로운 방송 감각으로 라이브 방송의 퀄리티를 책임지는 방송팀의 핵심입니다.",
-      "stats": [
-        {
-          "n": 4100,
-          "u": "누적 방송시간(h)"
-        },
-        {
-          "n": 350,
-          "u": "클립 수"
-        },
-        {
-          "n": 140000,
-          "u": "누적 시청자"
-        }
-      ],
-      "soop": "melodingding"
-    },
-    {
-      "slug": "bbakso",
-      "name": "빡쏘",
-      "role": "영업부 대리",
-      "dept": "영업부",
-      "rank": 4,
-      "color": "linear-gradient(135deg,#1a0a18,#ec4899)",
-      "initials": "빡",
-      "img": "img/빡쏘.png",
-      "bio": "작지만 강하다! 패기 넘치는 영업력으로 빠르게 성장 중인 영업부의 기대주입니다.",
-      "stats": [
-        {
-          "n": 2200,
-          "u": "누적 방송시간(h)"
-        },
-        {
-          "n": 160,
-          "u": "클립 수"
-        },
-        {
-          "n": 58000,
-          "u": "누적 시청자"
-        }
-      ],
-      "soop": "soyoung6056"
-    },
-    {
-      "slug": "bbiyoko",
-      "name": "삐요코",
-      "role": "콘텐츠 PD",
-      "dept": "컨텐츠부",
-      "rank": 4,
-      "color": "linear-gradient(135deg,#0a1a1a,#14b8a6)",
-      "initials": "삐",
-      "img": "img/삐요코.png",
-      "bio": "꼼꼼한 편집과 센스 있는 기획으로 고래상사의 콘텐츠를 완성하는 PD입니다.",
-      "stats": [
-        {
-          "n": 3000,
-          "u": "누적 방송시간(h)"
-        },
-        {
-          "n": 240,
-          "u": "클립 수"
-        },
-        {
-          "n": 95000,
-          "u": "누적 시청자"
-        }
-      ],
-      "soop": "nlov555jij"
-    },
-    {
       "slug": "ssongi",
       "name": "쏭이",
-      "role": "신입사원",
-      "dept": "총무부",
-      "rank": 5,
+      "role": "게임부 사원",
+      "dept": "게임부",
+      "rank": 21,
       "color": "linear-gradient(135deg,#0a0a22,#6366f1)",
       "initials": "쏭",
       "img": "img/쏭이.png",
-      "bio": "무한한 가능성을 지닌 고래상사의 막내. 빠르게 성장하는 신입사원입니다.",
+      "bio": "무한한 가능성을 지닌 게임부의 기대주. 빠르게 성장하며 팀의 활력을 더하는 사원입니다.",
       "stats": [
         {
           "n": 800,
@@ -288,41 +184,67 @@
       "soop": "gatgdf"
     },
     {
-      "slug": "chaehana",
-      "name": "채하나",
-      "role": "인사팀장",
-      "dept": "인사부",
-      "rank": 3,
-      "color": "linear-gradient(135deg,#1a0a00,#f97316)",
-      "initials": "채",
-      "img": "img/채하나.png",
-      "bio": "친근하고 활발한 성격으로 직원들의 고충을 들어주는 든든한 인사팀장입니다.",
+      "slug": "joara",
+      "name": "조아라",
+      "role": "게임부 사원",
+      "dept": "게임부",
+      "rank": 22,
+      "color": "linear-gradient(135deg,#0a1a10,#10b981)",
+      "initials": "조",
+      "img": "img/조아라.png",
+      "bio": "게임부의 든든한 허리. 부장을 보좌하며 팀을 열정적으로 받치는 사원입니다.",
       "stats": [
         {
-          "n": 2600,
+          "n": 3600,
           "u": "누적 방송시간(h)"
         },
         {
-          "n": 185,
+          "n": 280,
           "u": "클립 수"
         },
         {
-          "n": 76000,
+          "n": 115000,
           "u": "누적 시청자"
         }
       ],
-      "soop": "chae1hana"
+      "soop": "joaras2"
+    },
+    {
+      "slug": "bbakso",
+      "name": "빡쏘",
+      "role": "게임부 사원",
+      "dept": "게임부",
+      "rank": 23,
+      "color": "linear-gradient(135deg,#1a0a18,#ec4899)",
+      "initials": "빡",
+      "img": "img/빡쏘.png",
+      "bio": "작지만 강하다! 패기 넘치는 플레이로 빠르게 존재감을 키워가는 게임부 사원입니다.",
+      "stats": [
+        {
+          "n": 2200,
+          "u": "누적 방송시간(h)"
+        },
+        {
+          "n": 160,
+          "u": "클립 수"
+        },
+        {
+          "n": 58000,
+          "u": "누적 시청자"
+        }
+      ],
+      "soop": "soyoung6056"
     },
     {
       "slug": "heehuideok",
       "name": "희희덕",
-      "role": "연구개발팀",
-      "dept": "개발팀",
-      "rank": 4,
+      "role": "게임부 사원",
+      "dept": "게임부",
+      "rank": 24,
       "color": "linear-gradient(135deg,#0a1a0a,#22c55e)",
       "initials": "희",
       "img": "img/희희덕.png",
-      "bio": "독특한 아이디어와 분석력으로 새로운 콘텐츠를 연구하는 개발팀의 두뇌입니다.",
+      "bio": "탄탄한 게임 실력과 성실함으로 팀에 기여하는 게임부 사원입니다.",
       "stats": [
         {
           "n": 1900,
@@ -340,41 +262,93 @@
       "soop": "poippoi52"
     },
     {
-      "slug": "peuha",
-      "name": "프하",
-      "role": "마케팅팀",
-      "dept": "마케팅팀",
-      "rank": 4,
-      "color": "linear-gradient(135deg,#160a22,#a855f7)",
-      "initials": "프",
-      "img": "img/프하.png",
-      "bio": "변화무쌍한 전략과 SNS 감각으로 고래상사를 세상에 알리는 마케터입니다.",
+      "slug": "milktea",
+      "name": "밀크티냠",
+      "role": "컨텐츠부 사원",
+      "dept": "컨텐츠부",
+      "rank": 25,
+      "color": "linear-gradient(135deg,#1a1200,#f59e0b)",
+      "initials": "밀",
+      "img": "img/밀크티냠.png",
+      "bio": "톡톡 튀는 아이디어와 꼼꼼함으로 콘텐츠 기획을 받치는 컨텐츠부 사원입니다.",
       "stats": [
         {
-          "n": 2100,
+          "n": 2800,
           "u": "누적 방송시간(h)"
         },
         {
-          "n": 155,
+          "n": 195,
           "u": "클립 수"
         },
         {
-          "n": 63000,
+          "n": 72000,
           "u": "누적 시청자"
         }
       ],
-      "soop": "peuhaha"
+      "soop": "ducke77"
+    },
+    {
+      "slug": "bbiyoko",
+      "name": "삐요코",
+      "role": "컨텐츠부 사원",
+      "dept": "컨텐츠부",
+      "rank": 26,
+      "color": "linear-gradient(135deg,#0a1a1a,#14b8a6)",
+      "initials": "삐",
+      "img": "img/삐요코.png",
+      "bio": "꼼꼼한 편집과 센스 있는 기획으로 콘텐츠를 완성하는 컨텐츠부 사원입니다.",
+      "stats": [
+        {
+          "n": 3000,
+          "u": "누적 방송시간(h)"
+        },
+        {
+          "n": 240,
+          "u": "클립 수"
+        },
+        {
+          "n": 95000,
+          "u": "누적 시청자"
+        }
+      ],
+      "soop": "nlov555jij"
+    },
+    {
+      "slug": "chaehana",
+      "name": "채하나",
+      "role": "컨텐츠부 사원",
+      "dept": "컨텐츠부",
+      "rank": 27,
+      "color": "linear-gradient(135deg,#1a0a00,#f97316)",
+      "initials": "채",
+      "img": "img/채하나.png",
+      "bio": "친근하고 활발한 에너지로 콘텐츠에 생기를 더하는 컨텐츠부 사원입니다.",
+      "stats": [
+        {
+          "n": 2600,
+          "u": "누적 방송시간(h)"
+        },
+        {
+          "n": 185,
+          "u": "클립 수"
+        },
+        {
+          "n": 76000,
+          "u": "누적 시청자"
+        }
+      ],
+      "soop": "chae1hana"
     },
     {
       "slug": "muka",
       "name": "묵아",
-      "role": "비서실",
-      "dept": "비서실",
-      "rank": 4,
+      "role": "게임부 인턴",
+      "dept": "게임부",
+      "rank": 30,
       "color": "linear-gradient(135deg,#0a1820,#06b6d4)",
       "initials": "묵",
       "img": "img/묵아.png",
-      "bio": "완벽한 일정 관리로 대표이사를 보좌하는 고래상사의 숨은 일꾼입니다.",
+      "bio": "게임부에 새로 합류한 패기의 인턴. 근성으로 실력을 쌓아가는 중입니다.",
       "stats": [
         {
           "n": 1600,
@@ -392,15 +366,41 @@
       "soop": "nororo"
     },
     {
+      "slug": "peuha",
+      "name": "프하",
+      "role": "게임부 인턴",
+      "dept": "게임부",
+      "rank": 31,
+      "color": "linear-gradient(135deg,#160a22,#a855f7)",
+      "initials": "프",
+      "img": "img/프하.png",
+      "bio": "장비 세팅부터 실전까지 하나씩 배워가는 게임부 인턴입니다.",
+      "stats": [
+        {
+          "n": 2100,
+          "u": "누적 방송시간(h)"
+        },
+        {
+          "n": 155,
+          "u": "클립 수"
+        },
+        {
+          "n": 63000,
+          "u": "누적 시청자"
+        }
+      ],
+      "soop": "peuhaha"
+    },
+    {
       "slug": "selkie",
       "name": "셀키",
-      "role": "총무부장",
-      "dept": "총무부",
-      "rank": 2,
+      "role": "컨텐츠부 인턴",
+      "dept": "컨텐츠부",
+      "rank": 32,
       "color": "linear-gradient(135deg,#1a0808,#ef4444)",
       "initials": "셀",
       "img": "img/셀키.png",
-      "bio": "내부 살림을 빈틈없이 관리하는 총무부의 베테랑. 회사의 안살림 담당입니다.",
+      "bio": "이제 막 합류한 컨텐츠부의 새내기 인턴. 밝은 인사로 팀에 스며드는 중입니다.",
       "stats": [
         {
           "n": 3400,
