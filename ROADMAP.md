@@ -1,8 +1,9 @@
-# 고래상사 리워크 — 로드맵 v2 (2026-07-07)
+# 고래상사 리워크 — 로드맵 v3 (2026-07-08)
 
 > 리워크가 운영(goraesangsa.com)을 대체하는 순간(cutover)까지, 그리고 그 이후의 전체 계획.
 > 각 항목에 **실행자 / 선행조건 / 절차 / 합격 기준**을 명시한다. 진행하면서 체크박스를 갱신할 것.
-> v2: 데이터 스키마·URL 맵·Vercel 절차·D-Day 런북·리스크를 실측 기반으로 구체화.
+> v3(2026-07-08): 멤버 직급 동기화·아카이브 태그/카테고리·시드 제거·임베드 보안강화 반영 +
+> 데이터 사전·검증 명세·이관 경로를 진행분만큼 재구체화. (v2=2026-07-07 실측 구체화, v1=2026-07-07 최초)
 
 ---
 
@@ -14,7 +15,17 @@
 | 18페이지 실구현 | 홈 + crew/members/member, archive(+detail), clips(+clip), schedule(+detail), multiview, notices(+notice), news, admin 5종 | `831d30b` |
 | Phase A (07-02) | SOOP 로그인 CRUD 4종(공지·클립·일정·아카이브), `/rework/*` 격리, `WhaleUI`/`WhaleData`, safeUrl XSS 방어 | `63bb07c` |
 | Phase B (07-07) | 커스텀토큰 서버 강제 (아래 상세) | `63bb07c` |
-| 로드맵 | 이 문서 | `88562ae`~ |
+| 로드맵 v1·v2 | 이 문서 | `88562ae`·`7d20c3c` |
+| **07-08 일괄 (NEW)** | 멤버 직급 동기화 + 아카이브 태그·카테고리 + 시드 제거 + 임베드 보안 + 주석 최신화 | **`1020030`** |
+
+**`1020030`(2026-07-08) 세부** — 전부 빌드·검증 완료(§부록 C-2):
+- **멤버 16인 직급/부서/순서 동기화**(§2-A-1 완료): placeholder(영업부·기획실·방송팀 등 가공 부서) → 운영본 조직도(2026-06-08 진급 반영본)의 실제 임원/비서부/게임부/컨텐츠부로 교정. 셀키=인턴(옛 "총무부장" 오류)·멜로딩딩=비서부 부장(옛 "방송팀장" 오류) 등 다수 수정. `rank` 재부여(임원0~/부장10~/사원20~/인턴30~).
+- **아카이브↔클립 태그 연결**(§2-A-6 NEW): 클립·아카이브 폼 양쪽에 `tags`(쉼표→배열) 필드. 아카이브 상세가 `D.list('clips')` 후 **태그 교집합(대소문자 무시)** 클립을 "관련 클립" 섹션에 **임베드 미리보기**로 렌더.
+- **임베드 미리보기 `embedUrlOf`**(운영 `contest.js getEmbedUrl` 이식 + 보안강화): YouTube·SOOP VOD를 플레이어 임베드로 변환해 **별도 썸네일 이미지 불필요**. ⚠️보안: `new URL` 파싱 + 호스트 엄격검증(정확일치/`.`접미사)으로 iframe src 주입 차단 — `youtube.com/embed/{검증id}`·`*.sooplive.*/player/{숫자}/embed`로만 재조립(원본 패스스루 제거).
+- **아카이브 분류(크루대전/컨텐츠)**(§2-A-7 NEW): 폼에 `category` select + 크루전용 필드(순위/상대/게임) 동적 토글. 리스트 필터 칩(전체/🏆크루대전/🎬컨텐츠), 카드·상세 조건부 렌더(컨텐츠는 순위·전적 배지 대신 카테고리 배지). 기존 15건은 category 없음 → **크루대전으로 기본 처리**(하위호환).
+- **시드 불러오기 제거**(클립·일정·공지): cutover 전엔 401만 유발 + 실데이터도 아니므로 삭제. 버튼·`importSeed`·죽은 `window.WHALE_*` 주입·`clips_json_script`/`schedule_json_script`/`notices_json_script` 함수까지 정리. **아카이브 운영기록 이관 버튼은 유지**(실데이터 마이그레이션 경로).
+- **stale 주석 최신화**: 아카이브 docstring(크루대전→통합), 상세("대회"→"기록"), content JSON `_comment`(clips/schedule/notices — 이제 실 페이지는 Firebase 렌더, 이 JSON은 admin 데모·뉴스 피드 미리보기 전용).
+- **뒷정리**: 노출된 서비스계정 키 JSON 삭제(§1-2 완료).
 
 **Phase B 구성** (전부 배포·검증 완료):
 - 워커 `POST /auth/firebase` (`whale-status-worker.kyefyx.workers.dev`, 소스 `04_WCHP/whale-auth-worker/worker.js` — 레포 밖):
@@ -27,52 +38,58 @@
   `sessionStorage.soop_fb = {idToken, refreshToken, expiresAt}`. 교환 실패해도 로그인은 유지(쓰기만 거부됨).
   `assets/site.js` = `authParam()/writeUrl()`이 WhaleData 쓰기 URL에 `?auth=idToken` 첨부,
   만료 60초 전부터 `securetoken.googleapis.com/v1/token`으로 자동 refresh, 로그아웃 시 `soop_fb` 폐기.
-- RTDB 규칙 게시(사본 `src/firebase-rules.json`): `/rework` 공개쓰기 제거. **검증 매트릭스 11/11 PASS**(부록 C).
+- RTDB 규칙 게시(사본 `src/firebase-rules.json`): `/rework` 공개쓰기 제거. **검증 매트릭스 11/11 PASS**(부록 C-1).
 
 ### 0-2. 현재 제약 (의도된 상태)
 - SOOP OAuth redirect_uri = `https://www.goraesangsa.com/auth/callback` 고정 +
   워커 CORS `ALLOWED_ORIGIN` = `https://www.goraesangsa.com`
   → **리워크 오리진에서는 실로그인 불가 → 편집 기능은 cutover까지 잠김.**
   dev 로그인은 idToken이 없어 쓰기 401(규칙이 막는 게 정상 동작).
+  → 이 제약 때문에 시드/이관 버튼이 지금은 무조건 401 (07-08에 클립/일정/공지 시드 제거한 근거).
 - 운영 경로(`/status` `/contests` `/schedules` `/crews`)는 여전히 공개쓰기(`.write:true`) —
   운영본이 무토큰으로 쓰는 구조라 cutover 후 Phase C(§5-1)에서 조인다.
 
-### 0-3. 인프라·데이터 실측 (2026-07-07 curl 확인)
+### 0-3. 인프라·데이터 실측 (2026-07-07 curl / 2026-07-08 재확인)
 - **운영 호스팅 = Vercel** (응답헤더 `server: Vercel`, `vercel.json = {"cleanUrls": true}` 단 1개 설정).
   연결된 Vercel 계정·GitHub 레포는 **미확인**(§6-Q1). 운영 코드 로컬 사본 = `04_WCHP/Whale-Corp-main/`.
 - 운영 페이지 6종: `index` `CCTV` `schedule` `ranking` `contest` `admin` (+`auth/callback`).
+  운영 조직도(#org, index.html 88~142행)가 **멤버 직급 권위 소스** — cast 슬라이더(146~300행)에 soop id·별명·캐치프레이즈.
 - RTDB 현황:
   - `/schedules` **73건 실사용 중** — 스키마 `{date:"YYYY-MM-DD", event:"제목", members:[soop id...], groupId?}`.
     members 고유값 11종 실측: soop id 10종 + `"goraesangsa"`(크루 전체 태그). `groupId`=기간 반복 일정 묶음.
   - `/contests` 15건(운영) / `/rework/contests` 15건(07-02 이관 사본) — cutover 직전 diff 재이관 필요.
+    ⚠️이 15건은 `category` 필드 없음 → 리워크 렌더가 크루대전으로 기본 처리(07-08 하위호환). 이관 스크립트에서 `category:"크루대전"` 명시 주입 권장(§3-C).
   - `/rework/notices` 1건 = **dev 테스트 공지**(ownerId `dev:핫케이크_`, title "테스트") → 삭제 대상(§1-4).
   - `/rework/clips`·`/rework/schedules` **비어 있음** (시드 미이관 — 실데이터 넣을 때 충돌 없음).
   - `/crews` = 상대 크루 사전 `{aliases:[], currentName}` (아카이브 상세가 참조). `/permissions` = 닉→"admin"|"editor".
+- 이미지 자산(2026-07-08 실측, `img/` 20장 7.5MB): **`wave-bg.png` 4.8MB(최대 압축 대상)**, 멤버 초상 `.png` 200~300KB 다수(멜로딩딩299·삐요코293·채하나284·조아라271·프하200·울산큰고래185). **favicon 없음**. 압축 도구: Pillow 12.2.0 로컬 사용가능, 운영본 `Whale-Corp-main/favicon.png` 이식 가능(§2-B-4/6 참조).
 - 레포: `github.com/HotCake0/Test_version`. **로컬 브랜치명 `Test_version`** → 푸시는 `git push origin Test_version:main`.
 
 ### 0-4. 리워크 데이터 스키마 (부록 B에 전체 사전)
 - 시드 단일소스: `src/content/{members,clips,schedule,notices,site}.json` → `python3 src/build.py` → `pages/*.html`.
   **pages/는 산출물 — 직접 수정 금지, 수정은 build.py/JSON에만.**
+- ⚠️07-08 변경: `clips/schedule/notices.json`은 이제 **admin 데모 페이지·뉴스 피드(news) 미리보기 전용 정적 시드**.
+  실 clips/schedule/notices 페이지는 Firebase(`WhaleData.list`)에서 렌더하며 이 파일을 안 씀(시드 불러오기·`WHALE_*` 주입 제거됨).
+  `members.json`만 여전히 빌드타임 실렌더 소스(crew/members/member + multiview·news의 멤버 메타).
 - CRUD 런타임 스키마는 각 폼이 정의(부록 B). 공통 자동 필드: `ownerId, ownerNick, createdAt, updatedAt`.
 
 ---
 
 ## 1. 즉시 뒷정리 — 보안 (cutover 무관, 지금 바로)
 
-- [ ] **1-1. 서비스계정 키 교체** — 실행자: 사용자(콘솔) + Claude(검증). 소요 ~5분.
-  - 사유: 현행 키(`04cee49a...`)의 private_key가 2026-07-07 채팅에 노출됨.
+- [~] **1-1. 서비스계정 키 교체** — ⏸ **사용자 보류(2026-07-08 "키는 무시해")**. 아래 절차는 재개 시 참고용으로 보존.
+  - 사유: 현행 키(`04cee49a...`)의 private_key가 2026-07-07 채팅에 노출됨. **키 자체는 폐기 전까지 유효**(노출된 채 살아있음).
+  - 리스크 수용 판단: 격리된 `/rework`만 영향 + 운영은 무영향이라 사용자가 후순위로 미룸. cutover 전 재개 권장(§5-5 로테이션과 병합 가능).
   - 절차 (⚠️ **이 순서대로 해야 무중단** — 새 키 등록 후 옛 키 삭제):
     1. Firebase 콘솔 → ⚙️ 프로젝트 설정 → 서비스 계정 → "새 비공개 키 생성" → JSON 다운로드.
        (같은 서비스계정 `firebase-adminsdk-fbsvc@whaie-corp.iam.gserviceaccount.com`에 키만 추가됨)
     2. Cloudflare → Workers 및 Pages → whale-status-worker → 설정 → 변수 및 비밀 →
        `FIREBASE_SA_KEY` 편집 → 새 JSON의 `private_key` 값으로 교체(따옴표 안, `\n` 포함 그대로).
        `FIREBASE_SA_EMAIL`은 동일하므로 그대로 둠. **코드 변경·재배포 불필요**(secret 교체만으로 반영).
-    3. Google Cloud 콘솔(프로젝트 설정 → 서비스 계정 → "Google Cloud에서 서비스 계정 관리") →
-       firebase-adminsdk 계정 → 키 탭 → 옛 키 `04cee49a...` **삭제**.
-    4. 새 JSON 파일도 secret 등록 직후 삭제(다운로드 폴더에 남기지 않기).
-  - 합격 기준(Claude가 실행): ① 가짜 토큰 `POST /auth/firebase` → 400(워커 생존)
-    ② 실제 커스텀토큰 플로우는 옛 키 삭제 후에도 정상(새 키로 서명되므로) — 원하면 검증 매트릭스 1·2번 재실행.
-- [ ] **1-2. 현행 키 JSON 삭제** — `C:\Users\kyefy\Downloads\whaie-corp-firebase-adminsdk-fbsvc-04cee49ab6.json`.
+    3. Google Cloud 콘솔 → 서비스 계정 → firebase-adminsdk 계정 → 키 탭 → 옛 키 `04cee49a...` **삭제**.
+    4. 새 JSON 파일도 secret 등록 직후 삭제.
+  - 합격 기준(Claude가 실행): ① 가짜 토큰 `POST /auth/firebase` → 400(워커 생존) ② 검증 매트릭스 1·2번 재실행.
+- [x] **1-2. 현행 키 JSON 삭제** — ✅ **2026-07-08 완료**(Claude가 `~/Downloads/whaie-corp-firebase-adminsdk-fbsvc-04cee49ab6.json` 삭제). 레포엔 키 값 없음(ROADMAP엔 키 ID·절차만).
 - [ ] **1-3. (선택) 로컬 브랜치명 정리** — 실행자: Claude. 이후 `git push`만으로 푸시 가능.
   ```bash
   git branch -m Test_version main
@@ -80,8 +97,9 @@
   git remote set-head origin -a
   ```
 - [ ] **1-4. dev 테스트 공지 삭제** — `/rework/notices`의 "테스트" 1건(ownerId `dev:핫케이크_`).
-  규칙 강제로 이제 콘솔 외엔 admin 토큰이 필요 → Claude가 서비스계정 발급 admin 토큰으로 DELETE
-  (검증 매트릭스와 동일한 방식), 또는 사용자가 Firebase 콘솔 데이터 탭에서 노드 삭제.
+  규칙 강제로 이제 콘솔 외엔 admin 토큰 필요 → Claude가 서비스계정 발급 admin 토큰으로 DELETE
+  (검증 매트릭스와 동일 방식), 또는 사용자가 Firebase 콘솔 데이터 탭에서 노드 삭제.
+  ⚠️1-1을 "키 무시"로 보류했으므로 서비스계정 토큰 발급도 보류 상태 — cutover 후 admin UI로 삭제하는 게 더 간단할 수 있음.
 
 ---
 
@@ -89,20 +107,29 @@
 
 ### 2-A. 콘텐츠 실데이터화
 
-- [ ] **2-A-1. 멤버 직책/부서 확정** — 실행자: 사용자(확정) + Claude(반영). ⭐결정 필요(§6-Q3)
-  - 현재 `src/content/members.json` 16인의 `role`(직책)·`dept`(부서)·`bio`·`stats`가 역할극 placeholder.
-  - 운영본 조직도가 근거: 임원(대표=울산큰고래, 부사장=견자희) / 부장(비서부 멜로딩딩·게임부 김마렌·컨텐츠부 감자가비) /
-    사원·인턴 — **2026-06-08 진급 반영분(채하나·희희덕=사원)까지 포함해 최신 직급표를 사용자에게 받을 것.**
-  - 반영 필드: `role`, `dept`, `rank`(정렬키: 임원0~/부장10~/사원20~/인턴30~ 등 간격 유지), `bio`, `stats`(실측 없으면 유지).
-  - 절차: JSON 수정 → `python3 src/build.py` → crew/members/member 3페이지 확인.
-  - 합격: members 16카드 직급 정렬 일치, member 상세 스탯/소개 어색함 없음, 홈 조직 소개와 모순 없음.
-- [ ] **2-A-2. 클립 실데이터** — `/rework/clips`가 비어 있으므로 방식 자유:
-  - (a) `src/content/clips.json`을 실클립(제목/제작자/SOOP VOD·유튜브 URL/날짜)으로 갱신 →
-    cutover 후 관리자 "시드 불러오기" 1클릭 이관. **사전 준비 가능해서 권장.**
-  - (b) cutover 후 관리자 로그인으로 UI에서 직접 입력.
-  - 주의: url은 `https?://`만 통과(safeUrl) — SOOP VOD는 `https://vod.sooplive.com/player/{id}` 형식 사용.
+- [x] **2-A-1. 멤버 직책/부서 확정** — ✅ **2026-07-08 완료**(운영본 조직도에서 추출·반영, 커밋 `1020030`).
+  운영 index.html #org를 권위 소스로 사용(사용자 "홈페이지에 정보 있다" 확인). 확정 16인:
+
+  | rank | 이름 | soop id | role | dept |
+  |---|---|---|---|---|
+  | 0 | 울산큰고래 | bach023 | 사장 | 임원 |
+  | 1 | 견자희 | gyeonjahee | 부사장 | 임원 |
+  | 10 | 멜로딩딩 | melodingding | 비서부 부장 | 비서부 |
+  | 11 | 김마렌 | kimmaren77 | 게임부 부장 | 게임부 |
+  | 12 | 감자가비 | doki0818 | 컨텐츠부 부장 | 컨텐츠부 |
+  | 20~24 | 이지수·쏭이·조아라·빡쏘·희희덕 | xpdpfv2·gatgdf·joaras2·soyoung6056·poippoi52 | 게임부 사원 | 게임부 |
+  | 25~27 | 밀크티냠·삐요코·채하나 | ducke77·nlov555jij·chae1hana | 컨텐츠부 사원 | 컨텐츠부 |
+  | 30~31 | 묵아·프하 | nororo·peuhaha | 게임부 인턴 | 게임부 |
+  | 32 | 셀키 | sellkey | 컨텐츠부 인턴 | 컨텐츠부 |
+
+  - `stats`(방송시간/클립수/시청자)는 실측 부재로 기존 placeholder 유지 → §5-4(SOOP API 실데이터)에서 교체.
+  - 잔여 미세정리(후순위): `crew.html` 프로즈에 "대표이사/신입사원" 옛 표현 잔존, admin-clips 데모 테이블에 옛 부서명(정적 목업이라 무해) — cutover 콘텐츠 손질 때 정리.
+- [ ] **2-A-2. 클립 실데이터** — `/rework/clips`가 비어 있음. ⚠️**07-08 시드 불러오기 제거로 경로 변경**:
+  - (a) ~~cutover 후 "시드 불러오기" 1클릭~~ **삭제됨**. 대신 필요하면 **Claude가 admin 토큰 이관 스크립트**로 일괄 입력(§3-C 아카이브/일정 이관과 동일 패턴, `clips.json`→`/rework/clips` POST).
+  - (b) **cutover 후 관리자 로그인으로 UI에서 직접 입력**(권장 — 실데이터가 적고 사용자가 직접 골라 넣는 게 자연스러움).
+  - 입력 팁: `url`은 `https?://`만 통과(safeUrl). SOOP VOD = `https://vod.sooplive.com/player/{id}`, 유튜브 = `youtu.be/{id}` 또는 `watch?v={id}`. **이미지 URL은 선택** — 비우면 카드/관련클립이 영상 링크로 임베드 미리보기(07-08 embedUrlOf), SOOP 썸네일 이미지를 따로 구할 필요 없음. `tags`에 관련 아카이브 태그 넣으면 그 아카이브 상세에 자동 노출.
 - [ ] **2-A-3. 공지 실데이터** — §1-4 테스트 공지 삭제 후, 개시 공지(리뉴얼 안내 등) 준비.
-  cutover 후 입력이 자연스러움. 급하면 Claude가 admin 토큰으로 대행 입력 가능.
+  ⚠️07-08 공지 시드 제거 → cutover 후 admin UI 입력이 정석(급하면 Claude admin 토큰 대행). news 피드 미리보기는 `notices.json` 정적 시드를 계속 씀(실 공지와 별개).
 - [ ] **2-A-4. 일정 데이터 통합** — ⭐결정 필요(§6-Q2). **권장 ①(리워크로 통일)** 기준 이관 설계:
   - 스키마 매핑 (운영 `/schedules` 73건 → `/rework/schedules`):
 
@@ -110,32 +137,43 @@
     |---|---|---|
     | `date` "YYYY-MM-DD" | `date` | 그대로 |
     | `event` | `title` | 그대로 |
-    | `members` [soop id] | `members` [멤버명] | 워커 `CREW_MEMBERS` 맵(id→명)으로 변환. `"goraesangsa"` → 16인 전원 또는 `["고래상사 전체"]` 태그(리워크 렌더 확인 후 결정) |
-    | `groupId` | (버림 또는 보존) | 리워크 폼엔 없음 — 보존해도 무해하므로 **보존 권장**(후속 기간반복 기능 대비) |
+    | `members` [soop id] | `members` [멤버명] | 워커 `CREW_MEMBERS` 맵(id→명)으로 변환. **이제 `members.json`의 확정 16인 매핑(§2-A-1)과 교차검증 가능**. `"goraesangsa"` → 16인 전원 또는 `["고래상사 전체"]` 태그(리워크 렌더 확인 후 결정) |
+    | `groupId` | (보존) | 리워크 폼엔 없지만 보존(§5-3 기간반복 대비) |
     | (없음) | `time` | `""` (미상) |
-    | (없음) | `type` | members 1인=개인방송, 2인 이상=합방, 전체태그=특집 등 규칙 매핑(스크립트에서) |
+    | (없음) | `type` | members 1인=개인방송, 2인 이상=합방, 전체태그=특집 등 규칙 매핑(스크립트) |
     | (없음) | `desc` | `""` |
     | (없음) | `ownerId/ownerNick/createdAt/updatedAt` | 서비스계정 이관 시 admin 소유로 주입(`ownerId`=관리자 soop id `bach023` 권장) |
-  - 실행: Claude가 이관 스크립트 작성(admin 토큰으로 POST) → 건수 73=73 검증 → 리워크 캘린더 렌더 확인.
+  - 실행: Claude가 이관 스크립트 작성(admin 토큰 POST) → 건수 73=73 검증 → 리워크 캘린더 렌더 확인.
   - 이관 후 운영 admin.js 일정 시스템은 읽기 전용 유산이 됨(§3-D에서 인수 결정).
   - 시점: **cutover 직전**(그 사이 운영에 새 일정이 계속 추가되므로 D-Day 단계에 포함, §4-2).
-- [ ] **2-A-5. 뉴스 피드** — news.html은 공지+클립+일정 통합 피드. 소스가 채워지면 자동. 별도 작업 없음(확인만).
+- [ ] **2-A-5. 뉴스 피드** — news.html은 공지+클립+일정 통합 피드. ⚠️**현재 정적 시드(`NOTICES/CLIPS/SCHEDULE` 상수)로 렌더** — Firebase 실데이터와 별개(빌드타임 미리보기). cutover 후 실데이터 반영하려면 news도 `WhaleData.list` 런타임 로드로 전환 필요(§5-4 소규모 항목으로 이동). 지금은 확인만.
+- [x] **2-A-6. 아카이브↔클립 태그 연결** — ✅ **2026-07-08 완료**(`1020030`).
+  - 클립·아카이브 폼에 `tags`(쉼표→배열). 아카이브 상세 하단 "관련 클립": `D.list('clips')` 후 태그 교집합(소문자 정규화) 필터 → 카드 그리드에 임베드(YouTube/SOOP) 또는 정적 썸네일 폴백.
+  - 임베드 helper `embedUrlOf`(build_archive_detail 인라인): `new URL` 파싱→호스트 화이트리스트(`youtu.be`/`youtube(-nocookie).com`/`sooplive.com`/`sooplive.co.kr`, 정확일치·`.`접미사) → 검증된 id/숫자로만 재조립. **저장형 iframe-src 주입 차단**(보안리뷰 지적 반영, 부록 C-2 10/10 PASS).
+  - 운영 방법(사용자): 아카이브 기록과 클립에 같은 태그(예 "여름특집")를 넣으면 그 기록 상세에 해당 클립들이 미리보기로 뜸.
+- [x] **2-A-7. 아카이브 카테고리(크루대전/컨텐츠)** — ✅ **2026-07-08 완료**(`1020030`).
+  - `category` select(크루대전|컨텐츠), 폼에서 컨텐츠 선택 시 순위/상대/게임 필드 자동 숨김. 리스트 칩(전체/🏆크루대전/🎬컨텐츠) 클라 필터. 카드·상세: 크루대전=순위/전적, 컨텐츠=카테고리 배지만.
+  - 기존 15건(category 없음)=크루대전 기본. 헤더 "통합 아카이브", 상세 "기록 상세"로 문구 일반화.
+  - 남은 것: 컨텐츠 카테고리 **실데이터 입력**(cutover 후 admin UI, 또는 Claude 대행). 컨텐츠 항목은 순위/상대/게임 비우고 제목·날짜·멤버·영상·태그만.
 
 ### 2-B. 품질 점검
 
 - [ ] **2-B-1. 모바일/반응형 실기기** — 실행자: 사용자(메모리 방침: UI 확인은 사용자).
   중점: 홈 sec02 가로핀 모바일 폴백(≤860px 세로 스택), 하위페이지 드로어, CRUD 모달 폼 입력(모바일 키보드),
-  캘린더 7열 그리드 축소, 멀티뷰 iframe 그리드.
+  캘린더 7열 그리드 축소, 멀티뷰 iframe 그리드, **NEW: 아카이브 카테고리 칩 줄바꿈·관련클립 임베드 그리드(≥210px 오토필)**.
 - [ ] **2-B-2. reduced-motion + 콘솔 에러 0** — 실행자: Claude(Playwright).
   19페이지 순회: HTTP 200, console error 0, `prefers-reduced-motion` 에뮬레이션 시 인트로/핀 비활성 확인.
-- [ ] **2-B-3. SEO/메타 일괄** — 실행자: Claude. build.py head partial에 페이지별
-  `<meta name="description">`, `og:title/description/image`(대표 이미지 1장 지정 필요), `<link rel="canonical">`.
-  홈 index.html은 손수정(검증본 인라인 유지 원칙 준수 — head만 추가).
-  합격: 전 페이지 meta 존재 + OG 디버거(카톡 공유 미리보기) 정상.
-- [ ] **2-B-4. 이미지 최적화** — 실행자: Claude. `img/` 20장 실측 후 200KB 초과분 재압축(화질 유지),
-  가능하면 `loading="lazy"` 부여(빌드 템플릿에서 일괄).
+  **NEW 주의: 아카이브 상세 관련클립 임베드 iframe이 콘솔 에러(third-party 쿠키 경고 등) 유발 가능 — 실오류와 구분.**
+- [ ] **2-B-3. SEO/메타 일괄** — 실행자: Claude. build.py `head()`(build.py 49행)에 페이지별
+  `<meta name="description">`, `og:title/description/image`(대표 이미지 1장 지정 — 후보: 운영 `favicon.png` 또는 홈 히어로), `<link rel="canonical">`.
+  홈 index.html은 손수정(검증본 인라인 유지 — head만 추가). 합격: 전 페이지 meta 존재 + 카톡 공유 미리보기 정상.
+- [ ] **2-B-4. 이미지 최적화** — 실행자: Claude(Pillow 12.2.0). **실측 기반 구체화**:
+  - 최우선 `img/wave-bg.png` **4.8MB** → 배경용이라 리사이즈+재압축(예: 폭 1920 축소 + PNG 최적화/WebP, 목표 <300KB).
+  - 200KB 초과 초상 6장(멜로딩딩·삐요코·채하나·조아라·프하·울산큰고래) → 품질 유지 재압축 목표 <150KB.
+  - `loading="lazy"` 빌드 템플릿 일괄 부여(멤버/클립/관련클립 img). 합격: `img/` 총량 7.5MB→<2MB, 육안 화질 저하 없음.
 - [ ] **2-B-5. 상세페이지 이상 접근** — `?id=존재하지않는키`, `?i=999` 접근 시 폴백 문구 확인(구현돼 있음 — 재확인만).
-- [ ] **2-B-6. favicon/터치아이콘** — 운영본 `favicon.png` 이식 또는 신규.
+  아카이브 상세: 없는 id → "기록을 찾을 수 없습니다" + 목록 링크(07-08 문구 확인).
+- [ ] **2-B-6. favicon/터치아이콘** — 운영본 `Whale-Corp-main/favicon.png` 이식(build.py `head()`에 `<link rel="icon">` + apple-touch-icon). 현재 리워크에 favicon 전무.
 
 ---
 
@@ -143,28 +181,28 @@
 
 ### 3-A. Vercel 배포 전환 (⭐ §6-Q1 확인 후 확정)
 - **확인할 것**: goraesangsa.com이 붙은 Vercel 프로젝트의 ①소유 계정(사용자 본인? 친구?) ②연결 GitHub 레포 ③빌드 설정.
-  확인법: Vercel 대시보드 → 프로젝트 → Settings → Domains / Git. 접근 권한이 없으면 친구에게 이양(Transfer) 요청.
-- **시나리오 ① (기존 프로젝트에서 연결 레포 교체) — 접근 권한이 있으면 권장, 가장 단순**:
+  확인법: Vercel 대시보드 → 프로젝트 → Settings → Domains / Git. 접근 권한 없으면 친구에게 이양(Transfer) 요청.
+- **시나리오 ① (기존 프로젝트에서 연결 레포 교체) — 접근 권한 있으면 권장, 가장 단순**:
   1. Vercel 프로젝트 Settings → Git → Disconnect → `HotCake0/Test_version` 연결(branch `main`).
   2. Framework Preset = Other(정적), Root Directory = `/`, Build Command 없음, Output = `/`.
   3. 다음 push부터 리워크가 서빙됨. 도메인/DNS/인증서 변경 없음. **롤백 = Vercel Instant Rollback(이전 배포 클릭 1회).**
 - **시나리오 ② (새 프로젝트 + 도메인 이전) — 기존 프로젝트를 못 만질 때**:
-  1. 본인 Vercel 계정에 `Test_version` import → 임시 `*.vercel.app` URL로 전체 검수(§4-4를 미리 수행 가능. 단 실로그인은 불가).
+  1. 본인 Vercel 계정에 `Test_version` import → 임시 `*.vercel.app`로 전체 검수(§4-4 사전수행 가능, 단 실로그인 불가).
   2. 기존 프로젝트에서 도메인 제거 → 새 프로젝트에 `goraesangsa.com`+`www.goraesangsa.com` 추가.
-  3. DNS는 이미 Vercel을 가리키므로 보통 재검증만으로 붙음(TXT 검증 요구 시 도메인 등록처에서 추가).
+  3. DNS는 이미 Vercel을 가리키므로 보통 재검증만으로 붙음(TXT 요구 시 등록처에서 추가).
   4. 롤백 = 도메인을 옛 프로젝트로 되붙임(수 분).
-- 공통: `vercel.json`을 **사전에 레포에 커밋**(§3-B 리다이렉트 포함). apex→www 리다이렉트가 기존과 동일하게
-  유지되는지 확인(redirect_uri가 www 고정이므로 www가 정식이어야 함. 확인: `curl -sI https://goraesangsa.com` → www로 30x).
+- 공통: `vercel.json`을 **사전에 레포에 커밋**(§3-B 리다이렉트 포함). apex→www 리다이렉트 유지 확인
+  (redirect_uri가 www 고정이므로 www가 정식. `curl -sI https://goraesangsa.com` → www로 30x).
 
 ### 3-B. URL 호환 — 리다이렉트 맵 (vercel.json 초안)
-- 운영 6페이지 → 리워크 대응 (cleanUrls 유지 — `.html` 접근도 자동 처리됨):
+- 운영 6페이지 → 리워크 대응 (cleanUrls 유지 — `.html` 접근도 자동 처리):
 
   | 옛 URL | 새 URL | 근거 |
   |---|---|---|
   | `/` | `/` (리워크 index) | — |
   | `/CCTV` | `/pages/multiview` | 멀티뷰 동일 기능 |
   | `/schedule` | `/pages/schedule` | 일정 |
-  | `/contest` | `/pages/archive` | 크루대전 기록 |
+  | `/contest` | `/pages/archive` | 아카이브(크루대전 기본 필터로 착지) |
   | `/ranking` | `/pages/archive` | 통계는 §5-4 재구현 전까지 아카이브로 흡수 |
   | `/admin` | `/pages/admin` | 관리자 |
   | `/auth/callback` | (경로 동일 — 리다이렉트 불필요) | SOOP redirect_uri 불변이 핵심 |
@@ -186,134 +224,122 @@
     ]
   }
   ```
-  (admin은 `permanent:false` — §3-D 결정에 따라 목적지가 바뀔 수 있음. cleanUrls 환경에선 `.html` source가
-  실제 유통 안 될 수 있으나 북마크 대비 포함. 커밋 전 Claude가 Vercel 문서 기준 문법 재검증.)
-- 홈 `index.html`의 내부 링크는 이미 `pages/*.html` 상대경로 — cleanUrls가 `.html` 접근을 무확장 URL로
-  308 리다이렉트하므로 동작엔 문제 없음. (선택 폴리싱: 빌드에서 링크를 무확장으로 통일 — 후순위.)
+  (admin은 `permanent:false` — §3-D 결정에 따라 목적지 변동 가능. 커밋 전 Claude가 Vercel 문서 기준 문법 재검증.)
+- 홈 `index.html`의 내부 링크는 이미 `pages/*.html` 상대경로 — cleanUrls가 무확장 URL로 308. (선택 폴리싱: 링크 무확장 통일 — 후순위.)
 
 ### 3-C. 데이터 경로 정책
 - **결정: `/rework/*`를 그대로 정식 경로로 사용** (1차 cutover). 근거: 코드·규칙·데이터 무변경 = 리스크 0.
-  개명 이전(`/v2/*` 등)은 §5-5 후순위(서비스계정 복사 + `site.js`의 `REWORK_BASE` 1줄 + 규칙 이동이면 되지만 지금 할 이유 없음).
+  개명 이전(`/v2/*` 등)은 §5-5 후순위(서비스계정 복사 + `site.js REWORK_BASE` 1줄 + 규칙 이동).
 - [ ] **아카이브 재이관**: cutover 직전 운영 `/contests` → `/rework/contests` diff 동기화.
-  07-02 이관 후 운영에 추가/수정된 건만 반영(스크립트: 두 컬렉션 fetch → 운영 push키 기준 비교 →
-  누락/변경분 admin 토큰 POST/PATCH). Phase A의 "불러오기" 버튼은 목록이 빌 때만 작동하므로 스크립트 필수.
+  07-02 이관 후 운영 추가/수정분만 반영(스크립트: 두 컬렉션 fetch → push키 비교 → 누락/변경분 admin POST/PATCH).
+  ⚠️07-08 이후 이관 스크립트는 각 건에 **`category:"크루대전"` 명시 주입**(하위호환 넘어 데이터 정합). "불러오기" 버튼은 목록 빌 때만 작동하므로 diff엔 스크립트 필수.
 - [ ] **일정 이관**: §2-A-4 매핑대로 (D-Day 단계).
 - `/crews`(상대크루 사전)는 그대로 사용(공개 읽기 유지 — 아카이브 상세가 참조).
 
 ### 3-D. 운영 전용 기능 인수인계 (⭐ §6-Q4)
 | 운영 기능 | 리워크 현황 | 옵션 |
 |---|---|---|
-| ranking.html — 멤버 참여율/승률 통계, 현역 필터 | 없음 (아카이브에 전적 표시만) | ⓐ §5-4에서 리워크 디자인으로 재구현(권장) ⓑ 포기 |
-| admin.html — 기간 반복 일정(groupId 일괄 수정), 멤버 직급색 관리 | admin-*는 데모 목업. 일정 CRUD는 단건만 | ⓐ §5-3에서 기간반복 이식 ⓑ 단건 입력으로 충분하면 포기 |
+| ranking.html — 멤버 참여율/승률 통계, 현역 필터 | 없음(아카이브에 전적 표시만) | ⓐ §5-4에서 리워크 디자인 재구현(권장) ⓑ 포기 |
+| admin.html — 기간 반복 일정(groupId 일괄), 멤버 직급색 관리 | admin-*는 데모 목업. 일정 CRUD 단건만 | ⓐ §5-3 기간반복 이식 ⓑ 단건이면 포기 |
 | image-protect.js — 우클릭/드래그 저장 방지 | 미적용 | ⓐ site.js에 이식(15줄) ⓑ 미적용 |
 | 워커 cron 5분 `/status` 갱신 | 리워크 멤버/멀티뷰가 동일 소스 사용 | **그대로 유지(무변경)** |
-| update_status.py (수동 갱신 스크립트) | 워커 cron이 대체 중 | 폐기 |
+| update_status.py (수동 갱신) | 워커 cron이 대체 | 폐기 |
 
 ---
 
 ## 4. Cutover 실행 런북 (D-Day)
 
 > 예상 소요 1~2시간 + 24시간 집중 관찰. 방송 없는 낮 시간대 권장.
-> 사전조건: §1 완료, §2-A-1/2 완료, §3-A/B/D 결정 완료, vercel.json 커밋됨.
+> 사전조건: §1-4 완료(테스트공지 삭제), §2-A-2/3(클립·공지 준비), §3-A/B/D 결정, vercel.json 커밋. (§1-1 키교체는 사용자 보류 상태 — cutover 전 재개 권장하나 blocker 아님.)
 
-- [ ] **4-1. 백업 (T-0h)** — 실행자: Claude + 사용자
-  - 코드: 운영 레포에 태그 `prod-final-YYYYMMDD` (또는 로컬 `Whale-Corp-main` zip 보관 — 이미 로컬 사본 있음).
-  - 데이터: RTDB 전체 export — Firebase 콘솔 → Realtime Database → 데이터 탭 → ⋮ → "JSON 내보내기"
-    (또는 Claude가 admin 토큰으로 `GET /.json` 덤프해 로컬 저장). **합격: 파일 열어 최상위 키 6종 확인.**
-- [ ] **4-2. 데이터 최신화** — 실행자: Claude
-  - §3-C 아카이브 diff 재이관 → 운영 15건(당시 기준) 대비 rework 건수·필드 일치 검증.
+- [ ] **4-1. 백업 (T-0h)** — Claude + 사용자
+  - 코드: 운영 레포에 태그 `prod-final-YYYYMMDD` (또는 로컬 `Whale-Corp-main` zip — 이미 로컬 사본 있음).
+  - 데이터: RTDB 전체 export — Firebase 콘솔 → RTDB → 데이터 탭 → ⋮ → "JSON 내보내기"
+    (또는 Claude가 `GET /.json` 덤프). **합격: 파일 열어 최상위 키 6종 확인.**
+- [ ] **4-2. 데이터 최신화** — Claude
+  - §3-C 아카이브 diff 재이관(+`category` 주입) → 건수·필드 일치 검증.
   - §2-A-4 일정 이관 73건(당시 기준) → 건수 일치 + 캘린더 스팟 체크 3건.
-- [ ] **4-3. 배포 전환** — 실행자: 사용자(Vercel 콘솔) — §3-A 결정 시나리오 실행.
-- [ ] **4-4. 스모크 테스트 (전환 직후 10분)** — 실행자: Claude (curl+Playwright)
+- [ ] **4-3. 배포 전환** — 사용자(Vercel 콘솔) — §3-A 결정 시나리오 실행.
+- [ ] **4-4. 스모크 테스트 (전환 직후 10분)** — Claude(curl+Playwright)
   - `https://www.goraesangsa.com/` 및 `pages/*` 19페이지 HTTP 200 + 콘솔 에러 0.
-  - 리다이렉트 6종( §3-B 표 ) 30x → 목적지 200.
-  - apex→www 리다이렉트 유지. `/auth/callback` 200(코드 없이 접근 시 "인증 코드가 없습니다" 문구 = 정상).
-  - `/status` 데이터로 멀티뷰/멤버 LIVE 뱃지 렌더 확인(워커 cron 무영향 증거).
+  - 리다이렉트 6종(§3-B) 30x → 목적지 200. apex→www 유지. `/auth/callback` 200(코드 없이=문구 정상).
+  - `/status` 데이터로 멀티뷰/멤버 LIVE 뱃지 렌더(워커 cron 무영향 증거).
+  - **NEW: 아카이브 카테고리 칩 필터 동작 + 관련클립 임베드 렌더 스팟 체크.**
 - [ ] **4-5. 실로그인 검증 (사용자 + Claude 안내)** — **Phase B의 첫 실전 검증 지점**
-  1. 관리자 계정(울산큰고래 또는 editor 핫케이크_)으로 SOOP 로그인 →
-     개발자도구 Application → Session Storage에 `soop_user`(role=admin/editor)와 `soop_fb`(idToken) 생겼는지.
-  2. 공지 작성→수정→pinned 토글→삭제 / 클립 작성→featured 토글 / 일정 작성 / 아카이브 수정. 전부 성공해야 함.
-  3. 일반 SOOP 계정(권한 미등록)으로 로그인 → 본인 글 작성/수정 성공, 남의 글에 버튼 미노출.
-  4. (선택 심화) 일반 계정 콘솔에서 강제 호출:
-     `fetch('https://whaie-corp-default-rtdb...app/rework/notices/<남의글키>.json?auth='+JSON.parse(sessionStorage.soop_fb).idToken,{method:'DELETE'})`
-     → 401이어야 함(서버 강제의 실증).
-  - **실패 시**: 증상별 — `soop_fb` 없음=교환 실패(워커/키 확인), 쓰기 401=토큰 첨부/규칙 확인. Claude 호출해 진단.
-- [ ] **4-6. 모니터링** — 첫 24h 집중, 이후 1주.
-  - 관찰: 로그인 성공률(멤버 제보), 편집 401 오탐, 멀티뷰 status 5분 갱신, Vercel Analytics 4xx/5xx.
-  - **롤백 트리거**: ①로그인 전면 불가 ②주요 페이지 백지/JS 크래시 ③데이터 유실 정황. 사소한 스타일 버그는 전진 수정.
-- [ ] **4-7. 롤백 절차** (트리거 발동 시, ~5분)
-  - 시나리오①이었으면: Vercel Deployments → 직전(운영본) 배포 → "Instant Rollback".
-  - 시나리오②였으면: 도메인을 옛 프로젝트로 재연결.
-  - 데이터는 그대로 둬도 안전(운영본은 `/rework`를 안 읽음). 대규모 오염 시에만 4-1 백업 복원.
+  1. 관리자(울산큰고래 or editor 핫케이크_) SOOP 로그인 → Session Storage `soop_user`(role) + `soop_fb`(idToken) 확인.
+  2. 공지 작성→수정→pinned 토글→삭제 / 클립 작성→featured 토글→**태그 넣고 관련아카이브 노출 확인** / 일정 작성 / 아카이브 수정→**카테고리 전환 확인**. 전부 성공.
+  3. 일반 SOOP 계정(권한 미등록) 로그인 → 본인 글 작성/수정 성공, 남의 글 버튼 미노출.
+  4. (심화) 일반 계정 콘솔 강제 호출: `fetch('.../rework/notices/<남의글키>.json?auth='+idToken,{method:'DELETE'})` → 401.
+  - **실패 시**: `soop_fb` 없음=교환 실패(워커/키), 쓰기 401=토큰첨부/규칙. Claude 호출 진단.
+- [ ] **4-6. 모니터링** — 첫 24h 집중, 이후 1주. 로그인 성공률·편집 401 오탐·멀티뷰 5분갱신·Vercel 4xx/5xx.
+  - **롤백 트리거**: ①로그인 전면불가 ②주요페이지 백지/크래시 ③데이터 유실. 사소한 스타일은 전진 수정.
+- [ ] **4-7. 롤백** (~5분): 시나리오①=Vercel Instant Rollback / ②=도메인 재연결. 데이터는 둬도 안전(운영본은 `/rework` 안 읽음).
 - [ ] **4-8. 사후 정리 (안정 1주 후)**
-  - 개시 공지 게시, 클립/공지 실콘텐츠 입력 마저(§2-A-2·3 — 이제 UI로 가능).
-  - 옛 운영 코드 보존 처리(`Whale-Corp-main` → `리워크폐기/` 또는 별도 아카이브), `update_status.py` 폐기.
-  - 레포 README 갱신("이 레포가 goraesangsa.com 운영 코드"), 레포명 `Test_version` 개명 검토
-    (GitHub 리다이렉트 자동이지만 Vercel Git 연결은 재확인 필요).
-  - MEMORY/이 문서 체크박스 갱신.
+  - 개시 공지 게시, 클립/공지/컨텐츠 아카이브 실콘텐츠 입력(§2-A-2·3·7 — UI로 가능).
+  - 옛 운영 코드 보존(`Whale-Corp-main` → `리워크폐기/`), `update_status.py` 폐기.
+  - 레포 README 갱신, 레포명 `Test_version` 개명 검토(Vercel Git 재확인 필요).
+  - §1-1 키 로테이션 재개 검토. MEMORY/이 문서 체크박스 갱신.
 
 ---
 
 ## 5. Cutover 후 백로그 (우선순위순)
 
 ### 5-1. Phase C — 운영 데이터 경로 보안 강제 ⭐권장 1순위
-현재 `.write:true`인 4경로를 조인다. 전제: cutover 완료(운영본의 무토큰 쓰기가 사라진 뒤).
+현재 `.write:true`인 4경로를 조인다. 전제: cutover 완료(운영본 무토큰 쓰기 소멸 후).
 - **`/status`** — 쓰는 주체가 워커뿐. 워커를 서비스계정 인증으로 전환:
-  1. 워커에 Google OAuth2 assertion 플로우 추가 — 이미 있는 WebCrypto 서명 재사용:
-     JWT `{iss: SA_EMAIL, scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/firebase.database", aud: "https://oauth2.googleapis.com/token", iat, exp}`
-     서명 → `POST https://oauth2.googleapis.com/token` (`grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=...`)
-     → access_token(1h, 워커 메모리 캐시) → `PUT /status.json?access_token=...`.
-     서비스계정은 **규칙을 우회**(관리자 권한)하므로 규칙은 그냥 `.write:false`로.
+  1. 워커에 Google OAuth2 assertion 추가(기존 WebCrypto 서명 재사용):
+     JWT `{iss:SA_EMAIL, scope:"...userinfo.email ...firebase.database", aud:"https://oauth2.googleapis.com/token", iat, exp}`
+     → `POST oauth2.googleapis.com/token`(`grant_type=...jwt-bearer&assertion=...`) → access_token(1h 캐시) → `PUT /status.json?access_token=...`.
+     서비스계정은 규칙 우회(관리자) → 규칙은 `.write:false`.
   2. 규칙: `"status": { ".read": true, ".write": false }`.
-  3. 검증: cron 1주기 후 `/status/updated_at` 갱신 확인 + 무토큰 PUT 401.
-- **`/contests` `/schedules` `/crews`(운영 경로)** — cutover 후 아무도 안 씀(리워크는 `/rework` 사용) →
-  전부 `".write": false`. 옛 admin.html이 유통 중이면 깨지지만 이미 리다이렉트됨.
+  3. 검증: cron 1주기 후 `/status/updated_at` 갱신 + 무토큰 PUT 401.
+- **`/contests` `/schedules` `/crews`(운영 경로)** — cutover 후 아무도 안 씀 → 전부 `".write": false`.
 - **`/permissions`** — 현행 유지(`.write:false`).
-- 배포 물: 워커 재배포 1회 + 규칙 게시 1회. 검증 매트릭스에 status/운영경로 시나리오 추가해 재실행.
+- 배포: 워커 재배포 1회 + 규칙 게시 1회. 검증 매트릭스에 status/운영경로 시나리오 추가(부록 C-1 +3종).
 
 ### 5-2. RTDB 규칙 정제
-- **pinned/featured 관리자 전용 강제** (현재 클라 게이팅만 — owner가 자기 글을 pinned 지정 가능한 구멍):
+- **pinned/featured 관리자 전용 강제** (현재 클라 게이팅만 — owner가 자기 글 pinned 지정 가능한 구멍):
   ```
-  notices/$id/.validate 에 추가:
+  notices/$id/.validate 추가:
     (auth.token.admin === true) ||
     (!newData.child('pinned').exists() || newData.child('pinned').val() === (data.child('pinned').exists() ? data.child('pinned').val() : false))
   clips/$id: featured 동일 패턴
   ```
-  적용 후 검증: owner가 pinned:true PATCH → 401, admin → 200.
-- 필드 스키마 validate: `title.isString() && title.val().length <= 200`, url `newData.val().matches(/^https?:\\/\\//)` 계열.
-  (클라 safeUrl의 서버판 — XSS 저장 자체를 차단.)
+  적용 후 검증: owner pinned:true PATCH → 401, admin → 200.
+- 필드 스키마 validate: `title.isString() && length<=200`, url `matches(/^https?:\/\//)` 계열(클라 safeUrl의 서버판).
+  **NEW: `tags`도 검증 대상 — 문자열/배열 타입·개수 상한(예 ≤10). 임베드는 클라 embedUrlOf가 이미 호스트 강제하나, 저장 자체를 조일 거면 url validate와 함께.**
 - ownerNick 위조는 무해(판정은 ownerId)라 보류.
 
 ### 5-3. 관리자 페이지 실연동
-- admin-clips/notices(-members) 테이블: 데모 alert → `WhaleData` 실 CRUD + 일괄 삭제.
-- **기간 반복 일정**(옛 admin.js groupId): 리워크 일정 폼에 "반복(시작일~종료일/요일)" 추가 →
-  N건 create에 같은 `groupId` 주입, 수정 시 "연결된 N건 함께 수정" 옵션. §2-A-4에서 groupId 보존해 둔 것과 연결.
-- **permissions 관리 UI**: 규칙상 콘솔 전용이므로 워커 경유 필요 —
-  `POST /admin/permissions` (idToken 검증→admin claim 확인→서비스계정 access_token으로 쓰기, §5-1 재사용). 중기.
+- admin-clips/notices(-members) 테이블: 데모 alert → `WhaleData` 실 CRUD + 일괄 삭제. (07-08 시점 여전히 정적 목업.)
+- **기간 반복 일정**(옛 admin.js groupId): 리워크 일정 폼에 "반복(시작~종료/요일)" → N건 create에 같은 `groupId`, 수정 시 "연결 N건 함께" 옵션. §2-A-4에서 groupId 보존해 둔 것과 연결.
+- **permissions 관리 UI**: 콘솔 전용이므로 워커 경유 — `POST /admin/permissions`(idToken→admin claim→서비스계정 access_token 쓰기, §5-1 재사용). 중기.
 
 ### 5-4. 기능/콘텐츠
-- **통계 페이지 재구현**(옛 ranking): `/rework/contests` 기반 참여율/승률/현역필터 — 리워크 디자인. §3-B의 `/ranking` 리다이렉트 목적지 교체.
-- LIVE "지금 방송 중" 그리드 섹션 재도입 검토(과거 1회 제거 이력 — 사용자 재요청 시).
-- 클립 임베드 플레이어(현재 외부 링크만): SOOP `play.sooplive.com/{id}/embed`·유튜브 iframe, url 타입 감지.
-- 멤버 스탯 실데이터(SOOP API 방송시간/팔로워) — 워커 경유 캐시.
+- **통계 페이지 재구현**(옛 ranking): `/rework/contests` 기반 참여율/승률/현역필터 — 리워크 디자인. §3-B `/ranking` 목적지 교체.
+- **news 실데이터 전환**: 현재 정적 시드 렌더 → `WhaleData.list`(notices+clips+schedules) 런타임 통합 피드로. (소규모, §2-A-5에서 이관.)
+- **클립 임베드 플레이어 확대**: 07-08 아카이브 관련클립엔 임베드 적용됨. 클립 페이지/상세 본체에도 `embedUrlOf` 재사용해 인라인 재생 도입(현재 외부 링크). embedUrlOf를 공유 헬퍼(site.js)로 승격 검토.
+- **멤버 스탯 실데이터**(SOOP API 방송시간/팔로워) — 워커 경유 캐시 → `members.json` stats placeholder 교체(§2-A-1 연계).
+- LIVE "지금 방송 중" 그리드 재도입 검토(과거 제거 이력 — 재요청 시).
 
 ### 5-5. 운영 위생
-- RTDB 주간 백업 자동화: 워커 cron(주 1회) → `GET /.json`(서비스계정) → GitHub 레포 `backup/` 커밋 또는 R2 저장.
-- 서비스계정 키 로테이션 연 1회(절차 = §1-1). 다음 예정: **2027-07**.
-- `/rework` → 정식 경로 개명(원하면): 서비스계정 복사 → `site.js REWORK_BASE` 변경 → 규칙 이동 → 구경로 동결.
-- Lighthouse 분기 점검(성능/접근성/SEO ≥ 90 목표).
+- RTDB 주간 백업 자동화: 워커 cron(주1회) → `GET /.json`(서비스계정) → GitHub `backup/` 커밋 또는 R2.
+- 서비스계정 키 로테이션(절차 §1-1). **§1-1이 보류 중이므로 cutover 전 1회는 반드시 수행 권장**. 이후 연1회(다음 2027-07).
+- `/rework` → 정식 경로 개명(원하면): 서비스계정 복사 → `site.js REWORK_BASE` → 규칙 이동 → 구경로 동결.
+- Lighthouse 분기 점검(성능/접근성/SEO ≥ 90). 2-B-4 이미지 최적화 후 재측정.
 
 ---
 
 ## 6. 결정 대기 질문 (사용자 답변 필요)
 
-| # | 질문 | 선택지와 권장 | 막히는 단계 |
-|---|---|---|---|
-| Q1 | goraesangsa.com Vercel 프로젝트의 소유 계정·연결 레포는? 접근 가능한가? | 접근 가능→시나리오①, 불가→친구에게 이양 요청 or 시나리오② | §3-A, §4-3 |
-| Q2 | 일정 시스템: 리워크로 통일(운영 73건 이관) vs 기존 유지? | **①통일 권장**(권한강제 일원화, 이관 스크립트는 Claude 몫) | §2-A-4, §4-2 |
-| Q3 | 멤버 16인 최신 직급/부서 확정본? | 운영 조직도+진급 반영해 표로 주시면 반영 | §2-A-1 |
-| Q4 | ranking 통계·기간반복 일정·이미지보호 3종 인수 여부? | 통계=재구현 권장, 반복일정=사용빈도 따라, 이미지보호=취향 | §3-D, §5 |
-| Q5 | cutover 희망 시기? | §1·§2 완료 후 아무 때나. 방송 없는 낮 권장 | §4 |
+| # | 질문 | 선택지와 권장 | 막히는 단계 | 상태 |
+|---|---|---|---|---|
+| Q1 | goraesangsa.com Vercel 프로젝트 소유 계정·연결 레포? 접근 가능? | 접근 가능→시나리오①, 불가→이양 요청/시나리오② | §3-A,§4-3 | 대기 |
+| Q2 | 일정: 리워크 통일(73건 이관) vs 기존 유지? | **①통일 권장**(이관 스크립트는 Claude) | §2-A-4,§4-2 | 대기 |
+| Q3 | 멤버 16인 최신 직급/부서? | ~~표로 주시면 반영~~ **✅해결(운영 조직도에서 추출, 2-A-1 완료)** | §2-A-1 | ✅완료 |
+| Q4 | ranking 통계·기간반복·이미지보호 인수 여부? | 통계=재구현 권장, 반복=빈도 따라, 이미지보호=취향 | §3-D,§5 | 대기 |
+| Q5 | cutover 희망 시기? | §1-4·§2 완료 후. 방송 없는 낮 권장 | §4 | 대기 |
+| Q6 | 서비스계정 키(§1-1) 교체 재개 시점? | 07-08 "무시" → cutover 전 1회 권장(§5-5) | §1-1 | 보류 |
 
 ---
 
@@ -322,13 +348,16 @@
 | 리스크 | 확률 | 영향 | 완화/대응 |
 |---|---|---|---|
 | Vercel 프로젝트 접근 불가(친구 계정) | 중 | cutover 지연 | Q1 조기 확인, 시나리오② 준비됨 |
-| cutover 후 실로그인 실패(redirect/CORS 미스매치) | 저 | 편집 불가(열람은 정상) | 경로·www 사전 점검(§3-B), 4-5 즉시 검증, 워커 ALLOWED_ORIGIN 확인 |
-| 일정 이관 변환 오류(id→명, 전체태그) | 중 | 캘린더 오표기 | 매핑표 기반 스크립트+건수/스팟 검증, 원본 73건 불변이라 재이관 가능 |
-| 옛 URL 유입 깨짐(카톡 공유 링크 등) | 중 | 404 | §3-B 리다이렉트 맵, 배포 직후 6종 실측 |
-| 브라우저 캐시로 "안 바뀜" 오인 | 높 | 혼선(실제 장애 아님) | 이 프로젝트 반복 패턴 — Ctrl+Shift+R 먼저, grep/curl로 사실 확인 |
-| 규칙 강화 후 예상 밖 401(관리자인데 거부 등) | 저 | 편집 장애 | admin claim은 로그인 시점 발급 — permissions 변경 후엔 재로그인 필요함을 공지 |
-| 서비스계정 키 재노출 | 저 | DB 전권 탈취 | §1-1 로테이션, 키는 채팅/레포/OneDrive에 절대 게시 금지, Cloudflare secret에만 |
-| OneDrive 동기화 충돌(레포가 OneDrive 안) | 중 | 파일 잠김/유실 | 대량 산출물 생성 금지(기존 사고 교훈), 커밋·푸시로 GitHub가 원본 역할 |
+| cutover 후 실로그인 실패(redirect/CORS) | 저 | 편집 불가(열람 정상) | 경로·www 사전 점검(§3-B), 4-5 즉시 검증, 워커 ALLOWED_ORIGIN 확인 |
+| 일정 이관 변환 오류(id→명, 전체태그) | 중 | 캘린더 오표기 | 매핑표+§2-A-1 확정 16인 교차검증, 건수/스팟 검증, 원본 불변이라 재이관 가능 |
+| 아카이브 이관 시 category 누락 | 중 | 필터에 안 잡힘 | §3-C 스크립트에서 `category` 명시 주입 + 렌더 기본값(크루대전) 이중안전 |
+| 클립/컨텐츠 태그 오타로 관련클립 미매칭 | 중 | 연결 누락(장애 아님) | 소문자 정규화 매칭, 입력 시 기존 태그 재사용 권장. §5-3에서 태그 자동완성 검토 |
+| 악의적 클립 url로 iframe 주입 시도 | 저 | (차단됨) | 07-08 embedUrlOf 호스트강제로 차단(부록 C-2). §5-2 서버 url validate로 저장차단 추가 가능 |
+| 옛 URL 유입 깨짐(카톡 공유) | 중 | 404 | §3-B 리다이렉트 맵, 배포 직후 6종 실측 |
+| 브라우저 캐시 "안 바뀜" 오인 | 높 | 혼선(장애 아님) | 반복 패턴 — Ctrl+Shift+R 먼저, grep/curl로 사실 확인 |
+| 규칙 강화 후 예상 밖 401(관리자인데 거부) | 저 | 편집 장애 | admin claim은 로그인 시점 발급 — permissions 변경 후 재로그인 필요 공지 |
+| 서비스계정 키 재노출/현행 노출키 방치 | 중 | DB 전권 탈취 | §1-1(현재 보류) cutover 전 로테이션, 키는 채팅/레포/OneDrive 절대 금지, Cloudflare secret에만 |
+| OneDrive 동기화 충돌(레포가 OneDrive 안) | 중 | 파일 잠김/유실 | 대량 산출물 금지, 커밋·푸시로 GitHub가 원본 |
 
 ---
 
@@ -341,7 +370,9 @@
   ├─ 로그인: SOOP OAuth(response_type=code) → /auth/callback.html
   │    └ 워커 /auth/token(code→access_token) → /auth/firebase(→커스텀토큰)
   │      → identitytoolkit signInWithCustomToken(→idToken) → sessionStorage.soop_fb
-  └─ 쓰기: WhaleData.create/update/remove → RTDB /rework/*.json?auth=idToken
+  ├─ 쓰기: WhaleData.create/update/remove → RTDB /rework/*.json?auth=idToken
+  └─ 아카이브 상세: D.list('contests')+D.list('clips') → 태그 교집합 "관련 클립"
+       → embedUrlOf(호스트강제)로 YouTube/SOOP 임베드 iframe (07-08)
 
 [Cloudflare Worker  whale-status-worker.kyefyx.workers.dev]
   ├─ POST /auth/token · GET /auth/me · POST /auth/firebase · GET /search/bj
@@ -357,22 +388,30 @@
 
 ## 부록 B. 데이터 사전
 
-**`/rework/notices`** (실측): `title, cat(카테고리), date"YYYY-MM-DD", body[문단배열], pinned:bool(관리자),
-ownerId, ownerNick, createdAt, updatedAt(ms)`
-**`/rework/clips`** (폼 기준): `title, creator, category, date, duration, views:int, img(url|grad), url(https만),
-desc, featured:bool(관리자, 단일 유지), owner/시간 4종`
+**`src/content/members.json`** (빌드타임 실렌더 소스, 16인): `slug, name, role(직책), dept(임원|비서부|게임부|컨텐츠부),
+rank(정렬키 임원0~/부장10~/사원20~/인턴30~), color(그라데이션), initials, img(리워크루트 상대), bio, stats[{n,u}]×3, soop(id)`.
+직급/부서/순서 권위 소스 = 운영 index.html #org (07-08 동기화, §2-A-1 표).
+**`/rework/notices`** (실측): `title, cat(카테고리), date"YYYY-MM-DD", body[문단배열], pinned:bool(관리자), owner/시간 4종`
+**`/rework/clips`** (폼 기준, 07-08 `tags` 추가): `title, creator, category, desc, url(https만), img(url|비우면 임베드/그라데이션),
+tags[문자열](아카이브 연결키), featured:bool(관리자, 단일 유지), owner/시간 4종`
 **`/rework/schedules`** (폼: date/time/title/members/type/desc): `date, time"HH:MM", title, members[명],
-type(개인방송|합방|대회|특집|공지방송 — TYPE_COLORS 색맵), desc, owner/시간 4종 (+이관분은 groupId 보존)`
-**`/rework/contests`** (운영 스키마 그대로): `title, date, games{game_NNN:{name,result:bool(true=승)}},
-members[명], opponents[{crewId,name,result:bool ⚠️렌더에서 true=패(반전, 폼이 왕복 보정)}], rank:int,
-total_teams:int, notes, videos[{label,type,url}]`
+type(개인방송|합방|대회|특집|공지방송 — TYPE_COLORS 색맵), desc, owner/시간 4종 (+이관분 groupId 보존)`
+**`/rework/contests`** (07-08 `category`·`tags` 추가): `category(크루대전|컨텐츠, 없으면 크루대전), title, date,
+games{game_NNN:{name,result:bool(true=승)}}, members[명], opponents[{crewId,name,result:bool ⚠️렌더 true=패(반전, 폼 왕복보정)}],
+rank:int(컨텐츠는 null), total_teams:int, notes, videos[{label,type,url}], tags[문자열], owner/시간 4종`
 **운영 `/schedules`**: `date, event, members[soop id | "goraesangsa"=전체], groupId?`
-**운영 `/contests`**: rework/contests와 동일 스키마(원본)
+**운영 `/contests`**: rework/contests와 동일 스키마(원본, category/tags 없음 → 이관 시 주입)
 **`/crews`**: `{pushKey: {aliases[], currentName}}`
-**`/status`**: `{members{soopId:{id,name,is_live,title,viewers,thumbnail,live_url}}, updated_at}` — 워커가 5분마다 PUT
+**`/status`**: `{members{soopId:{id,name,is_live,title,viewers,thumbnail,live_url}}, updated_at}` — 워커 5분 PUT
 
-## 부록 C. 규칙 검증 매트릭스 (2026-07-07 11/11 PASS — 재실행용 명세)
+**임베드 규칙(`embedUrlOf`, build_archive_detail 인라인)**: 입력 url → `new URL` 파싱 →
+host ∈ {`youtu.be`,`youtube.com`,`youtube-nocookie.com`,`sooplive.com`,`sooplive.co.kr`}(정확일치 또는 `.`접미사) →
+YouTube: `[\w-]{6,}` videoId 검증 후 `https://www.youtube.com/embed/{id}` / SOOP: `/player/(\d+)` → `https://{host}/player/{id}/embed`.
+그 외/파싱실패/비http(s) → null(정적 카드 폴백). **원본 문자열 패스스루 없음(주입 차단).**
 
+## 부록 C. 검증 매트릭스
+
+### C-1. RTDB 규칙 (2026-07-07 11/11 PASS — 재실행용)
 서비스계정 키로 임의 uid/claim 커스텀토큰 발급 → signInWithCustomToken → REST 호출:
 | # | 시나리오 | 기대 |
 |---|---|---|
@@ -387,8 +426,30 @@ total_teams:int, notes, videos[{label,type,url}]`
 | 9 | 일반 A: POST /rework/contests | 401 |
 | 10 | admin: contests 생성·삭제 | 200/200 |
 | 11 | 무토큰 GET /rework/clips | 200 (읽기 공개) |
-스크립트는 세션 휘발(scratchpad `rules-matrix.mjs`) — 필요 시 "검증 매트릭스 다시 돌려줘"로 재작성 요청.
-Phase C 이후엔 +3종: 무토큰 PUT /status 401, 무토큰 PUT /contests 401, 워커 cron 후 updated_at 갱신.
+스크립트는 세션 휘발(scratchpad). "검증 매트릭스 다시 돌려줘"로 재작성. ⚠️§1-1 키 보류 중이라 실행하려면 현행 키 사용(폐기 전).
+Phase C 이후 +3종: 무토큰 PUT /status 401, 무토큰 PUT /contests 401, 워커 cron 후 updated_at 갱신.
+
+### C-2. embedUrlOf 보안 (2026-07-08 10/10 PASS — node 재실행용)
+`pages/archive-detail.html`에서 `hostMatch`+`embedUrlOf` 추출 → `new Function`/`eval`로 케이스 검증:
+| 입력 | 기대 |
+|---|---|
+| `vod.sooplive.com/player/195579607` | `.../player/195579607/embed` |
+| `vod.sooplive.com/player/195579607/`(끝슬래시) | `.../player/195579607/embed` |
+| `vod.sooplive.com/player/195579607/embed`(이미embed) | 그대로 |
+| `youtu.be/bgNd-gPb_ok?si=xx` | `youtube.com/embed/bgNd-gPb_ok` |
+| `youtube.com/watch?v=abc123&t=5` | `youtube.com/embed/abc123` |
+| `evil.com/sooplive.com/player/1`(경로위장) | **null** |
+| `sooplive.com.evil.com/player/1`(서브도메인위장) | **null** |
+| `evilsooplive.com/player/1`(접두위장) | **null** |
+| `evil.com/x?u=youtube.com/embed/abc`(쿼리위장) | **null** |
+| `javascript:...//sooplive.com/player/1` | **null** |
+
+### C-3. 07-08 회귀 체크 (build 후 자동)
+- `python3 src/build.py` → 18페이지 생성 성공.
+- 전 페이지 인라인 `<script>` `new Function` 파싱 0 에러(38개).
+- 시드 버튼: clips/schedule/notices=0, archive=유지. 죽은 `WHALE_*` 주입 0.
+- 멤버 페이지에 옛 placeholder 부서(영업부/기획실 등) 0.
+- 클립 폼 `tags`, 아카이브 폼 `tags`+`category` 존재. 칩 `data-f`=all/크루대전/컨텐츠.
 
 ## 부록 D. 명령어 치트시트
 
@@ -399,8 +460,10 @@ python3 src/build.py
 python3 -m http.server 8792
 # 푸시 (브랜치명 정리 전)
 git push origin Test_version:main
-# 워커 신규 엔드포인트 생존 확인 (401이면 정상)
+# 워커 신규 엔드포인트 생존 확인 (401/400이면 정상)
 curl -s -o /dev/null -w "%{http_code}" -X POST https://whale-status-worker.kyefyx.workers.dev/auth/firebase
 # RTDB 컬렉션 건수 훑기
 curl -s "https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/rework.json?shallow=true"
+# embedUrlOf 보안 재검증(부록 C-2) / 규칙 매트릭스(부록 C-1)
+#   → "임베드 보안 테스트 돌려줘" / "검증 매트릭스 다시 돌려줘"
 ```
