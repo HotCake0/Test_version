@@ -42,10 +42,22 @@
     hambBtn.setAttribute('aria-expanded', 'false');
     hambBtn.setAttribute('aria-label', '메뉴 열기');
     document.body.style.overflow = '';
+    $$('.grp.open', gnbOverlay).forEach(function (g) {
+      g.classList.remove('open');
+      var t = $('.grp-t', g);
+      if (t) t.setAttribute('aria-expanded', 'false');
+    });
   }
   if (hambBtn && gnbOverlay) {
     hambBtn.addEventListener('click', function () { menuOpen ? closeGnb() : openGnb(); });
     $$('a', gnbOverlay).forEach(function (a) { a.addEventListener('click', closeGnb); });
+    /* 서브메뉴 탭/클릭 토글 — 터치·키보드 접근 (hover는 @media(hover:hover) 전용) */
+    $$('.grp-t', gnbOverlay).forEach(function (t) {
+      t.addEventListener('click', function () {
+        var open = t.parentElement.classList.toggle('open');
+        t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
   }
 
   /* ---- 로그인 모달 + 숲(SOOP) 권한 게이팅 (운영본과 동일 패턴) ---- */
@@ -273,6 +285,10 @@
     memberModalAva.innerHTML = (m.img ? '<img src="' + escH(m.img) + '" alt="' + escH(m.name) + '" onerror="this.style.display=\'none\'">' : '') + escH(m.initials || '');
     var set = function (id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
     set('memberModalDept', m.dept || '');
+    var deptEl = document.getElementById('memberModalDept');
+    /* 부서 그라데이션 위 어두운 스크림 — 밝은 색 끝단에서도 흰 글자 대비 확보 */
+    if (deptEl) deptEl.style.background = m.color
+      ? 'linear-gradient(rgba(5,7,18,.38),rgba(5,7,18,.38)),' + m.color : '';
     set('memberModalName', m.name || '');
     set('memberModalRole', m.role || '');
     set('memberModalBio',  m.bio || '');

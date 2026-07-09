@@ -18,7 +18,7 @@
 <!-- ===== 헤더 ===== -->
 <header id="header">
   <div class="header-in">
-    <a class="h-logo" href="#">고래<span class="lk">상사</span></a>
+    <a class="h-logo" href="index.html">고래<span class="lk">상사</span></a>
     <div class="h-right">
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button"
@@ -34,51 +34,51 @@
   <nav aria-label="주요 메뉴">
     <ul class="gnb-menu">
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">01</span>메인 · 소식</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button>
         <ul class="gnb-sub">
           <li><a class="active" href="index.html"><span class="sn">1-1</span>메인 홈</a></li>
           <li><a href="pages/news.html"><span class="sn">1-2</span>최신 소식</a></li>
         </ul>
       </li>
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">02</span>크루 · 멤버</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button>
         <ul class="gnb-sub">
           <li><a href="pages/crew.html"><span class="sn">2-1</span>크루 소개</a></li>
           <li><a href="pages/members.html"><span class="sn">2-2</span>멤버 목록</a></li>
         </ul>
       </li>
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">03</span>아카이브</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button>
         <ul class="gnb-sub">
           <li><a href="pages/archive.html"><span class="sn">3-1</span>통합 아카이브</a></li>
         </ul>
       </li>
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">04</span>클립</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button>
         <ul class="gnb-sub">
           <li><a href="pages/clips.html"><span class="sn">4-1</span>베스트 클립</a></li>
         </ul>
       </li>
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">05</span>방송 일정</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button>
         <ul class="gnb-sub">
           <li><a href="pages/schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li>
         </ul>
       </li>
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">06</span>멀티뷰</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button>
         <ul class="gnb-sub">
           <li><a href="pages/multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li>
         </ul>
       </li>
       <li class="grp">
-        <div class="grp-t" tabindex="0"><span class="mn">07</span>공지</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button>
         <ul class="gnb-sub">
           <li><a href="pages/notices.html"><span class="sn">7-1</span>공지사항</a></li>
         </ul>
       </li>
       <li class="grp admin-only">
-        <div class="grp-t" tabindex="0"><span class="mn">08</span>관리자</div>
+        <button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button>
         <ul class="gnb-sub">
           <li><a href="pages/admin.html"><span class="sn">8-1</span>관리자 홈</a></li>
           <li><a href="pages/admin-login.html"><span class="sn">8-2</span>로그인</a></li>
@@ -109,6 +109,7 @@
     고래<span style="color:var(--accent)">상사</span>
   </div>
   <div class="intro-clip" id="introClip"></div>
+  <button class="intro-skip" id="introSkip" type="button" hidden>인트로 건너뛰기 →</button>
   <div class="hero-container" id="heroContainer">
     <h1>회사 버추얼 크루<br><span class="g">고래상사</span>에 오신 걸 환영합니다</h1>
     <p>방송, 클립, 멤버 정보를 한곳에서. 16인 크루의 모든 콘텐츠를 고래상사 공식 홈페이지에서 만나보세요.</p>
@@ -125,7 +126,6 @@
      =================================================== -->
 <section class="sec02" id="sec02">
   <div class="sec02-head img-ani bottom-top">
-    <span class="sec-label">고래상사의 비즈니스</span>
     <h2>BUSINESS</h2>
     <p class="sub-txt">고래상사 크루들의 다양한 활동을 만나보세요.</p>
   </div>
@@ -139,7 +139,6 @@
           <div class="txt-bx">
             <div class="slide-num">01</div>
             <div class="card-text">
-              <div class="card-en">Live Streaming</div>
               <div class="card-ko">라이브<br>방송</div>
               <div class="card-desc">매일 이어지는 고래상사 멤버들의 실시간 방송. 출근부터 퇴근까지 함께하세요.</div>
             </div>
@@ -152,7 +151,6 @@
           <div class="txt-bx">
             <div class="slide-num">02</div>
             <div class="card-text">
-              <div class="card-en">Member Management</div>
               <div class="card-ko">멤버<br>매니지먼트</div>
               <div class="card-desc">16인 크루 각각의 역할과 성장을 지원하는 체계적인 매니지먼트 시스템.</div>
             </div>
@@ -165,7 +163,6 @@
           <div class="txt-bx">
             <div class="slide-num">03</div>
             <div class="card-text">
-              <div class="card-en">Content Creation</div>
               <div class="card-ko">콘텐츠<br>제작</div>
               <div class="card-desc">기획부터 편집까지, 고품질 버추얼 콘텐츠를 제작하여 팬들과 공유합니다.</div>
             </div>
@@ -178,7 +175,6 @@
           <div class="txt-bx">
             <div class="slide-num">04</div>
             <div class="card-text">
-              <div class="card-en">Goods &amp; Commerce</div>
               <div class="card-ko">굿즈·<br>커머스</div>
               <div class="card-desc">고래상사 캐릭터 굿즈와 한정판 콜라보 상품으로 팬 여러분을 만나봅니다.</div>
             </div>
@@ -191,7 +187,6 @@
           <div class="txt-bx">
             <div class="slide-num">05</div>
             <div class="card-text">
-              <div class="card-en">Fan Community</div>
               <div class="card-ko">팬<br>커뮤니티</div>
               <div class="card-desc">바다 너머 팬들과 함께 만드는 고래상사의 세계. 여러분도 고래 가족이 될 수 있어요.</div>
             </div>
@@ -208,7 +203,7 @@
 <section class="sec03 scroller" id="sec03">
   <div class="sec03-head">
     <div><h2 class="img-ani bottom-top">크루 &amp; <em>멤버</em></h2></div>
-    <a class="more-link" href="#">전체 멤버 보기 →</a>
+    <a class="more-link" href="pages/members.html">전체 멤버 보기 →</a>
   </div>
   <div class="swiper swiper-member" id="memberSwiper">
     <div class="swiper-wrapper" id="memberTrack"></div>
@@ -228,7 +223,7 @@
       <h2>베스트 <em>클립</em></h2>
     </div>
     <div class="orig">
-      <a class="orig-feat img-ani left-right" id="origFeat" href="#" aria-label="대표 영상 재생">
+      <a class="orig-feat img-ani left-right" id="origFeat" href="pages/clips.html" aria-label="대표 영상 재생">
         <div class="orig-feat-bg" id="origFeatBg"
              style="background:linear-gradient(135deg,#1f2060,#2040a0)"></div>
         <img id="origImg" src="img/시상식.jpg" alt="제1회 고래상사 시상식 하이라이트"
@@ -236,24 +231,24 @@
         <span class="orig-play" aria-hidden="true">▶</span>
       </a>
       <ul class="orig-list img-ani right-left" id="origList">
-        <li><a class="orig-item active" href="#"
+        <li><a class="orig-item active" href="pages/clips.html"
                data-img="img/시상식.jpg" data-grad="linear-gradient(135deg,#1f2060,#2040a0)">
           <span class="oi-t">제1회 고래상사 시상식 하이라이트</span>
           <span class="oi-ar" aria-hidden="true">↗</span></a></li>
-        <li><a class="orig-item" href="#"
+        <li><a class="orig-item" href="pages/clips.html"
                data-img="img/신입생환영회.jpg" data-grad="linear-gradient(135deg,#0a1a20,#0d2a30)">
           <span class="oi-t">신입생 환영회 단체 합방 풀영상</span>
           <span class="oi-ar" aria-hidden="true">↗</span></a></li>
-        <li><a class="orig-item" href="#"
+        <li><a class="orig-item" href="pages/clips.html"
                data-img="img/첫인상.jpg" data-grad="linear-gradient(135deg,#1a0f30,#2a0a40)">
           <span class="oi-t">내 첫인상은 어때? 익명 토크쇼</span>
           <span class="oi-ar" aria-hidden="true">↗</span></a></li>
-        <li><a class="orig-item" href="#" data-grad="linear-gradient(135deg,#1f4fd8,#0fb5b0)">
+        <li><a class="orig-item" href="pages/clips.html" data-grad="linear-gradient(135deg,#1f4fd8,#0fb5b0)">
           <span class="oi-t">전 직원 크루대전 명장면 모음집</span>
           <span class="oi-ar" aria-hidden="true">↗</span></a></li>
       </ul>
     </div>
-    <div class="orig-more"><a class="more" href="#">클립 갤러리 전체 보기 ↓</a></div>
+    <div class="orig-more"><a class="more" href="pages/clips.html">클립 갤러리 전체 보기 ↓</a></div>
     <div class="two">
       <div class="panel img-ani bottom-top">
         <h3>이번 주 방송 일정</h3>
@@ -265,20 +260,20 @@
           <span class="desc"><b>오후 8시</b> — 고래상사 전사 공지 방송</span></div>
         <div class="sched-row"><span class="day">토 07.19</span>
           <span class="desc"><b>오후 3시</b> — 주말 특집 콜라보 방송</span></div>
-        <div class="panel-foot"><a class="btn sm" href="#">전체 일정 보기 →</a></div>
+        <div class="panel-foot"><a class="btn sm" href="pages/schedule.html">전체 일정 보기 →</a></div>
       </div>
       <div class="panel img-ani bottom-top tran01">
         <h3>콘텐츠 아카이브</h3>
         <div class="arch-row">
           <div class="t">전체 다시보기 <span>지난 방송 풀영상 모아보기</span></div>
-          <a class="btn sm" href="#">바로가기</a></div>
+          <a class="btn sm" href="pages/archive.html">바로가기</a></div>
         <div class="arch-row">
           <div class="t">크루대전 기록 <span>역대 대회 전적과 통계</span></div>
-          <a class="btn sm" href="#">바로가기</a></div>
+          <a class="btn sm" href="pages/archive.html">바로가기</a></div>
         <div class="arch-row">
           <div class="t">베스트 클립 <span>화제의 장면 하이라이트</span></div>
-          <a class="btn sm" href="#">바로가기</a></div>
-        <div class="panel-foot"><a class="btn sm primary" href="#">아카이브 탐색하기 →</a></div>
+          <a class="btn sm" href="pages/clips.html">바로가기</a></div>
+        <div class="panel-foot"><a class="btn sm primary" href="pages/archive.html">아카이브 탐색하기 →</a></div>
       </div>
     </div>
   </div>
@@ -291,7 +286,7 @@
     <div class="footer-links">
       <a class="btn sm ghost" href="pages/notices.html">공지사항</a>
       <a class="btn sm ghost admin-only" href="pages/admin.html">관리자 페이지</a>
-      <a class="btn sm ghost" href="#">YouTube</a>
+      <a class="btn sm ghost" href="https://www.youtube.com/channel/UCIchCOLwLBMD87quHlNuXjQ" target="_blank" rel="noopener noreferrer">YouTube</a>
       <a class="btn sm ghost" href="와이어프레임/index.html" style="border-color:rgba(47,99,255,.3);color:#9aa6bd;">와이어프레임 전체보기</a>
     </div>
   </div>
@@ -493,9 +488,21 @@
     hambBtn.setAttribute('aria-expanded','false');
     hambBtn.setAttribute('aria-label','메뉴 열기');
     document.body.style.overflow = '';
+    gnbOverlay.querySelectorAll('.grp.open').forEach(function (g) {
+      g.classList.remove('open');
+      var t = g.querySelector('.grp-t');
+      if (t) t.setAttribute('aria-expanded','false');
+    });
   }
   hambBtn.addEventListener('click', function () { menuOpen ? closeGnb() : openGnb(); });
   gnbOverlay.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeGnb); });
+  /* 서브메뉴 탭/클릭 토글 — 터치·키보드 접근 (hover는 @media(hover:hover) 전용) */
+  gnbOverlay.querySelectorAll('.grp-t').forEach(function (t) {
+    t.addEventListener('click', function () {
+      var open = t.parentElement.classList.toggle('open');
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
 
   /* -------------------------------------------------------
      로그인 모달 — 숲(SOOP) OAuth + 권한 게이팅
@@ -586,30 +593,47 @@
   var introClip     = document.getElementById('introClip');
   var heroContainer = document.getElementById('heroContainer');
 
-  /* 인트로는 세션당 한 번만 재생. 새로고침(스크롤 내려간 상태 포함)에서는
-     인트로/스크롤 잠금 없이 히어로를 바로 보여준다. */
+  /* 인트로는 최초 방문 1회만 재생(localStorage). 새로고침·재방문에서는
+     인트로/스크롤 잠금 없이 히어로를 바로 보여준다. 재생 중 건너뛰기 버튼 노출. */
   var introDone = false;
-  try { introDone = sessionStorage.getItem('whaleIntroPlayed') === '1'; } catch (e) {}
+  try { introDone = localStorage.getItem('whaleIntroPlayed') === '1'; } catch (e) {}
 
   if (PRM || introDone) {
     heroContainer.classList.add('on');
   } else {
-    try { sessionStorage.setItem('whaleIntroPlayed', '1'); } catch (e) {}
+    try { localStorage.setItem('whaleIntroPlayed', '1'); } catch (e) {}
+    var introSkip   = document.getElementById('introSkip');
+    var introTimers = [];
     /* 첫 3600ms 스크롤 잠금 */
     var _blk = function (e) { e.preventDefault(); };
-    window.addEventListener('wheel',     _blk, { passive: false });
-    window.addEventListener('touchmove', _blk, { passive: false });
-    setTimeout(function () {
+    var _unlock = function () {
       window.removeEventListener('wheel',     _blk);
       window.removeEventListener('touchmove', _blk);
-    }, 3600);
+    };
+    window.addEventListener('wheel',     _blk, { passive: false });
+    window.addEventListener('touchmove', _blk, { passive: false });
+    introTimers.push(setTimeout(_unlock, 3600));
     /* 원본 207~224행 그대로 */
-    setTimeout(function () { introLogo.classList.add('on'); },      700);
-    setTimeout(function () { introClip.classList.add('on'); },     1400);
-    setTimeout(function () { introClip.classList.add('on2'); },    1700);
-    setTimeout(function () { introLogo.classList.add('go'); },     2000);
-    setTimeout(function () { introClip.classList.add('active'); }, 2700);
-    setTimeout(function () { heroContainer.classList.add('on'); }, 4000);
+    introTimers.push(setTimeout(function () { introLogo.classList.add('on'); },      700));
+    introTimers.push(setTimeout(function () { introClip.classList.add('on'); },     1400));
+    introTimers.push(setTimeout(function () { introClip.classList.add('on2'); },    1700));
+    introTimers.push(setTimeout(function () { introLogo.classList.add('go'); },     2000));
+    introTimers.push(setTimeout(function () { introClip.classList.add('active'); }, 2700));
+    introTimers.push(setTimeout(function () {
+      heroContainer.classList.add('on');
+      if (introSkip) introSkip.hidden = true;
+    }, 4000));
+    if (introSkip) {
+      introSkip.hidden = false;
+      introSkip.addEventListener('click', function () {
+        introTimers.forEach(clearTimeout);
+        _unlock();
+        introLogo.classList.add('on', 'go');
+        introClip.classList.add('on', 'on2', 'active');
+        heroContainer.classList.add('on');
+        introSkip.hidden = true;
+      });
+    }
   }
 
   /* -------------------------------------------------------
@@ -786,7 +810,11 @@
     var m = MEMBERS[idx];
     memberModalAva.style.background = m.color;
     memberModalAva.innerHTML = (m.img ? '<img src="' + m.img + '" alt="' + m.name + '" onerror="this.style.display=\'none\'">' : '') + m.initials;
-    document.getElementById('memberModalDept').textContent = m.dept;
+    var deptEl = document.getElementById('memberModalDept');
+    deptEl.textContent = m.dept;
+    /* 부서 그라데이션 위 어두운 스크림 — 밝은 색 끝단에서도 흰 글자 대비 확보 */
+    deptEl.style.background = m.color
+      ? 'linear-gradient(rgba(5,7,18,.38),rgba(5,7,18,.38)),' + m.color : '';
     document.getElementById('memberModalName').textContent = m.name;
     document.getElementById('memberModalRole').textContent = m.role;
     document.getElementById('memberModalBio').textContent  = m.bio;

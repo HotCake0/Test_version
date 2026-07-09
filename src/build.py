@@ -78,7 +78,7 @@ def header_and_drawer(current_slug):
         grp_cls = "grp admin-only" if g.get("admin") else "grp"
         groups_html.append(
             f'<li class="{grp_cls}">'
-            f'<div class="grp-t" tabindex="0"><span class="mn">{g["no"]}</span>{esc(g["title"])}</div>'
+            f'<button class="grp-t" type="button" aria-expanded="false"><span class="mn">{g["no"]}</span>{esc(g["title"])}</button>'
             f'<ul class="gnb-sub">{"".join(sub)}</ul></li>')
 
     header = """<header id="header"><div class="header-in">
