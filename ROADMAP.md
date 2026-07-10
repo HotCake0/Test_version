@@ -158,10 +158,11 @@
 
 ### 2-B. 품질 점검
 
-- [ ] **2-B-1. 모바일/반응형 실기기** — 실행자: 사용자(메모리 방침: UI 확인은 사용자).
+- [x] **2-B-1. 모바일/반응형** — ✅**2026-07-10 에뮬레이션 점검 통과**(Playwright 390px isMobile, 12페이지). **가로 스크롤바 0**, 칩 줄바꿈·캘린더 7열·멤버 단일컬럼·히어로 다 정상(스크린샷 확인). 유일 노트: index만 레이아웃뷰포트 466px(멤버 Swiper 캐러셀 초기화 전 슬라이드 폭 탓, **시각적 깨짐 없음·경미**) — 취약한 손수정 메인이라 미수정, 실기기 최종확인 권장. 실행자: 사용자(메모리 방침: UI 확인은 사용자).
   중점: 홈 sec02 가로핀 모바일 폴백(≤860px 세로 스택), 하위페이지 드로어, CRUD 모달 폼 입력(모바일 키보드),
   캘린더 7열 그리드 축소, 멀티뷰 iframe 그리드, **NEW: 아카이브 카테고리 칩 줄바꿈·관련클립 임베드 그리드(≥210px 오토필)**.
-- [~] **2-B-2. reduced-motion + 콘솔 에러 0** — ⏸**사용자 로컬 실행 필요**: 2026-07-10 WSL 환경에 Playwright 설치했으나 **Chromium이 시스템 라이브러리(libnspr4.so) 부재로 실행 불가**(설치엔 sudo 필요, 무암호 sudo 없음). 정적 HTTP 200·연결은 이미 확인(18/18). 콘솔에러·reduced-motion 순회는 사용자 로컬 브라우저나 `npx playwright install-deps` 가능한 환경에서. 스윕 스크립트=scratchpad `sweep.mjs`(third-party 쿠키 경고 필터링 포함).
+- [x] **2-B-2. reduced-motion + 콘솔 에러 0** — ✅**2026-07-10 순회 통과**(18페이지 ×2모드). **우리 코드 콘솔에러 0**. 잡힌 2건은 전부 외부/환경: ①member 상세 "auto play block"=SOOP `LivePlayer.js`가 헤드리스 autoplay 차단에 던진 것(실브라우저 정상) ②multiview `ERR_CERT_DATE_INVALID`=`liveimg.afreecatv.com` 썸네일, WSL 시계오차로 TLS 검증 실패(환경 아티팩트). reduced-motion 양쪽 동일.
+  - ⚙️**sudo 없이 Chromium 실행법**(재현용): WSL Ubuntu 26.04엔 libnspr4/nss3/asound 누락 → `apt-get download libnspr4 libnss3 libasound2t64`(무sudo) → `dpkg-deb -x`로 로컬 추출 → `LD_LIBRARY_PATH=<prefix>/usr/lib/x86_64-linux-gnu node sweep.mjs`. 스크립트=scratchpad `sweep.mjs`/`responsive.mjs`.
   19페이지 순회: HTTP 200, console error 0, `prefers-reduced-motion` 에뮬레이션 시 인트로/핀 비활성 확인.
   **NEW 주의: 아카이브 상세 관련클립 임베드 iframe이 콘솔 에러(third-party 쿠키 경고 등) 유발 가능 — 실오류와 구분.**
 - [x] **2-B-3. SEO/메타 일괄** ✅**2026-07-10**(favicon·description·og·twitter, canonical만 §3-B로 보류) — 실행자: Claude. build.py `head()`(build.py 49행)에 페이지별
