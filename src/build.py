@@ -46,14 +46,37 @@ def href(slug):
 
 # ---------- 공유 partial ----------
 
-def head(title, page_css=""):
+# og:image 등 소셜 스크레이퍼용 절대경로. canonical 경로는 라우팅 확정(ROADMAP §3-B) 후 별도 추가.
+BASE_URL = "https://goraesangsa.com"
+
+
+def page_description(slug):
+    """페이지별 meta description (site.json label 기반 합성)."""
+    gp = PAGE_BY_SLUG.get(slug)
+    if gp:
+        return f"고래상사 {gp[1]['label']} — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서."
+    return "고래상사 크루 공식 사이트 — 방송·클립·일정·아카이브를 한 곳에서."
+
+
+def head(title, page_css="", slug=None):
     css = f"<style>{page_css}</style>" if page_css else ""
+    ttl = f"{title} · 고래상사"
+    desc = page_description(slug)
     return f"""<!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-store">
-<title>{esc(title)} · 고래상사</title>
+<title>{esc(ttl)}</title>
+<meta name="description" content="{esc(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="고래상사">
+<meta property="og:title" content="{esc(ttl)}">
+<meta property="og:description" content="{esc(desc)}">
+<meta property="og:image" content="{BASE_URL}/favicon.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
 <script>if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('js-anim');</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
@@ -180,7 +203,7 @@ def tail(scripts=""):
 
 def write(slug, title, body, page_css="", scripts="", need_member_modal=False):
     mm = member_modal() if need_member_modal else ""
-    doc = (head(title, page_css)
+    doc = (head(title, page_css, slug)
            + header_and_drawer(slug)
            + '<main class="pg-wrap">' + body + '</main>'
            + footer() + mm + tail(scripts))

@@ -90,7 +90,7 @@
     4. 새 JSON 파일도 secret 등록 직후 삭제.
   - 합격 기준(Claude가 실행): ① 가짜 토큰 `POST /auth/firebase` → 400(워커 생존) ② 검증 매트릭스 1·2번 재실행.
 - [x] **1-2. 현행 키 JSON 삭제** — ✅ **2026-07-08 완료**(Claude가 `~/Downloads/whaie-corp-firebase-adminsdk-fbsvc-04cee49ab6.json` 삭제). 레포엔 키 값 없음(ROADMAP엔 키 ID·절차만).
-- [ ] **1-3. (선택) 로컬 브랜치명 정리** — 실행자: Claude. 이후 `git push`만으로 푸시 가능.
+- [x] **1-3. (선택) 로컬 브랜치명 정리** — ✅ **2026-07-10 완료**(`Test_version`→`main`, `origin/main` 추적). 이제 `git push`만으로 푸시.
   ```bash
   git branch -m Test_version main
   git fetch origin && git branch -u origin/main main
@@ -164,16 +164,16 @@
 - [ ] **2-B-2. reduced-motion + 콘솔 에러 0** — 실행자: Claude(Playwright).
   19페이지 순회: HTTP 200, console error 0, `prefers-reduced-motion` 에뮬레이션 시 인트로/핀 비활성 확인.
   **NEW 주의: 아카이브 상세 관련클립 임베드 iframe이 콘솔 에러(third-party 쿠키 경고 등) 유발 가능 — 실오류와 구분.**
-- [ ] **2-B-3. SEO/메타 일괄** — 실행자: Claude. build.py `head()`(build.py 49행)에 페이지별
+- [x] **2-B-3. SEO/메타 일괄** ✅**2026-07-10**(favicon·description·og·twitter, canonical만 §3-B로 보류) — 실행자: Claude. build.py `head()`(build.py 49행)에 페이지별
   `<meta name="description">`, `og:title/description/image`(대표 이미지 1장 지정 — 후보: 운영 `favicon.png` 또는 홈 히어로), `<link rel="canonical">`.
   홈 index.html은 손수정(검증본 인라인 유지 — head만 추가). 합격: 전 페이지 meta 존재 + 카톡 공유 미리보기 정상.
-- [ ] **2-B-4. 이미지 최적화** — 실행자: Claude(Pillow 12.2.0). **실측 기반 구체화**:
+- [x] **2-B-4. 이미지 최적화** ✅**2026-07-10 완료**(img/ 7.5MB→1.6MB, wave-bg 삭제+초상 재압축, `2eb5a0d`) — 실행자: Claude(Pillow 12.2.0). **실측 기반 구체화**:
   - 최우선 `img/wave-bg.png` **4.8MB** → 배경용이라 리사이즈+재압축(예: 폭 1920 축소 + PNG 최적화/WebP, 목표 <300KB).
   - 200KB 초과 초상 6장(멜로딩딩·삐요코·채하나·조아라·프하·울산큰고래) → 품질 유지 재압축 목표 <150KB.
   - `loading="lazy"` 빌드 템플릿 일괄 부여(멤버/클립/관련클립 img). 합격: `img/` 총량 7.5MB→<2MB, 육안 화질 저하 없음.
-- [ ] **2-B-5. 상세페이지 이상 접근** — `?id=존재하지않는키`, `?i=999` 접근 시 폴백 문구 확인(구현돼 있음 — 재확인만).
+- [x] **2-B-5. 상세페이지 이상 접근** ✅**2026-07-10 재확인**(5개 상세 모두 폴백 문구 존재) — `?id=존재하지않는키`, `?i=999` 접근 시 폴백 문구 확인(구현돼 있음 — 재확인만).
   아카이브 상세: 없는 id → "기록을 찾을 수 없습니다" + 목록 링크(07-08 문구 확인).
-- [ ] **2-B-6. favicon/터치아이콘** — 운영본 `Whale-Corp-main/favicon.png` 이식(build.py `head()`에 `<link rel="icon">` + apple-touch-icon). 현재 리워크에 favicon 전무.
+- [x] **2-B-6. favicon/터치아이콘** ✅**2026-07-10**(운영본 favicon.png 루트 이식, 전 페이지 icon+apple-touch) — 운영본 `Whale-Corp-main/favicon.png` 이식(build.py `head()`에 `<link rel="icon">` + apple-touch-icon). 현재 리워크에 favicon 전무.
 
 ---
 
