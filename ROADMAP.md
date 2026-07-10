@@ -191,10 +191,10 @@
   2. 기존 프로젝트에서 도메인 제거 → 새 프로젝트에 `goraesangsa.com`+`www.goraesangsa.com` 추가.
   3. DNS는 이미 Vercel을 가리키므로 보통 재검증만으로 붙음(TXT 요구 시 등록처에서 추가).
   4. 롤백 = 도메인을 옛 프로젝트로 되붙임(수 분).
-- 공통: `vercel.json`을 **사전에 레포에 커밋**(§3-B 리다이렉트 포함). apex→www 리다이렉트 유지 확인
+- 공통: `vercel.json`을 **사전에 레포에 커밋**(§3-B 리다이렉트 포함 — ✅2026-07-10 완료). apex→www 리다이렉트 유지 확인
   (redirect_uri가 www 고정이므로 www가 정식. `curl -sI https://goraesangsa.com` → www로 30x).
 
-### 3-B. URL 호환 — 리다이렉트 맵 (vercel.json 초안)
+### 3-B. URL 호환 — 리다이렉트 맵 (✅ 2026-07-10 `vercel.json` 레포 루트 커밋 완료 — Vercel 문서로 문법 재검증(permanent true=308·cleanUrls .html 자동 308), 대상 10건 존재 확인, `$schema` 추가. 남은 것: cutover 때 admin 목적지 §3-D 재확인만)
 - 운영 6페이지 → 리워크 대응 (cleanUrls 유지 — `.html` 접근도 자동 처리):
 
   | 옛 URL | 새 URL | 근거 |
