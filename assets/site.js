@@ -316,6 +316,15 @@
     if (mn) mn.addEventListener('click', function () { curIdx = (curIdx + 1) % MEMBERS.length; fillModal(curIdx); });
   }
 
+  /* ---- 이미지 저장 방지 (운영본 image-protect.js 이식) ----
+     우클릭 저장·드래그 저장만 차단 — 완전 차단은 불가(개발자도구로 우회 가능) */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+
   /* ---- 공용 ESC ---- */
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;

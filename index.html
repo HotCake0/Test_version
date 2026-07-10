@@ -895,6 +895,15 @@
     });
   }
 
+  /* 이미지 저장 방지 (운영본 image-protect.js 이식 — site.js와 동일 구현)
+     우클릭 저장·드래그 저장만 차단 — 완전 차단은 불가(개발자도구로 우회 가능) */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+
 })();
 </script>
 </body>
