@@ -225,6 +225,7 @@ PAGE_CSS = """
 .mlive{position:absolute;top:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;
   font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 9px;border-radius:7px;background:var(--hot);color:#fff;
   box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mlive[hidden]{display:none}  /* [hidden] 속성이 위 display:inline-flex에 밀리므로 명시 필요(오프라인 오표시 방지) */
 .mlive .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
 .mlive .mv-n{font-weight:700;opacity:.9}
 .mlive:hover{background:#ff1f4b}
@@ -268,7 +269,17 @@ PAGE_CSS = """
 .mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
 .mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
 .mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
-.mdetail .navrow{display:flex;gap:10px}
+.mdetail .navrow{display:flex;gap:10px;flex-wrap:wrap}
+.mdetail .soop-row{margin:0 0 14px}
+.mdetail .soop-row .btn{width:100%;justify-content:center;font-weight:800}
+/* 상세 라이브 임베드 (방송중일 때 초상 대신 노출) */
+.mdetail .media-live{position:relative;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line-2);background:#0a0f1e}
+.mdetail .media-live .embed{position:relative;aspect-ratio:16/9;width:100%}
+.mdetail .media-live iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.mdetail .live-tag{position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.04em;padding:5px 11px;border-radius:8px;background:var(--hot);color:#fff;box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mdetail .live-tag .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
+@media(prefers-reduced-motion:reduce){.mdetail .live-tag .d{animation:none}}
+.mdetail .live-title{padding:12px 14px;font-size:14px;font-weight:700;color:var(--ink);background:var(--surface);border-top:1px solid var(--line);word-break:keep-all}
 /* 클립 갤러리 대표 섹션 */
 .clips-hero{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(24px,3.6vw,56px);align-items:center;margin-bottom:clamp(40px,6vw,80px)}
 @media(max-width:900px){.clips-hero{grid-template-columns:1fr}}
@@ -475,8 +486,18 @@ def build_members():
     apply(map);}).catch(function(){});}
   load();setInterval(load,300000);
 })();</script>"""
+    # 카드 클릭 → 멤버 상세페이지 이동(모달 대신). LIVE 뱃지는 stopPropagation(위 live)으로 방송으로 감.
+    nav = """<script>(function(){
+  var grid=document.getElementById('mGrid');if(!grid)return;
+  [].forEach.call(grid.querySelectorAll('.mcard[data-idx]'),function(c){
+    var idx=c.getAttribute('data-idx');
+    function go(){location.href='member.html?i='+idx;}
+    c.addEventListener('click',go);
+    c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+  });
+})();</script>"""
     write("members", "멤버 목록", body, PAGE_CSS,
-          scripts=members_json_script() + filt + live, need_member_modal=True)
+          scripts=members_json_script() + filt + live + nav)
 
 
 def build_member():
@@ -489,33 +510,54 @@ def build_member():
   var i=parseInt(new URLSearchParams(location.search).get('i')||'0',10);
   if(isNaN(i)||i<0||i>=M.length)i=0;
   var PRM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var SURL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
+  var STATUS={};  // soop id -> {is_live, viewers, title, live_url}
   function countUp(el,t){if(PRM){el.textContent=t.toLocaleString();return;}
     var s=null;(function step(ts){if(!s)s=ts;var p=Math.min((ts-s)/1200,1);
     el.textContent=Math.floor((1-Math.pow(1-p,3))*t).toLocaleString();
     if(p<1)requestAnimationFrame(step);})(performance.now());}
   function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
-  function render(){
+  // st.live_url은 외부(status 피드) 값 → http/https만 허용, 아니면 신뢰 URL로 폴백(href javascript: 차단)
+  function safeHttp(u,fb){try{var p=new URL(u,location.href);return (p.protocol==='http:'||p.protocol==='https:')?u:fb;}catch(e){return fb;}}
+  // soop id는 자체 데이터(members.json)에서 오므로 신뢰됨. encodeURIComponent로만 방어.
+  function render(animate){
     var m=M[i];if(!m)return;
     document.title=m.name+' · 고래상사';
+    var st=STATUS[m.soop]||{}, live=!!st.is_live, sid=encodeURIComponent(m.soop||'');
     var img=m.img?'<img src="'+esc(m.img)+'" alt="'+esc(m.name)+'" onerror="this.style.display=\\'none\\'">':'';
+    // 방송중이면 초상 대신 라이브 임베드(멀티뷰와 동일한 play.sooplive.com/{id}/embed)
+    var media = live
+      ? '<div class="media-live"><div class="embed">'+
+          '<span class="live-tag"><span class="d"></span>LIVE '+esc((st.viewers||0).toLocaleString())+'명</span>'+
+          '<iframe src="https://play.sooplive.com/'+sid+'/embed" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen scrolling="no" title="'+esc(m.name)+' 방송"></iframe>'+
+        '</div>'+(st.title?'<div class="live-title">'+esc(st.title)+'</div>':'')+'</div>'
+      : '<div class="portrait" style="background:'+esc(m.color)+'">'+img+'<div class="ava-ph">'+esc(m.initials)+'</div></div>';
+    // SOOP 버튼: 방송중=방송으로 / 아니면=방송국으로
+    var soopHref = live ? safeHttp(st.live_url, 'https://play.sooplive.co.kr/'+sid)
+                        : ('https://www.sooplive.co.kr/station/'+sid);
+    var soopBtn = '<a class="btn sm '+(live?'primary':'')+'" href="'+esc(soopHref)+'" target="_blank" rel="noopener">'+
+                  (live?'▶ 방송 보러가기':'SOOP 방송국 →')+'</a>';
     var stats=(m.stats||[]).map(function(s,k){
       return '<div class="stat"><div class="n" id="ds'+k+'">0</div><div class="u">'+esc(s.u)+'</div></div>';}).join('');
     var el=document.getElementById('mDetail');
-    el.innerHTML=
-      '<div class="portrait" style="background:'+esc(m.color)+'">'+img+
-        '<div class="ava-ph">'+esc(m.initials)+'</div></div>'+
+    el.innerHTML= media +
       '<div><div class="dept-label">'+esc(m.dept)+'</div>'+
         '<h2>'+esc(m.name)+'</h2><div class="role">'+esc(m.role)+'</div>'+
         '<p class="bio">'+esc(m.bio)+'</p>'+
         '<div class="stats">'+stats+'</div>'+
+        '<div class="soop-row">'+soopBtn+'</div>'+
         '<div class="navrow"><button class="btn sm" id="dPrev">← 이전 멤버</button>'+
         '<button class="btn sm" id="dNext">다음 멤버 →</button>'+
-        '<a class="btn sm primary" href="members.html">전체 목록</a></div></div>';
-    (m.stats||[]).forEach(function(s,k){var e=document.getElementById('ds'+k);if(e)countUp(e,s.n);});
-    document.getElementById('dPrev').onclick=function(){i=(i-1+M.length)%M.length;render();};
-    document.getElementById('dNext').onclick=function(){i=(i+1)%M.length;render();};
+        '<a class="btn sm" href="members.html">전체 목록</a></div></div>';
+    (m.stats||[]).forEach(function(s,k){var e=document.getElementById('ds'+k);if(!e)return;
+      animate?countUp(e,s.n):(e.textContent=s.n.toLocaleString());});
+    document.getElementById('dPrev').onclick=function(){i=(i-1+M.length)%M.length;render(true);};
+    document.getElementById('dNext').onclick=function(){i=(i+1)%M.length;render(true);};
   }
-  render();
+  render(true);  // 즉시 페인트(초상). 상태 도착 후 방송중이면 임베드로 갱신
+  fetch(SURL+'?v='+Date.now()).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.members)Object.keys(d.members).forEach(function(k){var m=d.members[k];STATUS[m.id]=m;});
+  }).catch(function(){}).then(function(){render(false);});
 })();</script>"""
     write("member", "멤버 상세", body, PAGE_CSS,
           scripts=members_json_script() + render)

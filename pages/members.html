@@ -44,6 +44,7 @@
 .mlive{position:absolute;top:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;
   font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 9px;border-radius:7px;background:var(--hot);color:#fff;
   box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mlive[hidden]{display:none}  /* [hidden] 속성이 위 display:inline-flex에 밀리므로 명시 필요(오프라인 오표시 방지) */
 .mlive .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
 .mlive .mv-n{font-weight:700;opacity:.9}
 .mlive:hover{background:#ff1f4b}
@@ -87,7 +88,17 @@
 .mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
 .mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
 .mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
-.mdetail .navrow{display:flex;gap:10px}
+.mdetail .navrow{display:flex;gap:10px;flex-wrap:wrap}
+.mdetail .soop-row{margin:0 0 14px}
+.mdetail .soop-row .btn{width:100%;justify-content:center;font-weight:800}
+/* 상세 라이브 임베드 (방송중일 때 초상 대신 노출) */
+.mdetail .media-live{position:relative;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line-2);background:#0a0f1e}
+.mdetail .media-live .embed{position:relative;aspect-ratio:16/9;width:100%}
+.mdetail .media-live iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.mdetail .live-tag{position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.04em;padding:5px 11px;border-radius:8px;background:var(--hot);color:#fff;box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mdetail .live-tag .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
+@media(prefers-reduced-motion:reduce){.mdetail .live-tag .d{animation:none}}
+.mdetail .live-title{padding:12px 14px;font-size:14px;font-weight:700;color:var(--ink);background:var(--surface);border-top:1px solid var(--line);word-break:keep-all}
 /* 클립 갤러리 대표 섹션 */
 .clips-hero{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(24px,3.6vw,56px);align-items:center;margin-bottom:clamp(40px,6vw,80px)}
 @media(max-width:900px){.clips-hero{grid-template-columns:1fr}}
@@ -195,26 +206,6 @@
 <div class="scroll-topwrp" id="scrollTopWrp">
   <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="맨 위로 이동">
     <span class="ar" aria-hidden="true">↑</span>TOP</button>
-</div><div class="member-modal-bg" id="memberModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="memberModalName">
-  <div class="member-modal">
-    <button class="modal-close" id="memberModalClose" type="button" aria-label="닫기">×</button>
-    <div class="modal-ava" id="memberModalAva"></div>
-    <div class="modal-body">
-      <div class="modal-dept" id="memberModalDept"></div>
-      <div class="modal-name" id="memberModalName"></div>
-      <div class="modal-role" id="memberModalRole"></div>
-      <div class="modal-bio"  id="memberModalBio"></div>
-      <div class="modal-stats">
-        <div class="stat"><div class="stat-n" id="mstat0">0</div><div class="stat-u" id="mstat0u">—</div></div>
-        <div class="stat"><div class="stat-n" id="mstat1">0</div><div class="stat-u" id="mstat1u">—</div></div>
-        <div class="stat"><div class="stat-n" id="mstat2">0</div><div class="stat-u" id="mstat2u">—</div></div>
-      </div>
-      <div class="modal-nav-row">
-        <button class="btn sm" id="memberModalPrev" type="button">← 이전</button>
-        <button class="btn sm" id="memberModalNext" type="button">다음 →</button>
-      </div>
-    </div>
-  </div>
 </div><div class="login-modal-bg" id="loginModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="loginTitle">
   <div class="login-modal">
     <button class="login-close" id="loginClose" type="button" aria-label="닫기">×</button>
@@ -272,5 +263,13 @@
     var map={};if(d&&d.members){Object.keys(d.members).forEach(function(k){var m=d.members[k];map[m.id]=m;});}
     apply(map);}).catch(function(){});}
   load();setInterval(load,300000);
+})();</script><script>(function(){
+  var grid=document.getElementById('mGrid');if(!grid)return;
+  [].forEach.call(grid.querySelectorAll('.mcard[data-idx]'),function(c){
+    var idx=c.getAttribute('data-idx');
+    function go(){location.href='member.html?i='+idx;}
+    c.addEventListener('click',go);
+    c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+  });
 })();</script>
 </body></html>

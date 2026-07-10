@@ -44,6 +44,7 @@
 .mlive{position:absolute;top:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;
   font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 9px;border-radius:7px;background:var(--hot);color:#fff;
   box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mlive[hidden]{display:none}  /* [hidden] 속성이 위 display:inline-flex에 밀리므로 명시 필요(오프라인 오표시 방지) */
 .mlive .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
 .mlive .mv-n{font-weight:700;opacity:.9}
 .mlive:hover{background:#ff1f4b}
@@ -87,7 +88,17 @@
 .mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
 .mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
 .mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
-.mdetail .navrow{display:flex;gap:10px}
+.mdetail .navrow{display:flex;gap:10px;flex-wrap:wrap}
+.mdetail .soop-row{margin:0 0 14px}
+.mdetail .soop-row .btn{width:100%;justify-content:center;font-weight:800}
+/* 상세 라이브 임베드 (방송중일 때 초상 대신 노출) */
+.mdetail .media-live{position:relative;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line-2);background:#0a0f1e}
+.mdetail .media-live .embed{position:relative;aspect-ratio:16/9;width:100%}
+.mdetail .media-live iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.mdetail .live-tag{position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.04em;padding:5px 11px;border-radius:8px;background:var(--hot);color:#fff;box-shadow:0 4px 14px rgba(255,77,77,.5)}
+.mdetail .live-tag .d{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite}
+@media(prefers-reduced-motion:reduce){.mdetail .live-tag .d{animation:none}}
+.mdetail .live-title{padding:12px 14px;font-size:14px;font-weight:700;color:var(--ink);background:var(--surface);border-top:1px solid var(--line);word-break:keep-all}
 /* 클립 갤러리 대표 섹션 */
 .clips-hero{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(24px,3.6vw,56px);align-items:center;margin-bottom:clamp(40px,6vw,80px)}
 @media(max-width:900px){.clips-hero{grid-template-columns:1fr}}
