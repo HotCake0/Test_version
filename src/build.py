@@ -438,8 +438,8 @@ def build_crew():
         page_head_block("CREW", "고래상사의 사람들", "크루 소개")
         + '<section class="crew-hero img-ani bottom-top">'
           '<div><h2>버추얼 크루 <em>고래상사</em>는<br>16인의 개성으로 굴러갑니다</h2>'
-          '<p>대표이사부터 신입사원까지, 회사 역할극이라는 하나의 세계관 안에서 각자의 자리를 맡아 매일 방송을 이어갑니다. '
-          '게임·콘텐츠·영업·기획·방송… 부서는 달라도 \'웃음\'이라는 목표는 같습니다.</p>'
+          '<p>사장부터 인턴까지, 회사 역할극이라는 하나의 세계관 안에서 각자의 자리를 맡아 매일 방송을 이어갑니다. '
+          '비서·게임·컨텐츠… 부서는 달라도 \'웃음\'이라는 목표는 같습니다.</p>'
           '<div class="crew-metrics">'
           '<div class="crew-metric"><div class="n">16</div><div class="u">크루 인원</div></div>'
           f'<div class="crew-metric"><div class="n">{len(depts)}</div><div class="u">부서</div></div>'
@@ -2322,46 +2322,86 @@ NEWS_CSS = PAGE_CSS + """
 .news-hero .k{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase}
 .news-hero h2{margin:10px 0 12px;font-size:clamp(24px,3.4vw,40px);font-weight:900;letter-spacing:-.03em;word-break:keep-all}
 .news-hero p{margin:0 0 18px;color:var(--ink-2);line-height:1.7;word-break:keep-all}
+.news-empty{padding:14px 0;font-size:14px;color:var(--ink-2)}
 """
 
 
 def build_news():
-    notices_sorted = sorted(enumerate(NOTICES),
-                            key=lambda t: (not t[1].get("pinned"), t[1]["date"]), reverse=False)
-    notices_sorted = sorted(notices_sorted, key=lambda t: (0 if t[1].get("pinned") else 1, ),)
-    # 히어로 = 고정 공지 첫 번째
-    pinned = next((i for i, n in enumerate(NOTICES) if n.get("pinned")), 0)
-    hn = NOTICES[pinned]
-    hero = ('<div class="news-hero img-ani bottom-top"><div class="k">HEADLINE</div>'
-            f'<h2>{esc(hn["title"])}</h2><p>{esc(hn["body"][0])}</p>'
-            f'<a class="btn primary sm" href="notice.html?i={pinned}">자세히 보기 →</a></div>')
-
-    ncol = "".join(
-        f'<div class="news-row" onclick="location.href=\'notice.html?i={i}\'" role="button" tabindex="0">'
-        f'<span class="tag" style="--tc:{NOTICE_COLORS.get(n["cat"],"#2f63ff")}">{esc(n["cat"])}</span>'
-        f'<span class="t">{esc(n["title"])}</span><span class="dt">{esc(n["date"][5:])}</span></div>'
-        for i, n in sorted(enumerate(NOTICES), key=lambda t: t[1]["date"], reverse=True)[:5])
-
-    ccol = "".join(
-        f'<div class="news-row" onclick="location.href=\'clip.html?i={i}\'" role="button" tabindex="0">'
-        f'<span class="tag" style="--tc:#0fb5b0">{esc(c["category"])}</span>'
-        f'<span class="t">{esc(c["title"])}</span><span class="dt">{esc(c.get("date","")[5:])}</span></div>'
-        for i, c in list(enumerate(CLIPS))[:5])
-
-    scol = "".join(
-        f'<div class="news-row" onclick="location.href=\'schedule-detail.html?i={i}\'" role="button" tabindex="0">'
-        f'<span class="tag" style="--tc:{TYPE_COLORS.get(e["type"],"#2f63ff")}">{esc(e["type"])}</span>'
-        f'<span class="t">{esc(e["title"])}</span><span class="dt">{esc(e["date"][5:])}</span></div>'
-        for i, e in sorted(enumerate(SCHEDULE), key=lambda t: t[1]["date"])[:5])
+    # 07-11 런타임 전환(§2.5-3): 정적 시드 대신 WhaleData.list로 공지/클립/일정 실데이터 렌더.
+    # 히어로 = 고정 공지 우선(없으면 최신 공지). 데이터 없으면 히어로 숨김 + 패널별 빈 문구.
+    hero = ('<div class="news-hero img-ani bottom-top" id="newsHero" hidden><div class="k">HEADLINE</div>'
+            '<h2 id="newsHeroTitle"></h2><p id="newsHeroBody"></p>'
+            '<a class="btn primary sm" id="newsHeroLink" href="notices.html">자세히 보기 →</a></div>')
 
     body = (page_head_block("NEWS", "고래상사 메인", "최신 소식") + hero
             + '<div class="news-cols img-ani bottom-top">'
-              f'<div class="news-panel"><h3>📢 공지사항<a href="notices.html">전체 →</a></h3>{ncol}</div>'
-              f'<div class="news-panel"><h3>🎬 새 클립<a href="clips.html">전체 →</a></h3>{ccol}</div>'
+              '<div class="news-panel"><h3>📢 공지사항<a href="notices.html">전체 →</a></h3>'
+              '<div id="newsN"><div class="news-empty">불러오는 중...</div></div></div>'
+              '<div class="news-panel"><h3>🎬 새 클립<a href="clips.html">전체 →</a></h3>'
+              '<div id="newsC"><div class="news-empty">불러오는 중...</div></div></div>'
               '</div>'
               '<div style="height:clamp(24px,3vw,36px)"></div>'
-              f'<div class="news-panel img-ani bottom-top"><h3>🗓 다가오는 방송<a href="schedule.html">캘린더 →</a></h3>{scol}</div>')
-    write("news", "최신 소식", body, NEWS_CSS)
+              '<div class="news-panel img-ani bottom-top"><h3>🗓 다가오는 방송<a href="schedule.html">캘린더 →</a></h3>'
+              '<div id="newsS"><div class="news-empty">불러오는 중...</div></div></div>')
+
+    js = """<script>(function(){
+  var D=window.WhaleData;
+  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  var NC=""" + json.dumps(NOTICE_COLORS, ensure_ascii=False) + """;
+  var TC=""" + json.dumps(TYPE_COLORS, ensure_ascii=False) + """;
+  var elN=document.getElementById('newsN'), elC=document.getElementById('newsC'), elS=document.getElementById('newsS');
+  var heroEl=document.getElementById('newsHero');
+  function row(href,color,tag,title,dt){
+    return '<div class="news-row" data-href="'+esc(href)+'" role="button" tabindex="0">'
+      +'<span class="tag" style="--tc:'+(color||'#2f63ff')+'">'+esc(tag)+'</span>'
+      +'<span class="t">'+esc(title)+'</span><span class="dt">'+esc(dt)+'</span></div>';
+  }
+  function empty(el,msg){el.innerHTML='<div class="news-empty">'+esc(msg)+'</div>';}
+  function md(s){return (s||'').slice(5);}
+
+  D.list('notices').then(function(items){
+    if(!items.length){empty(elN,'등록된 공지가 없습니다.');return;}
+    var byDate=items.slice().sort(function(a,b){return a.date<b.date?1:(a.date>b.date?-1:0);});
+    var hn=items.filter(function(n){return n.pinned;})[0]||byDate[0];
+    document.getElementById('newsHeroTitle').textContent=hn.title;
+    document.getElementById('newsHeroBody').textContent=(hn.body&&hn.body[0])||'';
+    document.getElementById('newsHeroLink').href='notice.html?id='+encodeURIComponent(hn.id);
+    heroEl.hidden=false;
+    elN.innerHTML=byDate.slice(0,5).map(function(n){
+      return row('notice.html?id='+encodeURIComponent(n.id),NC[n.cat],n.cat,n.title,md(n.date));
+    }).join('');
+  }).catch(function(){empty(elN,'공지를 불러오지 못했습니다.');});
+
+  D.list('clips').then(function(items){
+    if(!items.length){empty(elC,'등록된 클립이 없습니다.');return;}
+    var sorted=items.slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+    elC.innerHTML=sorted.slice(0,5).map(function(c){
+      var dt=c.createdAt?new Date(c.createdAt).toISOString().slice(5,10):'';
+      return row('clip.html?id='+encodeURIComponent(c.id),'#0fb5b0',c.category||'클립',c.title,dt);
+    }).join('');
+  }).catch(function(){empty(elC,'클립을 불러오지 못했습니다.');});
+
+  D.list('schedules').then(function(items){
+    var today=new Date();today.setHours(0,0,0,0);
+    var iso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+    var up=items.filter(function(e){return e.date>=iso;}).sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0);});
+    if(!up.length){empty(elS,items.length?'예정된 방송이 없습니다.':'등록된 일정이 없습니다.');return;}
+    elS.innerHTML=up.slice(0,5).map(function(e){
+      return row('schedule-detail.html?id='+encodeURIComponent(e.id),TC[e.type],e.type||'방송',e.title,md(e.date));
+    }).join('');
+  }).catch(function(){empty(elS,'일정을 불러오지 못했습니다.');});
+
+  document.addEventListener('click',function(e){
+    var r=e.target.closest&&e.target.closest('.news-row[data-href]');
+    if(r)location.href=r.getAttribute('data-href');
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var r=e.target.closest&&e.target.closest('.news-row[data-href]');
+    if(r&&e.target===r){e.preventDefault();location.href=r.getAttribute('data-href');}
+  });
+})();</script>"""
+    write("news", "최신 소식", body, NEWS_CSS, scripts=js)
 
 
 def build():
