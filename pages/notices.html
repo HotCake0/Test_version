@@ -28,7 +28,7 @@
 .pg-sub{margin:0;font-size:clamp(15px,1.4vw,18px);color:var(--ink-2)}
 /* 필터 바 */
 .pg-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:clamp(24px,3vw,40px)}
-.chip{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;
+.chip{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;min-height:36px;
   border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--brand);color:var(--ink)}
 .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
@@ -214,7 +214,7 @@
 .ndetail-title{font-size:clamp(26px,4vw,48px);font-weight:900;letter-spacing:-.03em;margin:14px 0 8px;word-break:keep-all}
 .ndetail-date{font-size:13px;color:var(--ink-2);margin-bottom:28px;font-family:'JetBrains Mono',monospace}
 .ndetail-body{border-top:1px solid var(--line);padding-top:26px}
-.ndetail-body p{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.85;margin:0 0 18px;word-break:keep-all}
+.ndetail-body p{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.85;margin:0 0 18px;word-break:keep-all;max-width:70ch}
 .ndetail-nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px;border-top:1px solid var(--line);padding-top:26px}
 @media(max-width:640px){.nrow{flex-wrap:wrap;gap:8px}.ntitle{flex:1 1 100%;order:3}}
 </style></head><body>

@@ -34,6 +34,7 @@
     hambBtn.setAttribute('aria-expanded', 'true');
     hambBtn.setAttribute('aria-label', '메뉴 닫기');
     document.body.style.overflow = 'hidden';
+    var f = $('.grp-t', gnbOverlay); if (f) f.focus();  /* 키보드/SR 사용자를 메뉴 안으로 */
   }
   function closeGnb() {
     menuOpen = false;
@@ -42,6 +43,7 @@
     hambBtn.setAttribute('aria-expanded', 'false');
     hambBtn.setAttribute('aria-label', '메뉴 열기');
     document.body.style.overflow = '';
+    if (gnbOverlay.contains(document.activeElement)) hambBtn.focus();  /* 포커스 복귀 */
     $$('.grp.open', gnbOverlay).forEach(function (g) {
       g.classList.remove('open');
       var t = $('.grp-t', g);
@@ -243,8 +245,7 @@
     var wt = window.scrollY + window.innerHeight;
     $$('.img-ani').forEach(function (el) {
       var it = el.getBoundingClientRect().top + window.scrollY;
-      if (wt > it + 120) el.classList.add('img-aniload');
-      else if (window.innerWidth > 768) el.classList.remove('img-aniload');
+      if (wt > it + 120) el.classList.add('img-aniload');  /* once-only — 역스크롤 재실행은 산만해 제거(2026-07-11 critique) */
     });
   }
   if (PRM) {
@@ -335,6 +336,35 @@
   });
   document.addEventListener('dragstart', function (e) {
     if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+
+  /* ---- 모달 포커스 관리 — 열릴 때 이동, Tab 순환, 닫힐 때 복귀 (role=dialog 공통) ---- */
+  var lastModalFocus = null;
+  function modalFocusables(root) {
+    return $$('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])', root)
+      .filter(function (el) { return !el.disabled && el.offsetParent !== null; });
+  }
+  $$('[role="dialog"][aria-modal="true"]').forEach(function (d) {
+    new MutationObserver(function () {
+      if (!d.hidden) {
+        lastModalFocus = document.activeElement;
+        var f = modalFocusables(d);
+        if (f[0]) f[0].focus(); else { d.setAttribute('tabindex', '-1'); d.focus(); }
+      } else if (lastModalFocus) {
+        try { lastModalFocus.focus(); } catch (e) {}
+        lastModalFocus = null;
+      }
+    }).observe(d, { attributes: true, attributeFilter: ['hidden'] });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var d = null;
+    $$('[role="dialog"][aria-modal="true"]').forEach(function (x) { if (!x.hidden) d = x; });
+    if (!d) return;
+    var f = modalFocusables(d); if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (document.activeElement === last || !d.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
   });
 
   /* ---- 공용 ESC ---- */

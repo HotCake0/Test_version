@@ -28,7 +28,7 @@
 .pg-sub{margin:0;font-size:clamp(15px,1.4vw,18px);color:var(--ink-2)}
 /* 필터 바 */
 .pg-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:clamp(24px,3vw,40px)}
-.chip{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;
+.chip{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;min-height:36px;
   border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--brand);color:var(--ink)}
 .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
@@ -222,6 +222,7 @@
 .st-gap{height:clamp(24px,3vw,36px)}
 .st-empty{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
 .st-foot{margin-top:clamp(28px,4vw,44px)}
+@media(max-width:768px){.chip{min-height:40px}}
 @media(max-width:480px){.st-row{grid-template-columns:minmax(60px,auto) 1fr auto;gap:8px}
   .st-row .val{font-size:11px}.st-row .nm{font-size:13px}}
 </style></head><body>
@@ -275,6 +276,9 @@
   function badgeCls(p){return p>=60?'high':p>=40?'mid':'low';}
   function bar(w,l){var t=w+l;if(!t)return '';var wp=Math.round(w/t*100);
     return '<div class="st-bar"><span class="w" style="width:'+wp+'%"></span><span class="l" style="width:'+(100-wp)+'%"></span></div>';}
+  /* 참여율 등 '크기'는 단색 채움 — 빨강(패배 상태색)을 잔여분에 쓰지 않는다 */
+  function barSolo(v,t){var p=t?Math.round(Math.min(v,t)/t*100):0;
+    return '<div class="st-bar"><span class="w" style="width:'+p+'%"></span></div>';}
   /* 다자전: opponents는 상위 등수부터 — index >= rank-1 이면 고래상사가 위(승) */
   function oppResult(c,i){
     if((c.opponents||[]).length===1){var r=c.opponents[0].result;return r===undefined?null:!!r;}
@@ -334,7 +338,7 @@
     elM.innerHTML=mRows.length?mRows.map(function(n){
       var s=memberMap[n],ap=Math.round(s.att/totalEvents*100),wp=s.att?Math.round(s.win/s.att*100):0;
       return '<div class="st-row"><span class="nm">'+esc(n)+'</span>'
-        +bar(s.att,totalEvents-s.att)
+        +barSolo(s.att,totalEvents)
         +'<span class="val">'+s.att+'회('+ap+'%) <span class="st-badge '+badgeCls(wp)+'">승률 '+wp+'%</span></span></div>';
     }).join(''):'<div class="st-empty">멤버 기록이 없습니다.</div>';
     var gNames=Object.keys(gameMap).sort(function(a,b){return (gameMap[b].w+gameMap[b].l)-(gameMap[a].w+gameMap[a].l);});
