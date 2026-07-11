@@ -325,8 +325,39 @@
   function renderActions(){
     var html='';
     if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="clWriteBtn">+ 클립 추가</button>';
+    if(U.isAdmin()&&!ALL.length)html+='<button type="button" class="btn sm" id="clImportBtn">운영 아카이브에서 클립 불러오기 (최초 1회)</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('clWriteBtn');if(wb)wb.addEventListener('click',function(){clOpenForm('create',null,reload);});
+    var ib=document.getElementById('clImportBtn');if(ib)ib.addEventListener('click',importClips);
+  }
+  /* 운영 /contests의 videos 중 라벨에 '클립'/'편집'이 든 것만 골라 일괄 등록 (§2.5-4).
+     클릭 시점의 운영 데이터를 그대로 읽으므로 cutover 직전 추가분도 포함됨.
+     tags에 대회 제목을 넣어둠 — 아카이브 기록에 같은 태그를 달면 상세의 '관련 클립'으로 연결. */
+  function importClips(){
+    if(!U.isAdmin())return;
+    if(!confirm('운영 아카이브의 클립 영상만 골라 등록합니다. 계속할까요?'))return;
+    fetch('https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/contests.json?v='+Date.now())
+      .then(function(r){return r.json();}).then(function(d){
+        d=d||{};
+        var found=[];
+        Object.keys(d).forEach(function(k){
+          var o=d[k]||{}, vids=(o.videos||[]).filter(function(v){
+            var lab=(v.label||'');return lab.indexOf('클립')>=0||lab.indexOf('편집')>=0;});
+          vids.forEach(function(v,i){
+            var suffix=(v.label&&v.label!=='클립')?' '+v.label:' 클립';
+            if(vids.length>1)suffix+=' '+(i+1);
+            found.push({category:'대회', title:(o.title||'')+suffix, creator:'고래상사',
+              desc:o.date||'', url:v.url||'', img:'',
+              tags:(o.tags&&o.tags.length)?o.tags:(o.title?[o.title]:[])});
+          });
+        });
+        if(!found.length){alert('불러올 클립 영상이 없습니다.');return;}
+        if(!confirm(found.length+'개의 클립을 등록합니다. 진행할까요?'))return;
+        var chain=Promise.resolve();
+        found.forEach(function(p){chain=chain.then(function(){return D.create('clips',p);});});
+        chain.then(function(){alert('클립 '+found.length+'개 등록 완료.');reload();})
+             .catch(function(err){alert('등록 중 오류: '+(err&&err.message||err));reload();});
+      }).catch(function(err){alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
   }
   function heroActionsHtml(c){
     var h='';
