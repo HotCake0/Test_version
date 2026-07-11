@@ -165,7 +165,7 @@
   - ⚙️**sudo 없이 Chromium 실행법**(재현용): WSL Ubuntu 26.04엔 libnspr4/nss3/asound 누락 → `apt-get download libnspr4 libnss3 libasound2t64`(무sudo) → `dpkg-deb -x`로 로컬 추출 → `LD_LIBRARY_PATH=<prefix>/usr/lib/x86_64-linux-gnu node sweep.mjs`. 스크립트=scratchpad `sweep.mjs`/`responsive.mjs`.
   19페이지 순회: HTTP 200, console error 0, `prefers-reduced-motion` 에뮬레이션 시 인트로/핀 비활성 확인.
   **NEW 주의: 아카이브 상세 관련클립 임베드 iframe이 콘솔 에러(third-party 쿠키 경고 등) 유발 가능 — 실오류와 구분.**
-- [x] **2-B-3. SEO/메타 일괄** ✅**2026-07-10**(favicon·description·og·twitter, canonical만 §3-B로 보류) — 실행자: Claude. build.py `head()`(build.py 49행)에 페이지별
+- [x] **2-B-3. SEO/메타 일괄** ✅**2026-07-10**(favicon·description·og·twitter) + ✅**07-11 canonical 완료**(라우팅 확정 후 잔여분): BASE_URL을 정식 호스트 `www`로 교정, 전 페이지 `<link rel="canonical">`(cleanUrls 무확장), admin 페이지 `noindex,nofollow`, **robots.txt**(admin·auth 차단)+**sitemap.xml**(build.py 자동 생성, 진입점 10URL)+**브랜드 404.html**(자립형, 세계관 카피) 신설. apex→www 307 실측 확인 — 실행자: Claude. build.py `head()`(build.py 49행)에 페이지별
   `<meta name="description">`, `og:title/description/image`(대표 이미지 1장 지정 — 후보: 운영 `favicon.png` 또는 홈 히어로), `<link rel="canonical">`.
   홈 index.html은 손수정(검증본 인라인 유지 — head만 추가). 합격: 전 페이지 meta 존재 + 카톡 공유 미리보기 정상.
 - [x] **2-B-4. 이미지 최적화** ✅**2026-07-10 완료**(img/ 7.5MB→1.6MB, wave-bg 삭제+초상 재압축, `2eb5a0d`) — 실행자: Claude(Pillow 12.2.0). **실측 기반 구체화**:

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>페이지를 찾을 수 없습니다 · 고래상사</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+/* 어떤 경로에서 서빙돼도 스스로 성립하도록 외부 사이트 CSS에 의존하지 않음(폰트·파비콘만 절대경로) */
+:root{--bg:#070a14;--ink:#eef2fb;--ink-2:#9aa6bd;--brand:#2f63ff;--accent:#0fb5b0;
+  --line:rgba(255,255,255,.10);--surface:rgba(255,255,255,.045)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);color:var(--ink);font-family:'Pretendard',system-ui,-apple-system,sans-serif;
+  background-image:radial-gradient(900px 520px at 80% -10%,rgba(15,181,176,.18),transparent 60%),
+    radial-gradient(800px 560px at 8% 110%,rgba(47,99,255,.22),transparent 56%)}
+main{text-align:center;padding:40px 24px;max-width:560px}
+.logo{font-size:20px;font-weight:900;letter-spacing:-.02em}
+.logo .lk{color:var(--accent)}
+h1{margin:26px 0 10px;font-size:clamp(64px,14vw,120px);font-weight:900;letter-spacing:-.04em;line-height:1;
+  color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.22)}
+p{margin:0 0 30px;color:var(--ink-2);line-height:1.7;word-break:keep-all}
+.links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+a.btn{display:inline-block;padding:11px 20px;border-radius:999px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);text-decoration:none;font-size:14px;font-weight:700;
+  transition:border-color .15s,transform .15s}
+a.btn:hover{border-color:var(--brand);transform:translateY(-1px)}
+a.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+</style></head><body>
+<main>
+  <div class="logo">고래<span class="lk">상사</span></div>
+  <h1>404</h1>
+  <p>찾으시는 사무실이 이 층에 없습니다.<br>주소가 바뀌었거나, 처음부터 없던 방일 수 있어요.</p>
+  <div class="links">
+    <a class="btn primary" href="/">메인 홈</a>
+    <a class="btn" href="/pages/schedule">방송 일정</a>
+    <a class="btn" href="/pages/multiview">멀티뷰</a>
+  </div>
+</main>
+</body></html>

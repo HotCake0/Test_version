@@ -46,8 +46,8 @@ def href(slug):
 
 # ---------- 공유 partial ----------
 
-# og:image 등 소셜 스크레이퍼용 절대경로. canonical 경로는 라우팅 확정(ROADMAP §3-B) 후 별도 추가.
-BASE_URL = "https://goraesangsa.com"
+# og:image·canonical용 절대경로. www가 정식 호스트(apex는 Vercel이 www로 307, redirect_uri도 www 고정).
+BASE_URL = "https://www.goraesangsa.com"
 
 
 def page_description(slug):
@@ -62,6 +62,10 @@ def head(title, page_css="", slug=None):
     css = f"<style>{page_css}</style>" if page_css else ""
     ttl = f"{title} · 고래상사"
     desc = page_description(slug)
+    # canonical: cleanUrls 기준 무확장 경로. 상세페이지(?id=)도 베이스 URL로 수렴.
+    canonical = f'<link rel="canonical" href="{BASE_URL}/pages/{slug}">\n' if slug else ""
+    # 관리자 페이지는 검색엔진 비노출(클라 게이트만 있으므로 색인 자체를 차단)
+    robots = '<meta name="robots" content="noindex, nofollow">\n' if slug and slug.startswith("admin") else ""
     return f"""<!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="utf-8">
@@ -69,6 +73,7 @@ def head(title, page_css="", slug=None):
 <meta http-equiv="Cache-Control" content="no-store">
 <title>{esc(ttl)}</title>
 <meta name="description" content="{esc(desc)}">
+{canonical}{robots}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="{esc(ttl)}">
@@ -2594,6 +2599,25 @@ def build_news():
     write("news", "최신 소식", body, NEWS_CSS, scripts=js)
 
 
+def build_sitemap():
+    """sitemap.xml — 진입점 페이지만(상세·관리자 제외). canonical과 동일한 www·무확장 URL."""
+    urls = [f"{BASE_URL}/"]
+    for g in SITE["groups"]:
+        if g.get("admin"):
+            continue
+        for p in g["pages"]:
+            if p.get("home") or p.get("detail"):
+                continue
+            urls.append(f"{BASE_URL}/pages/{p['slug']}")
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls)
+           + "</urlset>\n")
+    with open(os.path.join(HERE, "..", "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(xml)
+    print(f"✅ sitemap.xml {len(urls)}개 URL")
+
+
 def build():
     done = {"news", "crew", "members", "member", "clips", "clip", "archive", "archive-detail", "stats",
             "schedule", "schedule-detail", "notices", "notice", "multiview",
@@ -2617,6 +2641,7 @@ def build():
     build_admin_clips()
     build_admin_notices()
     build_admin_members()
+    build_sitemap()
     stub_count = 0
     for g in SITE["groups"]:
         for p in g["pages"]:
