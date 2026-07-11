@@ -118,7 +118,7 @@ def header_and_drawer(current_slug):
               '</ul></nav>'
               '<div class="gnb-btm">'
               '<a href="../index.html">메인 홈</a>'
-              '<a href="../와이어프레임/index.html">와이어프레임</a>'
+              '<a href="multiview.html">멀티뷰</a>'
               '</div></div>')
     return header + drawer
 
@@ -361,7 +361,9 @@ PAGE_CSS = """
 .n-btn.pin-on{border-color:var(--warn);color:var(--warn)}
 .n-btn.del:hover{border-color:var(--hot);color:var(--hot)}
 .nlist-msg{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
-@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4}}
+/* 모바일: 수정/삭제 오탭 방지 — 터치 타겟 확대 + 버튼 간격 */
+@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4;gap:10px}
+  .n-btn{min-height:40px;padding:9px 14px;font-size:13px}}
 
 .n-modal-bg{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;
   padding:24px;background:rgba(3,6,14,.8);backdrop-filter:blur(6px)}
@@ -1051,19 +1053,25 @@ _ARCHIVE_JS_SHARED = r"""
   function safeUrl(u){u=(u==null?'':String(u)).trim();return /^https?:\/\//i.test(u)?u:'#';}
   function wl(c){var w=0,l=0,g=c.games||{};Object.keys(g).forEach(function(k){g[k].result?w++:l++;});return {w:w,l:l};}
   function parseMembers(s){return (s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
+  /* 승/패 표기가 없거나 오타면 null 반환 → 제출부에서 안내 (조용한 오저장 방지) */
   function parseOpponents(s){
-    return (s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean).map(function(line){
-      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
-      return {name:name, result: tag==='패'};
-    }).filter(function(o){return o.name;});
+    var out=[], lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    for(var i=0;i<lines.length;i++){
+      var parts=lines[i].split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      if(!name)continue;
+      if(tag!=='승'&&tag!=='패')return null;
+      out.push({name:name, result: tag==='패'});
+    }
+    return out;
   }
   function parseGames(s){
-    var lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean), out={};
-    lines.forEach(function(line,i){
-      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
-      if(!name)return;
+    var out={}, lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    for(var i=0;i<lines.length;i++){
+      var parts=lines[i].split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      if(!name)continue;
+      if(tag!=='승'&&tag!=='패')return null;
       out['game'+i]={name:name, result: tag==='승'};
-    });
+    }
     return out;
   }
   function parseVideos(s){
@@ -1125,13 +1133,17 @@ _ARCHIVE_JS_SHARED = r"""
     var category=acForm.category.value||'크루대전';
     var isCrew=category==='크루대전';
     var rankVal=acForm.rank.value.trim();
+    var opponents=isCrew?parseOpponents(acForm.opponents.value):[];
+    if(opponents===null){acModalMsg.textContent='상대 크루는 한 줄에 "이름|승" 또는 "이름|패" 형식으로 입력하세요.';return;}
+    var games=isCrew?parseGames(acForm.games.value):{};
+    if(games===null){acModalMsg.textContent='게임 결과는 한 줄에 "게임명|승" 또는 "게임명|패" 형식으로 입력하세요.';return;}
     var payload={
       category:category,
       title:title, date:acForm.date.value.trim(),
       rank: (isCrew&&rankVal!=='')?parseInt(rankVal,10):null,
       members: parseMembers(acForm.members.value),
-      opponents: isCrew?parseOpponents(acForm.opponents.value):[],
-      games: isCrew?parseGames(acForm.games.value):{},
+      opponents: opponents,
+      games: games,
       videos: videos,
       tags: parseMembers(acForm.tags.value)
     };
@@ -1397,8 +1409,8 @@ SCHEDULE_CSS = PAGE_CSS + """
 .cal-ev:hover{background:color-mix(in srgb,var(--tc) 34%,transparent)}
 .cal-more{font-size:10.5px;color:var(--ink-2);font-weight:700;padding-left:3px}
 .slist{display:flex;flex-direction:column}
-.slist .sched-row{cursor:pointer;transition:padding-left .15s}
-.slist .sched-row:hover{padding-left:6px}
+.slist .sched-row{cursor:pointer;transition:transform .15s}
+.slist .sched-row:hover{transform:translateX(6px)}
 .slist .sched-row .day{--tc:var(--brand);background:var(--tc)}
 .stype{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:999px;margin-left:8px;
   border-left:0;background:color-mix(in srgb,var(--tc) 22%,transparent);color:var(--ink)}
@@ -2203,11 +2215,11 @@ ADMIN_GATE_JS = """<script>(function(){
     return !!(u&&(u.role==='admin'||u.role==='editor'));}catch(e){return false;}}
   var gate=document.getElementById('admGate'),bodyEl=document.getElementById('admBody');
   function sync(){var a=isAdmin();if(gate)gate.hidden=a;if(bodyEl)bodyEl.hidden=!a;}
-  sync();setInterval(sync,1000);
+  sync();document.addEventListener('whale:authchange',sync);
   var lb=document.getElementById('admLogin');
   if(lb)lb.addEventListener('click',function(){var b=document.getElementById('loginBtn');if(b)b.click();});
   [].forEach.call(document.querySelectorAll('[data-demo]'),function(el){
-    el.addEventListener('click',function(){alert('데모 환경입니다. 실제 저장/수정은 Firebase 연동 후 활성화됩니다.');});
+    el.addEventListener('click',function(){alert('이 관리 테이블은 미리보기입니다. 실제 등록·수정·삭제는 클립/공지/일정/아카이브 각 페이지에서 로그인 후 바로 가능합니다.');});
   });
 })();</script>"""
 
@@ -2221,22 +2233,32 @@ def admin_gate(inner):
 
 
 def build_admin_dashboard():
+    # 07-11 critique 반영: "데모 환경" 거짓 문구 제거(CRUD는 Phase A/B로 이미 라이브),
+    # 통계 카드는 D.list 실데이터 카운트로 채움(멤버 16인만 빌드타임 정적).
     inner = (
-        '<div class="adm-note">⚠️ 데모 환경입니다. 표시 데이터는 시드이며, 저장/수정 기능은 Firebase 연동 후 활성화됩니다.</div>'
+        '<div class="adm-note">공지·클립·일정·아카이브는 각 페이지에서 직접 작성/수정합니다. 저장은 즉시 반영됩니다.</div>'
         '<div class="adm-stats">'
         f'<div class="adm-stat"><div class="n">{len(MEMBERS)}</div><div class="u">멤버</div></div>'
-        f'<div class="adm-stat"><div class="n">{len(CLIPS)}</div><div class="u">클립</div></div>'
-        f'<div class="adm-stat"><div class="n">{len(ARCHIVE)}</div><div class="u">아카이브</div></div>'
-        f'<div class="adm-stat"><div class="n">{len(SCHEDULE)}</div><div class="u">일정</div></div>'
-        f'<div class="adm-stat"><div class="n">{len(NOTICES)}</div><div class="u">공지</div></div>'
+        '<div class="adm-stat"><div class="n" data-cnt="clips">—</div><div class="u">클립</div></div>'
+        '<div class="adm-stat"><div class="n" data-cnt="contests">—</div><div class="u">아카이브</div></div>'
+        '<div class="adm-stat"><div class="n" data-cnt="schedules">—</div><div class="u">일정</div></div>'
+        '<div class="adm-stat"><div class="n" data-cnt="notices">—</div><div class="u">공지</div></div>'
         '</div>'
         '<div class="adm-quick">'
         '<a href="admin-clips.html"><span class="ic">🎬</span><span class="t">클립 관리</span><span class="d">베스트 클립 등록·수정·삭제</span></a>'
         '<a href="admin-notices.html"><span class="ic">📢</span><span class="t">공지/일정 관리</span><span class="d">공지사항·방송 일정 관리</span></a>'
         '<a href="admin-members.html"><span class="ic">👥</span><span class="t">멤버/크루 관리</span><span class="d">멤버 정보·직급 관리</span></a>'
         '</div>')
+    stats_js = """<script>(function(){
+  var D=window.WhaleData;if(!D)return;
+  ['clips','contests','schedules','notices'].forEach(function(col){
+    D.list(col).then(function(items){
+      var el=document.querySelector('[data-cnt="'+col+'"]');if(el)el.textContent=items.length;
+    }).catch(function(){});
+  });
+})();</script>"""
     body = page_head_block("ADMIN", "관리자 전용", "관리자 홈") + admin_gate(inner)
-    write("admin", "관리자 홈", body, ADMIN_CSS, scripts=ADMIN_GATE_JS)
+    write("admin", "관리자 홈", body, ADMIN_CSS, scripts=ADMIN_GATE_JS + stats_js)
 
 
 def build_admin_login():
@@ -2246,9 +2268,7 @@ def build_admin_login():
         '<p style="color:var(--ink-2);font-size:13px;margin-top:16px;line-height:1.7">권한 계정만 접근할 수 있습니다. '
         '관리자(admin)는 전체 관리, 편집자(editor)는 일정·공지 관리가 가능합니다.</p></div>')
     # 로그인 페이지는 게이트 없이 항상 로그인 유도
-    body = (page_head_block("ADMIN", "관리자 전용", "로그인")
-            + '<div class="adm-note">⚠️ 데모 — 로컬에서는 상단 로그인의 "개발용 로그인"으로 닉네임 권한을 조회해 테스트하세요.</div>'
-            + inner)
+    body = page_head_block("ADMIN", "관리자 전용", "로그인") + inner
     extra = '<script>var b2=document.getElementById("admLogin2");if(b2)b2.addEventListener("click",function(){var b=document.getElementById("loginBtn");if(b)b.click();});</script>'
     write("admin-login", "관리자 로그인", body, ADMIN_CSS, scripts=extra)
 
@@ -2310,9 +2330,9 @@ NEWS_CSS = PAGE_CSS + """
 .news-panel h3{margin:0 0 16px;font-size:20px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 .news-panel h3 a{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-2)}
 .news-panel h3 a:hover{color:var(--accent)}
-.news-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line);cursor:pointer;transition:padding-left .15s}
+.news-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line);cursor:pointer;transition:transform .15s}
 .news-row:first-of-type{border-top:none}
-.news-row:hover{padding-left:5px}
+.news-row:hover{transform:translateX(5px)}
 .news-row .tag{flex:0 0 auto;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;
   border-left:3px solid var(--tc);background:color-mix(in srgb,var(--tc) 20%,transparent);color:var(--ink)}
 .news-row .t{flex:1 1 auto;font-size:14.5px;font-weight:700;word-break:keep-all}

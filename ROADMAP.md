@@ -182,7 +182,9 @@
 
 필수 선행조건은 §1~§3에서 전부 소진 — 이 구간은 **완성도 상향 전용**(사용자 방침: "완성도를 계속 높이고 다듬고 담금질"). 후보 백로그(우선순위 제안, 진행하며 갱신):
 
-- [ ] **2.5-1. impeccable 재-critique** — 07-08 채점 25/40 이후 P0/P1/P2·AI티 정리를 전부 반영했으므로 재채점으로 남은 감점 요인 식별 → 후속 수정. 담금질 기간의 나침반 역할.
+- [x] **2.5-1. impeccable 재-critique** ✅**2026-07-11 완료 — 26/40 (Acceptable, 이전 25)**. 듀얼 에이전트(디자인 리뷰+검출기). 검출기 53건 중 진성 5건(em-dash 케이던스·layout-transition), 오탐/의도 48건(단일폰트=외부CSS 미추적 오탐, GNB 넘버링=기능적 색인, 호버 글로우=피드백).
+  **당일 후속 수정 완료**: ①[P1] admin 대시보드 거짓 "데모 환경" 문구 제거+통계 D.list 실카운트+게이트 폴링→authchange 이벤트 ②[P2] 홈 가짜 "이번 주 일정" 4건→`/rework/schedules` 런타임(다가오는 4건, textContent 조립, ScrollTrigger.refresh) ③[P2] 모바일 .n-btn 터치타겟 40px ④전역 focus-visible 링(:where 특이도0, 카드 위젯 포함) ⑤layout-transition 4곳 padding-left→transform ⑥와이어프레임 링크 전면 제거+`.vercelignore` 신설(와이어프레임/src/ROADMAP 등 배포 제외) ⑦아카이브 폼 승/패 파싱 silent failure→명시 검증+안내 ⑧시드 클립 제목 em-dash 케이던스 9건 리라이트.
+  **남은 감점 요인(후순위 기록)**: 헬프/단축키/일괄작업 부재(H10=1점, §5-3), pg-eyebrow+EN 아웃라인 헤더 18페이지 반복(admin만이라도 분기 검토, §5-3 admin 실연동 때), og:image 페이지별 차별화(§5-4), confirm/alert 네이티브 다이얼로그 톤(§5-4), 동시편집 last-write-wins(§5-2).
 - [ ] **2.5-2. ranking 통계 재구현 앞당김** — Q4에서 §5-4(cutover 후)로 결정했으나 3주 여유가 생겨 **앞당김 가능**. 운영 ranking.js 로직(참여율/승률/현역 필터) + 리워크 디자인. 완성되면 §3-B `/ranking` 리다이렉트 목적지를 신설 페이지로 교체.
 - [x] **2.5-3. news 피드 런타임 전환** ✅**2026-07-11 완료** — build_news()를 `D.list('notices'|'clips'|'schedules')` 런타임 렌더로 교체. 히어로=고정공지 우선(없으면 최신), 클립=createdAt 최신 5, 일정=오늘 이후 5. 패널별 빈 문구·실패 문구, `.news-empty` 스타일. 시드 상수는 news에서 미사용(다른 페이지 미리보기는 유지). node --check 통과.
 - [ ] **2.5-4. 콘텐츠 사전 준비** — 개시 공지 문구 초안, 클립 후보 목록(URL+태그) 선정. 입력 자체는 cutover 후 admin UI지만 준비는 미리(사용자 주도, Claude 보조).

@@ -1,0 +1,9 @@
+# 배포 제외 — 개발 산출물/내부 문서 (cutover 시 goraesangsa.com에 노출 금지)
+와이어프레임
+리워크폐기
+src
+ROADMAP.md
+index.before-assets.html
+고래상사 디자인 시스템.md
+고래상사 디자인 시스템 (standalone).html
+.impeccable

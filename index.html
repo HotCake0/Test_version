@@ -100,7 +100,7 @@
   </nav>
   <div class="gnb-btm">
     <a href="pages/notices.html">공지사항</a>
-    <a href="와이어프레임/index.html">와이어프레임</a>
+    <a href="pages/multiview.html">멀티뷰</a>
   </div>
 </div>
 
@@ -260,15 +260,10 @@
     <div class="orig-more"><a class="more" href="pages/clips.html">클립 갤러리 전체 보기 ↓</a></div>
     <div class="two">
       <div class="panel img-ani bottom-top">
-        <h3>이번 주 방송 일정</h3>
-        <div class="sched-row"><span class="day">월 07.14</span>
-          <span class="desc"><b>오후 8시</b> — 영업부 주간 회의 방송</span></div>
-        <div class="sched-row"><span class="day">수 07.16</span>
-          <span class="desc"><b>오후 9시</b> — 팀장단 긴급 대책 회의</span></div>
-        <div class="sched-row"><span class="day">금 07.18</span>
-          <span class="desc"><b>오후 8시</b> — 고래상사 전사 공지 방송</span></div>
-        <div class="sched-row"><span class="day">토 07.19</span>
-          <span class="desc"><b>오후 3시</b> — 주말 특집 콜라보 방송</span></div>
+        <h3>다가오는 방송 일정</h3>
+        <div id="homeSched">
+          <div class="sched-row"><span class="desc">일정을 불러오는 중...</span></div>
+        </div>
         <div class="panel-foot"><a class="btn sm" href="pages/schedule.html">전체 일정 보기 →</a></div>
       </div>
       <div class="panel img-ani bottom-top tran01">
@@ -296,7 +291,6 @@
       <a class="btn sm ghost" href="pages/notices.html">공지사항</a>
       <a class="btn sm ghost admin-only" href="pages/admin.html">관리자 페이지</a>
       <a class="btn sm ghost" href="https://www.youtube.com/channel/UCIchCOLwLBMD87quHlNuXjQ" target="_blank" rel="noopener noreferrer">YouTube</a>
-      <a class="btn sm ghost" href="와이어프레임/index.html" style="border-color:rgba(47,99,255,.3);color:#9aa6bd;">와이어프레임 전체보기</a>
     </div>
   </div>
   <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 역할극 버추얼 크루 · 16인.</div>
@@ -894,6 +888,40 @@
       setTimeout(function () { ScrollTrigger.refresh(); }, 300);
     });
   }
+
+  /* 홈 일정 패널 — /rework/schedules 실데이터(다가오는 4건). 하드코딩 가짜 일정 대체(07-11).
+     DOM은 textContent로만 조립(사용자 입력 데이터 이스케이프). 렌더 후 ScrollTrigger 재계산. */
+  (function(){
+    var box=document.getElementById('homeSched');
+    if(!box)return;
+    function msgRow(t){box.textContent='';var r=document.createElement('div');r.className='sched-row';
+      var d=document.createElement('span');d.className='desc';d.textContent=t;r.appendChild(d);box.appendChild(r);}
+    fetch(FIREBASE_BASE+'/rework/schedules.json?v='+Date.now())
+      .then(function(res){if(!res.ok)throw new Error(res.status);return res.json();})
+      .then(function(obj){
+        var items=obj?Object.keys(obj).map(function(k){return obj[k]||{};}):[];
+        var t=new Date();t.setHours(0,0,0,0);
+        var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+        var up=items.filter(function(e){return e.date>=iso;})
+                    .sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0);}).slice(0,4);
+        if(!up.length){msgRow('예정된 방송 일정이 없습니다. 캘린더에서 확인해 보세요.');return;}
+        box.textContent='';
+        var days=['일','월','화','수','목','금','토'];
+        up.forEach(function(e){
+          var r=document.createElement('div');r.className='sched-row';
+          var day=document.createElement('span');day.className='day';
+          var dt=new Date(e.date+'T00:00:00');
+          day.textContent=days[dt.getDay()]+' '+(e.date||'').slice(5).replace('-','.');
+          var desc=document.createElement('span');desc.className='desc';
+          if(e.time){var b=document.createElement('b');b.textContent=e.time;desc.appendChild(b);
+            desc.appendChild(document.createTextNode(' · '));}
+          desc.appendChild(document.createTextNode(e.title||''));
+          r.appendChild(day);r.appendChild(desc);box.appendChild(r);
+        });
+        if(window.ScrollTrigger)ScrollTrigger.refresh();
+      })
+      .catch(function(){msgRow('일정을 불러오지 못했습니다.');});
+  })();
 
   /* 이미지 저장 방지 (운영본 image-protect.js 이식 — site.js와 동일 구현)
      우클릭 저장·드래그 저장만 차단 — 완전 차단은 불가(개발자도구로 우회 가능) */

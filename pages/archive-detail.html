@@ -166,7 +166,9 @@
 .n-btn.pin-on{border-color:var(--warn);color:var(--warn)}
 .n-btn.del:hover{border-color:var(--hot);color:var(--hot)}
 .nlist-msg{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
-@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4}}
+/* 모바일: 수정/삭제 오탭 방지 — 터치 타겟 확대 + 버튼 간격 */
+@media(max-width:640px){.n-row-actions{flex:1 1 100%;order:4;gap:10px}
+  .n-btn{min-height:40px;padding:9px 14px;font-size:13px}}
 
 .n-modal-bg{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;
   padding:24px;background:rgba(3,6,14,.8);backdrop-filter:blur(6px)}
@@ -290,7 +292,7 @@
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
         aria-expanded="false" aria-controls="gnbOverlay"><span></span><span></span><span></span></button>
-    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="../와이어프레임/index.html">와이어프레임</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">ARCHIVE</h1><p class="pg-sub">기록 상세</p></header><div class="img-ani bottom-top" id="cDetail"><div class="stub"><p>불러오는 중…</p></div></div><div class="n-modal-bg" id="acModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="acModalTitle">
+    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">ARCHIVE</h1><p class="pg-sub">기록 상세</p></header><div class="img-ani bottom-top" id="cDetail"><div class="stub"><p>불러오는 중…</p></div></div><div class="n-modal-bg" id="acModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="acModalTitle">
   <div class="n-modal">
     <button class="n-modal-close" id="acModalClose" type="button" aria-label="닫기">×</button>
     <h2 id="acModalTitle">기록 추가</h2>
@@ -354,19 +356,25 @@
   function safeUrl(u){u=(u==null?'':String(u)).trim();return /^https?:\/\//i.test(u)?u:'#';}
   function wl(c){var w=0,l=0,g=c.games||{};Object.keys(g).forEach(function(k){g[k].result?w++:l++;});return {w:w,l:l};}
   function parseMembers(s){return (s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
+  /* 승/패 표기가 없거나 오타면 null 반환 → 제출부에서 안내 (조용한 오저장 방지) */
   function parseOpponents(s){
-    return (s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean).map(function(line){
-      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
-      return {name:name, result: tag==='패'};
-    }).filter(function(o){return o.name;});
+    var out=[], lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    for(var i=0;i<lines.length;i++){
+      var parts=lines[i].split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      if(!name)continue;
+      if(tag!=='승'&&tag!=='패')return null;
+      out.push({name:name, result: tag==='패'});
+    }
+    return out;
   }
   function parseGames(s){
-    var lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean), out={};
-    lines.forEach(function(line,i){
-      var parts=line.split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
-      if(!name)return;
+    var out={}, lines=(s||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    for(var i=0;i<lines.length;i++){
+      var parts=lines[i].split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
+      if(!name)continue;
+      if(tag!=='승'&&tag!=='패')return null;
       out['game'+i]={name:name, result: tag==='승'};
-    });
+    }
     return out;
   }
   function parseVideos(s){
@@ -428,13 +436,17 @@
     var category=acForm.category.value||'크루대전';
     var isCrew=category==='크루대전';
     var rankVal=acForm.rank.value.trim();
+    var opponents=isCrew?parseOpponents(acForm.opponents.value):[];
+    if(opponents===null){acModalMsg.textContent='상대 크루는 한 줄에 "이름|승" 또는 "이름|패" 형식으로 입력하세요.';return;}
+    var games=isCrew?parseGames(acForm.games.value):{};
+    if(games===null){acModalMsg.textContent='게임 결과는 한 줄에 "게임명|승" 또는 "게임명|패" 형식으로 입력하세요.';return;}
     var payload={
       category:category,
       title:title, date:acForm.date.value.trim(),
       rank: (isCrew&&rankVal!=='')?parseInt(rankVal,10):null,
       members: parseMembers(acForm.members.value),
-      opponents: isCrew?parseOpponents(acForm.opponents.value):[],
-      games: isCrew?parseGames(acForm.games.value):{},
+      opponents: opponents,
+      games: games,
       videos: videos,
       tags: parseMembers(acForm.tags.value)
     };
