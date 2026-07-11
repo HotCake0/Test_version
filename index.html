@@ -599,11 +599,13 @@
   var heroContainer = document.getElementById('heroContainer');
 
   /* 인트로는 최초 방문 1회만 재생(localStorage). 새로고침·재방문에서는
-     인트로/스크롤 잠금 없이 히어로를 바로 보여준다. 재생 중 건너뛰기 버튼 노출. */
+     인트로/스크롤 잠금 없이 히어로를 바로 보여준다. 재생 중 건너뛰기 버튼 노출.
+     모바일(≤768px)은 인트로 자체를 생략 — 첫 화면 지연·스크롤 잠금 없이 즉시 히어로. */
   var introDone = false;
   try { introDone = localStorage.getItem('whaleIntroPlayed') === '1'; } catch (e) {}
+  var noIntro = window.innerWidth <= 768;
 
-  if (PRM || introDone) {
+  if (PRM || introDone || noIntro) {
     heroContainer.classList.add('on');
   } else {
     try { localStorage.setItem('whaleIntroPlayed', '1'); } catch (e) {}
