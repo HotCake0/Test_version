@@ -240,21 +240,34 @@
     }
   };
 
-  /* ---- 스크롤 리빌 (홈과 동일 img-ani 공식) ---- */
-  function imgEvent() {
+  /* ---- 스크롤 리빌 — IntersectionObserver, once-only (07-11: 스크롤 전수 측정 layout thrash 제거) ---- */
+  function imgEvent() {   /* IO 미지원 브라우저 폴백 */
     var wt = window.scrollY + window.innerHeight;
     $$('.img-ani').forEach(function (el) {
       var it = el.getBoundingClientRect().top + window.scrollY;
-      if (wt > it + 120) el.classList.add('img-aniload');  /* once-only — 역스크롤 재실행은 산만해 제거(2026-07-11 critique) */
+      if (wt > it + 120) el.classList.add('img-aniload');
     });
   }
   if (PRM) {
     $$('.img-ani').forEach(function (el) { el.classList.add('img-aniload'); });
+  } else if ('IntersectionObserver' in window) {
+    var revealIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('img-aniload'); revealIO.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -100px 0px' });
+    $$('.img-ani').forEach(function (el) { revealIO.observe(el); });
   } else {
     imgEvent();
     window.addEventListener('scroll', imgEvent, { passive: true });
     window.addEventListener('load', imgEvent);
   }
+
+  /* ---- 헤더 중앙 바로가기 — 현재 섹션 표시 ---- */
+  $$('.h-nav a').forEach(function (a) {
+    var key = (a.getAttribute('href') || '').replace('.html', '');
+    if (key && location.pathname.indexOf(key) >= 0) a.classList.add('on');
+  });
 
   /* ---- Scroll Top ---- */
   var scrollTopWrp = document.getElementById('scrollTopWrp');

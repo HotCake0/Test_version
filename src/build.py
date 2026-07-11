@@ -113,6 +113,11 @@ def header_and_drawer(current_slug):
 
     header = """<header id="header"><div class="header-in">
     <a class="h-logo" href="../index.html">고래<span class="lk">상사</span></a>
+    <nav class="h-nav" aria-label="바로가기">
+      <a href="news.html">소식</a>
+      <a href="schedule.html">일정</a>
+      <a href="multiview.html">멀티뷰</a>
+    </nav>
     <div class="h-right">
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
@@ -179,11 +184,13 @@ def member_modal():
       <div class="modal-name" id="memberModalName"></div>
       <div class="modal-role" id="memberModalRole"></div>
       <div class="modal-bio"  id="memberModalBio"></div>
+      <div class="mstats-head"><span class="mstats-title">인사기록카드</span><span class="mstats-stamp">대외비</span></div>
       <div class="modal-stats">
         <div class="stat"><div class="stat-n" id="mstat0">0</div><div class="stat-u" id="mstat0u">—</div></div>
         <div class="stat"><div class="stat-n" id="mstat1">0</div><div class="stat-u" id="mstat1u">—</div></div>
         <div class="stat"><div class="stat-n" id="mstat2">0</div><div class="stat-u" id="mstat2u">—</div></div>
       </div>
+      <p class="mstats-note">* 출처: 인사부 문서고 — 열람 시 비밀 유지 서약이 적용됩니다.</p>
       <div class="modal-nav-row">
         <button class="btn sm" id="memberModalPrev" type="button">← 이전</button>
         <button class="btn sm" id="memberModalNext" type="button">다음 →</button>
@@ -226,6 +233,14 @@ PAGE_CSS = """
 .pg-en{margin:0 0 10px;font-size:clamp(40px,6vw,84px);font-weight:900;letter-spacing:-.04em;line-height:1;
   color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.18)}
 .pg-sub{margin:0;font-size:clamp(15px,1.4vw,18px);color:var(--ink-2)}
+/* pg-head 스태거 리빌(07-11) — 컨테이너는 리빌 엔진(.img-aniload 토글)만 빌리고 자체 이동 없음.
+   eyebrow 상승 → EN 헤더 좌측 슬라이드 → 부제 상승 순차. js-anim 없으면 초기상태 미적용(무JS/PRM 안전) */
+html.js-anim .pg-head.img-ani{transform:none;opacity:1}
+html.js-anim .pg-head .pg-eyebrow{opacity:0;transform:translateY(12px);transition:all .6s var(--ease) .05s}
+html.js-anim .pg-head .pg-en{opacity:0;transform:translateX(-46px);transition:all .85s var(--ease) .12s}
+html.js-anim .pg-head .pg-sub{opacity:0;transform:translateY(16px);transition:all .7s var(--ease) .3s}
+html.js-anim .pg-head.img-aniload .pg-eyebrow,html.js-anim .pg-head.img-aniload .pg-en,
+html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 /* 필터 바 */
 .pg-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:clamp(24px,3vw,40px)}
 .chip{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;min-height:36px;

@@ -29,6 +29,11 @@
 <header id="header">
   <div class="header-in">
     <a class="h-logo" href="index.html">고래<span class="lk">상사</span></a>
+    <nav class="h-nav" aria-label="바로가기">
+      <a href="pages/news.html">소식</a>
+      <a href="pages/schedule.html">일정</a>
+      <a href="pages/multiview.html">멀티뷰</a>
+    </nav>
     <div class="h-right">
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button"
@@ -316,11 +321,13 @@
       <div class="modal-name" id="memberModalName"></div>
       <div class="modal-role" id="memberModalRole"></div>
       <div class="modal-bio"  id="memberModalBio"></div>
+      <div class="mstats-head"><span class="mstats-title">인사기록카드</span><span class="mstats-stamp">대외비</span></div>
       <div class="modal-stats">
         <div class="stat"><div class="stat-n" id="mstat0">0</div><div class="stat-u" id="mstat0u">—</div></div>
         <div class="stat"><div class="stat-n" id="mstat1">0</div><div class="stat-u" id="mstat1u">—</div></div>
         <div class="stat"><div class="stat-n" id="mstat2">0</div><div class="stat-u" id="mstat2u">—</div></div>
       </div>
+      <p class="mstats-note">* 출처: 인사부 문서고 — 열람 시 비밀 유지 서약이 적용됩니다.</p>
       <div class="modal-nav-row">
         <button class="btn sm" id="memberModalPrev" type="button">← 이전</button>
         <button class="btn sm" id="memberModalNext" type="button">다음 →</button>
@@ -648,17 +655,23 @@
   /* -------------------------------------------------------
      스크롤 리빌 (animation.js 원본 img_event 재현)
      ------------------------------------------------------- */
-  function imgEvent() {
+  function imgEvent() {   /* IO 미지원 브라우저 폴백 */
     var wt = window.scrollY + window.innerHeight;
     document.querySelectorAll('.img-ani').forEach(function (el) {
       var it = el.getBoundingClientRect().top + window.scrollY;
-      if (wt > it + 200) {
-        el.classList.add('img-aniload');  /* once-only — 역스크롤 재실행 제거(2026-07-11 critique) */
-      }
+      if (wt > it + 200) el.classList.add('img-aniload');
     });
   }
   if (PRM) {
     document.querySelectorAll('.img-ani').forEach(function (el) { el.classList.add('img-aniload'); });
+  } else if ('IntersectionObserver' in window) {
+    /* 스크롤 핸들러 전수 측정(layout thrash) 대신 IO — once-only(2026-07-11 critique) */
+    var revealIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('img-aniload'); revealIO.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -140px 0px' });
+    document.querySelectorAll('.img-ani').forEach(function (el) { revealIO.observe(el); });
   } else {
     imgEvent();
     window.addEventListener('scroll', imgEvent, { passive: true });
@@ -671,16 +684,7 @@
      ------------------------------------------------------- */
   var isDesktop = window.innerWidth > 989;
 
-  /* overlay border-width 갱신 함수 (원본 284~295행 재현) */
-  function updateOverlays() {
-    document.querySelectorAll('.slide-box').forEach(function (el) {
-      if (el.classList.contains('on')) return;
-      var ov = el.querySelector('.overlay');
-      if (!ov) return;
-      var bw = el.classList.contains('on_lr') ? el.offsetWidth : el.offsetHeight;
-      ov.style.borderWidth = bw + 'px';
-    });
-  }
+  /* overlay 갱신 JS 폐기(07-11) — clip-path 와이프가 CSS만으로 덮개/공개를 처리 */
 
   if (isDesktop && !PRM) {
     gsap.registerPlugin(ScrollTrigger);
@@ -688,8 +692,7 @@
     var cards     = document.querySelectorAll('.slide-box');
     var numCards  = cards.length;
 
-    /* 초기: overlay 설정 + 첫 카드 on */
-    updateOverlays();
+    /* 초기: 첫 카드 on */
     if (cards[0]) cards[0].classList.add('on');
 
     /* GSAP ScrollTrigger pin — wrap2를 핀, slide-cont를 x로 이동
@@ -721,7 +724,6 @@
       document.querySelectorAll('.slide-box.box_right').forEach(function (el) {
         if (el.getBoundingClientRect().left <= window.innerWidth * 0.8) el.classList.add('on');
       });
-      updateOverlays();
     }, { passive: true });
 
   } else {
