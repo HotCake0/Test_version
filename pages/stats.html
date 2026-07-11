@@ -3,12 +3,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-store">
-<title>최신 소식 · 고래상사</title>
-<meta name="description" content="고래상사 최신 소식 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
+<title>통계 · 전적 · 고래상사</title>
+<meta name="description" content="고래상사 통계 · 전적 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="고래상사">
-<meta property="og:title" content="최신 소식 · 고래상사">
-<meta property="og:description" content="고래상사 최신 소식 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
+<meta property="og:title" content="통계 · 전적 · 고래상사">
+<meta property="og:description" content="고래상사 통계 · 전적 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
 <meta property="og:image" content="https://goraesangsa.com/favicon.png">
 <meta name="twitter:card" content="summary">
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -196,24 +196,32 @@
   padding:3px 8px;border-radius:999px;background:var(--warn);color:#1a1400}
 .clips-hero-info .n-row-actions{margin:0 0 14px}
 
-.news-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,36px)}
-@media(max-width:820px){.news-cols{grid-template-columns:1fr}}
-.news-panel h3{margin:0 0 16px;font-size:20px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-.news-panel h3 a{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-2)}
-.news-panel h3 a:hover{color:var(--accent)}
-.news-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line);cursor:pointer;transition:transform .15s}
-.news-row:first-of-type{border-top:none}
-.news-row:hover{transform:translateX(5px)}
-.news-row .tag{flex:0 0 auto;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;
-  border-left:3px solid var(--tc);background:color-mix(in srgb,var(--tc) 20%,transparent);color:var(--ink)}
-.news-row .t{flex:1 1 auto;font-size:14.5px;font-weight:700;word-break:keep-all}
-.news-row .dt{flex:0 0 auto;font-size:12px;color:var(--ink-2)}
-.news-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  padding:clamp(22px,3vw,34px);margin-bottom:clamp(28px,4vw,44px)}
-.news-hero .k{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase}
-.news-hero h2{margin:10px 0 12px;font-size:clamp(24px,3.4vw,40px);font-weight:900;letter-spacing:-.03em;word-break:keep-all}
-.news-hero p{margin:0 0 18px;color:var(--ink-2);line-height:1.7;word-break:keep-all}
-.news-empty{padding:14px 0;font-size:14px;color:var(--ink-2)}
+.st-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
+.st-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+.st-tile .n{font-size:clamp(24px,3vw,34px);font-weight:900;letter-spacing:-.03em}
+.st-tile .u{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.st-tile .s{font-size:12px;color:var(--accent);margin-top:2px}
+.st-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,36px)}
+@media(max-width:860px){.st-cols{grid-template-columns:1fr}}
+.st-panel h3{margin:0 0 6px;font-size:19px;font-weight:900;letter-spacing:-.02em}
+.st-panel .st-cap{margin:0 0 16px;font-size:12.5px;color:var(--ink-2)}
+.st-row{display:grid;grid-template-columns:minmax(72px,auto) 1fr auto;align-items:center;gap:12px;
+  padding:10px 0;border-top:1px solid var(--line)}
+.st-row:first-of-type{border-top:none}
+.st-row .nm{font-size:14px;font-weight:700;word-break:keep-all}
+.st-row .val{font-size:12.5px;color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.st-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;display:flex}
+.st-bar .w{background:var(--accent)}
+.st-bar .l{background:rgba(255,77,77,.55)}
+.st-badge{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.st-badge.high{background:rgba(15,181,176,.16);color:var(--accent)}
+.st-badge.mid{background:rgba(255,203,69,.14);color:var(--warn)}
+.st-badge.low{background:rgba(255,77,77,.14);color:var(--hot)}
+.st-gap{height:clamp(24px,3vw,36px)}
+.st-empty{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
+.st-foot{margin-top:clamp(28px,4vw,44px)}
+@media(max-width:480px){.st-row{grid-template-columns:minmax(60px,auto) 1fr auto;gap:8px}
+  .st-row .val{font-size:11px}.st-row .nm{font-size:13px}}
 </style></head><body>
 <div class="wavebg" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div><header id="header"><div class="header-in">
@@ -222,7 +230,7 @@
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
         aria-expanded="false" aria-controls="gnbOverlay"><span></span><span></span><span></span></button>
-    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a class="active" href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li><li><a href="stats.html"><span class="sn">3-2</span>통계 · 전적</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">고래상사 메인</span><h1 class="pg-en">NEWS</h1><p class="pg-sub">최신 소식</p></header><div class="news-hero img-ani bottom-top" id="newsHero" hidden><div class="k">HEADLINE</div><h2 id="newsHeroTitle"></h2><p id="newsHeroBody"></p><a class="btn primary sm" id="newsHeroLink" href="notices.html">자세히 보기 →</a></div><div class="news-cols img-ani bottom-top"><div class="news-panel"><h3>📢 공지사항<a href="notices.html">전체 →</a></h3><div id="newsN"><div class="news-empty">불러오는 중...</div></div></div><div class="news-panel"><h3>🎬 새 클립<a href="clips.html">전체 →</a></h3><div id="newsC"><div class="news-empty">불러오는 중...</div></div></div></div><div style="height:clamp(24px,3vw,36px)"></div><div class="news-panel img-ani bottom-top"><h3>🗓 다가오는 방송<a href="schedule.html">캘린더 →</a></h3><div id="newsS"><div class="news-empty">불러오는 중...</div></div></div></main><footer class="site-footer">
+    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li><li><a class="active" href="stats.html"><span class="sn">3-2</span>통계 · 전적</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">STATS</h1><p class="pg-sub">통계 · 전적</p></header><div class="st-tiles img-ani bottom-top" id="stTiles"></div><div class="st-cols img-ani bottom-top"><div class="st-panel"><h3>사원별 대회 성적</h3><p class="st-cap">참여율 순 · 승률은 참여 대회 기준</p><div id="stMembers"><div class="st-empty">불러오는 중...</div></div></div><div class="st-panel"><h3>게임별 승패</h3><p class="st-cap">크루대전에서 치른 종목별 전적</p><div id="stGames"></div></div></div><div class="st-gap"></div><div class="st-panel img-ani bottom-top"><h3>상대 크루 전적</h3><p class="st-cap">현재 크루명 기준 · 팀명에 마우스를 올리면 과거 이름 표시</p><div id="stCrews"></div></div><div class="st-foot img-ani bottom-top"><a class="btn sm" href="archive.html">전체 기록은 통합 아카이브에서 →</a></div></main><footer class="site-footer">
   <div class="footer-in">
     <span class="footer-logo">고래<span class="lk">상사</span></span>
     <div class="footer-links">
@@ -258,58 +266,90 @@
 <script>(function(){
   var D=window.WhaleData;
   function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
-  var NC={"공지": "#2f63ff", "이벤트": "#ff3d92", "업데이트": "#0fb5b0", "점검": "#ffcb45"};
-  var TC={"개인방송": "#2f63ff", "합방": "#0fb5b0", "대회": "#ff4d4d", "특집": "#ffcb45", "공지방송": "#8b5cf6"};
-  var elN=document.getElementById('newsN'), elC=document.getElementById('newsC'), elS=document.getElementById('newsS');
-  var heroEl=document.getElementById('newsHero');
-  function row(href,color,tag,title,dt){
-    return '<div class="news-row" data-href="'+esc(href)+'" role="button" tabindex="0">'
-      +'<span class="tag" style="--tc:'+(color||'#2f63ff')+'">'+esc(tag)+'</span>'
-      +'<span class="t">'+esc(title)+'</span><span class="dt">'+esc(dt)+'</span></div>';
+  var MEMBER_NAMES=["울산큰고래", "견자희", "멜로딩딩", "김마렌", "감자가비", "이지수", "쏭이", "조아라", "빡쏘", "희희덕", "밀크티냠", "삐요코", "채하나", "묵아", "프하", "셀키"];
+  var CREWS_URL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/crews.json';
+  var elT=document.getElementById('stTiles'),elM=document.getElementById('stMembers'),
+      elG=document.getElementById('stGames'),elC=document.getElementById('stCrews');
+  function badgeCls(p){return p>=60?'high':p>=40?'mid':'low';}
+  function bar(w,l){var t=w+l;if(!t)return '';var wp=Math.round(w/t*100);
+    return '<div class="st-bar"><span class="w" style="width:'+wp+'%"></span><span class="l" style="width:'+(100-wp)+'%"></span></div>';}
+  /* 다자전: opponents는 상위 등수부터 — index >= rank-1 이면 고래상사가 위(승) */
+  function oppResult(c,i){
+    if((c.opponents||[]).length===1){var r=c.opponents[0].result;return r===undefined?null:!!r;}
+    if(c.rank==null)return null;
+    return i>=c.rank-1;
   }
-  function empty(el,msg){el.innerHTML='<div class="news-empty">'+esc(msg)+'</div>';}
-  function md(s){return (s||'').slice(5);}
-
-  D.list('notices').then(function(items){
-    if(!items.length){empty(elN,'등록된 공지가 없습니다.');return;}
-    var byDate=items.slice().sort(function(a,b){return a.date<b.date?1:(a.date>b.date?-1:0);});
-    var hn=items.filter(function(n){return n.pinned;})[0]||byDate[0];
-    document.getElementById('newsHeroTitle').textContent=hn.title;
-    document.getElementById('newsHeroBody').textContent=(hn.body&&hn.body[0])||'';
-    document.getElementById('newsHeroLink').href='notice.html?id='+encodeURIComponent(hn.id);
-    heroEl.hidden=false;
-    elN.innerHTML=byDate.slice(0,5).map(function(n){
-      return row('notice.html?id='+encodeURIComponent(n.id),NC[n.cat],n.cat,n.title,md(n.date));
-    }).join('');
-  }).catch(function(){empty(elN,'공지를 불러오지 못했습니다.');});
-
-  D.list('clips').then(function(items){
-    if(!items.length){empty(elC,'등록된 클립이 없습니다.');return;}
-    var sorted=items.slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
-    elC.innerHTML=sorted.slice(0,5).map(function(c){
-      var dt=c.createdAt?new Date(c.createdAt).toISOString().slice(5,10):'';
-      return row('clip.html?id='+encodeURIComponent(c.id),'#0fb5b0',c.category||'클립',c.title,dt);
-    }).join('');
-  }).catch(function(){empty(elC,'클립을 불러오지 못했습니다.');});
-
-  D.list('schedules').then(function(items){
-    var today=new Date();today.setHours(0,0,0,0);
-    var iso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
-    var up=items.filter(function(e){return e.date>=iso;}).sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0);});
-    if(!up.length){empty(elS,items.length?'예정된 방송이 없습니다.':'등록된 일정이 없습니다.');return;}
-    elS.innerHTML=up.slice(0,5).map(function(e){
-      return row('schedule-detail.html?id='+encodeURIComponent(e.id),TC[e.type],e.type||'방송',e.title,md(e.date));
-    }).join('');
-  }).catch(function(){empty(elS,'일정을 불러오지 못했습니다.');});
-
-  document.addEventListener('click',function(e){
-    var r=e.target.closest&&e.target.closest('.news-row[data-href]');
-    if(r)location.href=r.getAttribute('data-href');
-  });
-  document.addEventListener('keydown',function(e){
-    if(e.key!=='Enter'&&e.key!==' ')return;
-    var r=e.target.closest&&e.target.closest('.news-row[data-href]');
-    if(r&&e.target===r){e.preventDefault();location.href=r.getAttribute('data-href');}
+  Promise.all([
+    D.list('contests'),
+    fetch(CREWS_URL+'?v='+Date.now()).then(function(r){return r.ok?r.json():{};}).catch(function(){return {};})
+  ]).then(function(res){
+    var all=res[0].filter(function(c){return (c.category||'크루대전')!=='컨텐츠';}),crews=res[1]||{};
+    if(!all.length){
+      elT.innerHTML='';elM.innerHTML='<div class="st-empty">아직 집계할 크루대전 기록이 없습니다.</div>';
+      elG.innerHTML='';elC.innerHTML='<div class="st-empty">기록이 쌓이면 자동으로 채워집니다.</div>';return;
+    }
+    all.forEach(function(c){c._g=Object.keys(c.games||{}).map(function(k){return c.games[k]||{};});});
+    var totalEvents=all.length,totalGames=0,totalWins=0,memberMap={},gameMap={},crewMap={};
+    all.forEach(function(c){
+      var w=c._g.filter(function(g){return g.result;}).length,l=c._g.length-w;
+      totalGames+=c._g.length;totalWins+=w;
+      var won=w>l;
+      (c.members||[]).forEach(function(n){
+        if(!memberMap[n])memberMap[n]={att:0,win:0};
+        memberMap[n].att++;if(won)memberMap[n].win++;
+      });
+      c._g.forEach(function(g){
+        if(!g.name)return;
+        if(!gameMap[g.name])gameMap[g.name]={w:0,l:0};
+        g.result?gameMap[g.name].w++:gameMap[g.name].l++;
+      });
+      (c.opponents||[]).forEach(function(op,i){
+        var key=op.crewId||('name:'+(op.name||'?'));
+        var crew=op.crewId?crews[op.crewId]:null;
+        if(crew&&crew.currentName==='고래상사')return;
+        if(!crewMap[key])crewMap[key]={w:0,l:0,name:(crew&&crew.currentName)||op.name||'?',
+          past:crew&&Array.isArray(crew.aliases)?crew.aliases.filter(function(a){return a!==crew.currentName;}):[]};
+        var r=oppResult(c,i);
+        if(r===true)crewMap[key].w++;else if(r===false)crewMap[key].l++;
+      });
+    });
+    var winRate=totalGames?Math.round(totalWins/totalGames*100):0;
+    var top=null,topAtt=-1;
+    Object.keys(memberMap).forEach(function(n){
+      if(MEMBER_NAMES.indexOf(n)<0)return;
+      if(memberMap[n].att>topAtt){topAtt=memberMap[n].att;top=n;}
+    });
+    elT.innerHTML=
+      '<div class="st-tile"><div class="n">'+totalEvents+'</div><div class="u">크루대전</div></div>'
+      +'<div class="st-tile"><div class="n">'+totalGames+'</div><div class="u">치른 게임</div></div>'
+      +'<div class="st-tile"><div class="n">'+winRate+'%</div><div class="u">게임 승률</div><div class="s">'+totalWins+'승 '+(totalGames-totalWins)+'패</div></div>'
+      +(top?'<div class="st-tile"><div class="n">'+esc(top)+'</div><div class="u">참여율 1위</div><div class="s">'+Math.round(topAtt/totalEvents*100)+'% 출전</div></div>':'');
+    var mRows=Object.keys(memberMap).filter(function(n){return MEMBER_NAMES.indexOf(n)>=0;})
+      .sort(function(a,b){
+        if(memberMap[b].att!==memberMap[a].att)return memberMap[b].att-memberMap[a].att;
+        return memberMap[b].win/memberMap[b].att-memberMap[a].win/memberMap[a].att;
+      });
+    elM.innerHTML=mRows.length?mRows.map(function(n){
+      var s=memberMap[n],ap=Math.round(s.att/totalEvents*100),wp=s.att?Math.round(s.win/s.att*100):0;
+      return '<div class="st-row"><span class="nm">'+esc(n)+'</span>'
+        +bar(s.att,totalEvents-s.att)
+        +'<span class="val">'+s.att+'회('+ap+'%) <span class="st-badge '+badgeCls(wp)+'">승률 '+wp+'%</span></span></div>';
+    }).join(''):'<div class="st-empty">멤버 기록이 없습니다.</div>';
+    var gNames=Object.keys(gameMap).sort(function(a,b){return (gameMap[b].w+gameMap[b].l)-(gameMap[a].w+gameMap[a].l);});
+    elG.innerHTML=gNames.length?gNames.map(function(n){
+      var s=gameMap[n];
+      return '<div class="st-row"><span class="nm">'+esc(n)+'</span>'+bar(s.w,s.l)
+        +'<span class="val">'+s.w+'승 '+s.l+'패</span></div>';
+    }).join(''):'<div class="st-empty">게임 기록이 없습니다.</div>';
+    var cKeys=Object.keys(crewMap).sort(function(a,b){return (crewMap[b].w+crewMap[b].l)-(crewMap[a].w+crewMap[a].l);});
+    elC.innerHTML=cKeys.length?cKeys.map(function(k){
+      var s=crewMap[k],t=s.w+s.l,p=t?Math.round(s.w/t*100):0;
+      var title=s.past.length?' title="과거 이름: '+esc(s.past.join(' → '))+'"':'';
+      return '<div class="st-row"><span class="nm"'+title+'>'+esc(s.name)+'</span>'+bar(s.w,s.l)
+        +'<span class="val">'+s.w+'승 '+s.l+'패 <span class="st-badge '+badgeCls(p)+'">'+p+'%</span></span></div>';
+    }).join(''):'<div class="st-empty">상대 크루 기록이 없습니다.</div>';
+  }).catch(function(err){
+    elM.innerHTML='<div class="st-empty">통계를 불러오지 못했습니다: '+esc(err&&err.message||err)+'</div>';
   });
 })();</script>
 </body></html>

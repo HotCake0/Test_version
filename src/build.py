@@ -1045,7 +1045,8 @@ def archive_form_modal():
 
 # 목록/상세 양쪽에서 공유하는 CRUD 헬퍼 JS — 클립/일정의 _..._JS_SHARED와 동일 구조.
 # 아카이브는 canEdit(본인 여부)이 아니라 isAdmin() 하나로만 게이팅한다(요구사항).
-# opponents.result: 렌더 규칙상 true=='패'(우리가 짐), false=='승'(우리가 이김) — 기존 archive-detail 렌더 로직 그대로 유지.
+# opponents.result: true=='승'(고래상사가 이김) — 운영 admin.js 저장 규약(isWin)·실데이터 15건 검증(07-11)과 일치.
+# (07-11 이전 렌더가 반대로 해석해 우승 기록 5건이 '패'로 표시되던 버그를 수정. 폼 파스/직렬화도 동일 규약.)
 # games.result: 렌더 규칙상 true=='승', false=='패' — 기존 렌더 로직(wl 집계·cd-res 클래스) 그대로 유지.
 _ARCHIVE_JS_SHARED = r"""
   var U=window.WhaleUI, D=window.WhaleData;
@@ -1060,7 +1061,7 @@ _ARCHIVE_JS_SHARED = r"""
       var parts=lines[i].split('|'), name=(parts[0]||'').trim(), tag=(parts[1]||'').trim();
       if(!name)continue;
       if(tag!=='승'&&tag!=='패')return null;
-      out.push({name:name, result: tag==='패'});
+      out.push({name:name, result: tag==='승'});
     }
     return out;
   }
@@ -1084,7 +1085,7 @@ _ARCHIVE_JS_SHARED = r"""
     }
     return out;
   }
-  function serializeOpponents(arr){return (arr||[]).map(function(o){return (o.name||'')+'|'+(o.result?'패':'승');}).join('\n');}
+  function serializeOpponents(arr){return (arr||[]).map(function(o){return (o.name||'')+'|'+(o.result?'승':'패');}).join('\n');}
   function serializeGames(obj){
     var keys=Object.keys(obj||{});
     return keys.map(function(k){var g=obj[k]||{};return (g.name||'')+'|'+(g.result?'승':'패');}).join('\n');
@@ -1351,7 +1352,7 @@ def build_archive_detail():
     var win=c.rank===1;
     var g=c.games||{},games=Object.keys(g).map(function(k){var x=g[k];
       return '<div class="cd-game"><span>'+esc(x.name)+'</span><span class="cd-res '+(x.result?'w':'l')+'">'+(x.result?'승':'패')+'</span></div>';}).join('');
-    var opp=(c.opponents||[]).map(function(o){return '<span class="op">'+esc(o.name)+(o.result===false?' <span style=color:var(--accent)>승</span>':o.result===true?' <span style=color:var(--hot)>패</span>':'')+'</span>';}).join('');
+    var opp=(c.opponents||[]).map(function(o){return '<span class="op">'+esc(o.name)+(o.result===true?' <span style=color:var(--accent)>승</span>':o.result===false?' <span style=color:var(--hot)>패</span>':'')+'</span>';}).join('');
     var vids=(c.videos||[]).map(function(v){return '<a class="btn sm primary" href="'+esc(safeUrl(v.url))+'" target="_blank" rel="noopener">▶ '+esc(v.label||'영상')+'</a>';}).join('');
     var cast=(c.members||[]).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
     var manage='';
@@ -2322,6 +2323,144 @@ def build_admin_members():
     write("admin-members", "멤버/크루 관리", body, ADMIN_CSS, scripts=ADMIN_GATE_JS)
 
 
+# ---------- 아키타입: 통계 · 전적 (운영 ranking.html 리워크 재구현, §2.5-2) ----------
+
+STATS_CSS = PAGE_CSS + """
+.st-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
+.st-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+.st-tile .n{font-size:clamp(24px,3vw,34px);font-weight:900;letter-spacing:-.03em}
+.st-tile .u{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.st-tile .s{font-size:12px;color:var(--accent);margin-top:2px}
+.st-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,36px)}
+@media(max-width:860px){.st-cols{grid-template-columns:1fr}}
+.st-panel h3{margin:0 0 6px;font-size:19px;font-weight:900;letter-spacing:-.02em}
+.st-panel .st-cap{margin:0 0 16px;font-size:12.5px;color:var(--ink-2)}
+.st-row{display:grid;grid-template-columns:minmax(72px,auto) 1fr auto;align-items:center;gap:12px;
+  padding:10px 0;border-top:1px solid var(--line)}
+.st-row:first-of-type{border-top:none}
+.st-row .nm{font-size:14px;font-weight:700;word-break:keep-all}
+.st-row .val{font-size:12.5px;color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.st-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;display:flex}
+.st-bar .w{background:var(--accent)}
+.st-bar .l{background:rgba(255,77,77,.55)}
+.st-badge{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.st-badge.high{background:rgba(15,181,176,.16);color:var(--accent)}
+.st-badge.mid{background:rgba(255,203,69,.14);color:var(--warn)}
+.st-badge.low{background:rgba(255,77,77,.14);color:var(--hot)}
+.st-gap{height:clamp(24px,3vw,36px)}
+.st-empty{padding:44px 0;text-align:center;color:var(--ink-2);font-size:14px}
+.st-foot{margin-top:clamp(28px,4vw,44px)}
+@media(max-width:480px){.st-row{grid-template-columns:minmax(60px,auto) 1fr auto;gap:8px}
+  .st-row .val{font-size:11px}.st-row .nm{font-size:13px}}
+"""
+
+
+def build_stats():
+    """통계 · 전적 — /rework/contests(크루대전만)를 집계해 요약·멤버별·게임별·크루별 통계 렌더.
+    운영 ranking.js 로직 이식 + 리워크 규약: games/opponents result true=승, 다자전은 rank 규칙."""
+    member_names = json.dumps([m["name"] for m in MEMBERS], ensure_ascii=False)
+    body = (page_head_block("STATS", "콘텐츠 아카이브", "통계 · 전적")
+            + '<div class="st-tiles img-ani bottom-top" id="stTiles"></div>'
+            + '<div class="st-cols img-ani bottom-top">'
+              '<div class="st-panel"><h3>사원별 대회 성적</h3><p class="st-cap">참여율 순 · 승률은 참여 대회 기준</p><div id="stMembers"><div class="st-empty">불러오는 중...</div></div></div>'
+              '<div class="st-panel"><h3>게임별 승패</h3><p class="st-cap">크루대전에서 치른 종목별 전적</p><div id="stGames"></div></div>'
+              '</div>'
+            + '<div class="st-gap"></div>'
+            + '<div class="st-panel img-ani bottom-top"><h3>상대 크루 전적</h3><p class="st-cap">현재 크루명 기준 · 팀명에 마우스를 올리면 과거 이름 표시</p><div id="stCrews"></div></div>'
+            + '<div class="st-foot img-ani bottom-top"><a class="btn sm" href="archive.html">전체 기록은 통합 아카이브에서 →</a></div>')
+
+    js = """<script>(function(){
+  var D=window.WhaleData;
+  function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
+  var MEMBER_NAMES=""" + member_names + """;
+  var CREWS_URL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/crews.json';
+  var elT=document.getElementById('stTiles'),elM=document.getElementById('stMembers'),
+      elG=document.getElementById('stGames'),elC=document.getElementById('stCrews');
+  function badgeCls(p){return p>=60?'high':p>=40?'mid':'low';}
+  function bar(w,l){var t=w+l;if(!t)return '';var wp=Math.round(w/t*100);
+    return '<div class="st-bar"><span class="w" style="width:'+wp+'%"></span><span class="l" style="width:'+(100-wp)+'%"></span></div>';}
+  /* 다자전: opponents는 상위 등수부터 — index >= rank-1 이면 고래상사가 위(승) */
+  function oppResult(c,i){
+    if((c.opponents||[]).length===1){var r=c.opponents[0].result;return r===undefined?null:!!r;}
+    if(c.rank==null)return null;
+    return i>=c.rank-1;
+  }
+  Promise.all([
+    D.list('contests'),
+    fetch(CREWS_URL+'?v='+Date.now()).then(function(r){return r.ok?r.json():{};}).catch(function(){return {};})
+  ]).then(function(res){
+    var all=res[0].filter(function(c){return (c.category||'크루대전')!=='컨텐츠';}),crews=res[1]||{};
+    if(!all.length){
+      elT.innerHTML='';elM.innerHTML='<div class="st-empty">아직 집계할 크루대전 기록이 없습니다.</div>';
+      elG.innerHTML='';elC.innerHTML='<div class="st-empty">기록이 쌓이면 자동으로 채워집니다.</div>';return;
+    }
+    all.forEach(function(c){c._g=Object.keys(c.games||{}).map(function(k){return c.games[k]||{};});});
+    var totalEvents=all.length,totalGames=0,totalWins=0,memberMap={},gameMap={},crewMap={};
+    all.forEach(function(c){
+      var w=c._g.filter(function(g){return g.result;}).length,l=c._g.length-w;
+      totalGames+=c._g.length;totalWins+=w;
+      var won=w>l;
+      (c.members||[]).forEach(function(n){
+        if(!memberMap[n])memberMap[n]={att:0,win:0};
+        memberMap[n].att++;if(won)memberMap[n].win++;
+      });
+      c._g.forEach(function(g){
+        if(!g.name)return;
+        if(!gameMap[g.name])gameMap[g.name]={w:0,l:0};
+        g.result?gameMap[g.name].w++:gameMap[g.name].l++;
+      });
+      (c.opponents||[]).forEach(function(op,i){
+        var key=op.crewId||('name:'+(op.name||'?'));
+        var crew=op.crewId?crews[op.crewId]:null;
+        if(crew&&crew.currentName==='고래상사')return;
+        if(!crewMap[key])crewMap[key]={w:0,l:0,name:(crew&&crew.currentName)||op.name||'?',
+          past:crew&&Array.isArray(crew.aliases)?crew.aliases.filter(function(a){return a!==crew.currentName;}):[]};
+        var r=oppResult(c,i);
+        if(r===true)crewMap[key].w++;else if(r===false)crewMap[key].l++;
+      });
+    });
+    var winRate=totalGames?Math.round(totalWins/totalGames*100):0;
+    var top=null,topAtt=-1;
+    Object.keys(memberMap).forEach(function(n){
+      if(MEMBER_NAMES.indexOf(n)<0)return;
+      if(memberMap[n].att>topAtt){topAtt=memberMap[n].att;top=n;}
+    });
+    elT.innerHTML=
+      '<div class="st-tile"><div class="n">'+totalEvents+'</div><div class="u">크루대전</div></div>'
+      +'<div class="st-tile"><div class="n">'+totalGames+'</div><div class="u">치른 게임</div></div>'
+      +'<div class="st-tile"><div class="n">'+winRate+'%</div><div class="u">게임 승률</div><div class="s">'+totalWins+'승 '+(totalGames-totalWins)+'패</div></div>'
+      +(top?'<div class="st-tile"><div class="n">'+esc(top)+'</div><div class="u">참여율 1위</div><div class="s">'+Math.round(topAtt/totalEvents*100)+'% 출전</div></div>':'');
+    var mRows=Object.keys(memberMap).filter(function(n){return MEMBER_NAMES.indexOf(n)>=0;})
+      .sort(function(a,b){
+        if(memberMap[b].att!==memberMap[a].att)return memberMap[b].att-memberMap[a].att;
+        return memberMap[b].win/memberMap[b].att-memberMap[a].win/memberMap[a].att;
+      });
+    elM.innerHTML=mRows.length?mRows.map(function(n){
+      var s=memberMap[n],ap=Math.round(s.att/totalEvents*100),wp=s.att?Math.round(s.win/s.att*100):0;
+      return '<div class="st-row"><span class="nm">'+esc(n)+'</span>'
+        +bar(s.att,totalEvents-s.att)
+        +'<span class="val">'+s.att+'회('+ap+'%) <span class="st-badge '+badgeCls(wp)+'">승률 '+wp+'%</span></span></div>';
+    }).join(''):'<div class="st-empty">멤버 기록이 없습니다.</div>';
+    var gNames=Object.keys(gameMap).sort(function(a,b){return (gameMap[b].w+gameMap[b].l)-(gameMap[a].w+gameMap[a].l);});
+    elG.innerHTML=gNames.length?gNames.map(function(n){
+      var s=gameMap[n];
+      return '<div class="st-row"><span class="nm">'+esc(n)+'</span>'+bar(s.w,s.l)
+        +'<span class="val">'+s.w+'승 '+s.l+'패</span></div>';
+    }).join(''):'<div class="st-empty">게임 기록이 없습니다.</div>';
+    var cKeys=Object.keys(crewMap).sort(function(a,b){return (crewMap[b].w+crewMap[b].l)-(crewMap[a].w+crewMap[a].l);});
+    elC.innerHTML=cKeys.length?cKeys.map(function(k){
+      var s=crewMap[k],t=s.w+s.l,p=t?Math.round(s.w/t*100):0;
+      var title=s.past.length?' title="과거 이름: '+esc(s.past.join(' → '))+'"':'';
+      return '<div class="st-row"><span class="nm"'+title+'>'+esc(s.name)+'</span>'+bar(s.w,s.l)
+        +'<span class="val">'+s.w+'승 '+s.l+'패 <span class="st-badge '+badgeCls(p)+'">'+p+'%</span></span></div>';
+    }).join(''):'<div class="st-empty">상대 크루 기록이 없습니다.</div>';
+  }).catch(function(err){
+    elM.innerHTML='<div class="st-empty">통계를 불러오지 못했습니다: '+esc(err&&err.message||err)+'</div>';
+  });
+})();</script>"""
+    write("stats", "통계 · 전적", body, STATS_CSS, scripts=js)
+
+
 # ---------- 아키타입: 최신 소식 (피드) ----------
 
 NEWS_CSS = PAGE_CSS + """
@@ -2425,7 +2564,7 @@ def build_news():
 
 
 def build():
-    done = {"news", "crew", "members", "member", "clips", "clip", "archive", "archive-detail",
+    done = {"news", "crew", "members", "member", "clips", "clip", "archive", "archive-detail", "stats",
             "schedule", "schedule-detail", "notices", "notice", "multiview",
             "admin", "admin-login", "admin-clips", "admin-notices", "admin-members"}
     build_crew()
@@ -2435,6 +2574,7 @@ def build():
     build_clip()
     build_archive()
     build_archive_detail()
+    build_stats()
     build_schedule()
     build_schedule_detail()
     build_notices()

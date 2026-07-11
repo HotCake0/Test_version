@@ -185,9 +185,13 @@
 - [x] **2.5-1. impeccable 재-critique** ✅**2026-07-11 완료 — 26/40 (Acceptable, 이전 25)**. 듀얼 에이전트(디자인 리뷰+검출기). 검출기 53건 중 진성 5건(em-dash 케이던스·layout-transition), 오탐/의도 48건(단일폰트=외부CSS 미추적 오탐, GNB 넘버링=기능적 색인, 호버 글로우=피드백).
   **당일 후속 수정 완료**: ①[P1] admin 대시보드 거짓 "데모 환경" 문구 제거+통계 D.list 실카운트+게이트 폴링→authchange 이벤트 ②[P2] 홈 가짜 "이번 주 일정" 4건→`/rework/schedules` 런타임(다가오는 4건, textContent 조립, ScrollTrigger.refresh) ③[P2] 모바일 .n-btn 터치타겟 40px ④전역 focus-visible 링(:where 특이도0, 카드 위젯 포함) ⑤layout-transition 4곳 padding-left→transform ⑥와이어프레임 링크 전면 제거+`.vercelignore` 신설(와이어프레임/src/ROADMAP 등 배포 제외) ⑦아카이브 폼 승/패 파싱 silent failure→명시 검증+안내 ⑧시드 클립 제목 em-dash 케이던스 9건 리라이트.
   **남은 감점 요인(후순위 기록)**: 헬프/단축키/일괄작업 부재(H10=1점, §5-3), pg-eyebrow+EN 아웃라인 헤더 18페이지 반복(admin만이라도 분기 검토, §5-3 admin 실연동 때), og:image 페이지별 차별화(§5-4), confirm/alert 네이티브 다이얼로그 톤(§5-4), 동시편집 last-write-wins(§5-2).
-- [ ] **2.5-2. ranking 통계 재구현 앞당김** — Q4에서 §5-4(cutover 후)로 결정했으나 3주 여유가 생겨 **앞당김 가능**. 운영 ranking.js 로직(참여율/승률/현역 필터) + 리워크 디자인. 완성되면 §3-B `/ranking` 리다이렉트 목적지를 신설 페이지로 교체.
+- [x] **2.5-2. ranking 통계 재구현** ✅**2026-07-11 완료** — `pages/stats.html` 신설(build_stats, 19페이지째). 운영 ranking.js 로직 이식: 요약 타일 4종(크루대전 수·게임 수·게임 승률·참여율 1위) + 사원별 성적(참여율 바+승률 뱃지) + 게임별 승패 + 상대 크루 전적(crews currentName·과거명 title). **Chart.js 의존 제거**(리워크 토큰 CSS 바). category=컨텐츠 제외 집계, 다자전 rank 규칙, GNB 3-2(드로어+홈 손수정 양쪽), `/ranking` 리다이렉트 목적지 stats로 교체. 실데이터 15건 node 시뮬레이션 검증(15전·32게임 53%·울산큰고래 87% 출전).
+  - ⭐**부수 발견·수정: opponents.result 반전 버그** — 데이터사전의 "true=패" 기록이 오독이었음(운영 admin.js `isWin` 규약=true=승, 실데이터 15건 교차검증). 이전 렌더가 **우승 기록 5건을 '패'로 표시**하던 실버그 → 아카이브 렌더/폼 파스/직렬화/부록B 전부 true=승으로 교정.
 - [x] **2.5-3. news 피드 런타임 전환** ✅**2026-07-11 완료** — build_news()를 `D.list('notices'|'clips'|'schedules')` 런타임 렌더로 교체. 히어로=고정공지 우선(없으면 최신), 클립=createdAt 최신 5, 일정=오늘 이후 5. 패널별 빈 문구·실패 문구, `.news-empty` 스타일. 시드 상수는 news에서 미사용(다른 페이지 미리보기는 유지). node --check 통과.
-- [ ] **2.5-4. 콘텐츠 사전 준비** — 개시 공지 문구 초안, 클립 후보 목록(URL+태그) 선정. 입력 자체는 cutover 후 admin UI지만 준비는 미리(사용자 주도, Claude 보조).
+- [~] **2.5-4. 콘텐츠 사전 준비** — 개시 공지 문구 **초안 2종 준비 완료(07-11)**, 클립 후보 목록(URL+태그)은 사용자 몫.
+  - **초안 A(정식 톤)**: 제목 "고래상사 홈페이지가 새로워졌습니다" / 본문: 새 단장 안내 → 멤버·일정·클립·아카이브 소개 → 멀티뷰 실시간 안내 → 오류 제보 요청. pinned ✅.
+  - **초안 B(세계관 톤)**: 제목 "[사내 공지] 고래상사 신사옥 입주 안내" / 본문: 신사옥 이전 → 전 직원(16명) 프로필·근무 일정·업무 성과 열람 → CCTV(멀티뷰) 안내 → 하자 제보는 관리부(방송 채팅). pinned ✅.
+  - 입력: cutover 후 admin 로그인 → 공지 작성 → 상단 고정 체크(news 히어로 자동 노출).
 - [x] **2.5-5. 미세정리 일괄** ✅**2026-07-11** — crew 프로즈 "사장부터 인턴까지·비서/게임/컨텐츠"로 교정(build.py+재빌드). admin-* 옛 부서명은 조사 결과 이미 없음. index 466px는 취약한 손수정 메인이라 **의도적 미수정 유지**(2-B-1 결론 준용, 시각적 깨짐 없음).
 - [ ] **2.5-6. D-Day 리허설** — 본인 Vercel 계정에 `Test_version` 별도 import → 임시 `*.vercel.app`에서 vercel.json 리다이렉트·cleanUrls·전 페이지 실배포 검수(§4-4 사전 수행, 실로그인만 제외). 리허설 후 프로젝트 삭제.
 - [ ] **2.5-7. 실기기 모바일 최종 확인**(사용자) — 2-B-1 에뮬레이션 통과분의 실기기 재확인.
@@ -414,7 +418,7 @@ tags[문자열](아카이브 연결키), featured:bool(관리자, 단일 유지)
 **`/rework/schedules`** (폼: date/time/title/members/type/desc): `date, time"HH:MM", title, members[명],
 type(개인방송|합방|대회|특집|공지방송 — TYPE_COLORS 색맵), desc, owner/시간 4종 (+이관분 groupId 보존)`
 **`/rework/contests`** (07-08 `category`·`tags` 추가): `category(크루대전|컨텐츠, 없으면 크루대전), title, date,
-games{game_NNN:{name,result:bool(true=승)}}, members[명], opponents[{crewId,name,result:bool ⚠️렌더 true=패(반전, 폼 왕복보정)}],
+games{game_NNN:{name,result:bool(true=승)}}, members[명], opponents[{crewId,name,result:bool **true=승**(운영 admin.js isWin 규약, 07-11 실데이터 15건 교차검증 — 이전 "true=패(반전)" 기록은 오독이었고 렌더 버그까지 유발해 07-11 수정)}],
 rank:int(컨텐츠는 null), total_teams:int, notes, videos[{label,type,url}], tags[문자열], owner/시간 4종`
 **운영 `/schedules`**: `date, event, members[soop id | "goraesangsa"=전체], groupId?`
 **운영 `/contests`**: rework/contests와 동일 스키마(원본, category/tags 없음 → 이관 시 주입)

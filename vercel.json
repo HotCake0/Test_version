@@ -8,8 +8,8 @@
     { "source": "/schedule.html", "destination": "/pages/schedule", "permanent": true },
     { "source": "/contest", "destination": "/pages/archive", "permanent": true },
     { "source": "/contest.html", "destination": "/pages/archive", "permanent": true },
-    { "source": "/ranking", "destination": "/pages/archive", "permanent": true },
-    { "source": "/ranking.html", "destination": "/pages/archive", "permanent": true },
+    { "source": "/ranking", "destination": "/pages/stats", "permanent": true },
+    { "source": "/ranking.html", "destination": "/pages/stats", "permanent": true },
     { "source": "/admin", "destination": "/pages/admin", "permanent": false },
     { "source": "/admin.html", "destination": "/pages/admin", "permanent": false }
   ]
