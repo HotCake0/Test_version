@@ -309,7 +309,7 @@
       scForm.type.value=item.type||'개인방송';scForm.members.value=(item.members||[]).join(', ');
       scForm.desc.value=item.desc||'';
     } else {
-      scForm.date.value=new Date().toISOString().slice(0,10);
+      scForm.date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);  /* 로컬(KST) 오늘 — toISOString 단독은 UTC라 00~09시에 어제로 채워짐 */
     }
     scModalBg.hidden=false;
   }
@@ -318,15 +318,17 @@
   if(scModalCloseBtn)scModalCloseBtn.addEventListener('click',scCloseForm);
   if(scModalBg)scModalBg.addEventListener('click',function(e){if(e.target===scModalBg)scCloseForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&scModalBg&&!scModalBg.hidden)scCloseForm();});
+  var scSaving=false;
   if(scForm)scForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(scSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     var date=scForm.date.value, time=scForm.time.value, title=scForm.title.value.trim(), type=scForm.type.value;
     if(!date||!time||!title){scModalMsg.textContent='날짜·시간·제목을 모두 입력하세요.';return;}
     var members=scForm.members.value.split(',').map(function(s){return s.trim();}).filter(Boolean);
     var payload={date:date,time:time,title:title,type:type,members:members,desc:scForm.desc.value.trim()};
-    scModalMsg.textContent='저장 중...';
+    scModalMsg.textContent='저장 중...';scSaving=true;
     var p=(scMode==='edit'&&scItem)?D.update('schedules',scItem.id,payload):D.create('schedules',payload);
-    p.then(function(){scCloseForm();scOnSaved();}).catch(function(err){scModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){scSaving=false;scCloseForm();scOnSaved();}).catch(function(err){scSaving=false;scModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 
   var S=[];

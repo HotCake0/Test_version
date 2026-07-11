@@ -6,6 +6,7 @@
 <title>클립 시청 · 고래상사</title>
 <meta name="description" content="고래상사 클립 시청 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
 <link rel="canonical" href="https://www.goraesangsa.com/pages/clip">
+<meta name="robots" content="noindex, nofollow">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="고래상사">
@@ -300,8 +301,10 @@
       return chain;
     });
   }
+  var clSaving=false;
   if(clForm)clForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(clSaving)return;  /* 저장 요청 진행 중 재제출 방지(더블클릭 중복 생성) */
     var title=clForm.title.value.trim(), creator=clForm.creator.value.trim(), category=clForm.category.value;
     if(!title||!creator){clModalMsg.textContent='제목·제작자를 입력하세요.';return;}
     var payload={category:category,title:title,creator:creator,desc:clForm.desc.value.trim(),
@@ -310,14 +313,14 @@
     if(payload.img&&!/^https?:\/\//i.test(payload.img)){clModalMsg.textContent='이미지 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
     var wantFeatured=!!(clForm.featured&&clForm.featured.checked&&U.isAdmin());
     if(U.isAdmin())payload.featured=wantFeatured;
-    clModalMsg.textContent='저장 중...';
+    clModalMsg.textContent='저장 중...';clSaving=true;
     var save=(clMode==='edit'&&clItem)?D.update('clips',clItem.id,payload):D.create('clips',payload);
     save.then(function(saved){
       if(!wantFeatured)return null;
       var myId=(clMode==='edit'&&clItem)?clItem.id:(saved&&saved.name);
       return unsetOtherFeatured(myId);
-    }).then(function(){clCloseForm();clOnSaved();})
-      .catch(function(err){clModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    }).then(function(){clSaving=false;clCloseForm();clOnSaved();})
+      .catch(function(err){clSaving=false;clModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 
   var detail=document.getElementById('cDetail');

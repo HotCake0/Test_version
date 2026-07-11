@@ -428,8 +428,10 @@
   if(acModalCloseBtn)acModalCloseBtn.addEventListener('click',acCloseForm);
   if(acModalBg)acModalBg.addEventListener('click',function(e){if(e.target===acModalBg)acCloseForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&acModalBg&&!acModalBg.hidden)acCloseForm();});
+  var acSaving=false;
   if(acForm)acForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(acSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     if(!U.isAdmin()){acModalMsg.textContent='관리자만 저장할 수 있습니다.';return;}
     var title=acForm.title.value.trim();
     if(!title){acModalMsg.textContent='대회명을 입력하세요.';return;}
@@ -452,9 +454,9 @@
       videos: videos,
       tags: parseMembers(acForm.tags.value)
     };
-    acModalMsg.textContent='저장 중...';
+    acModalMsg.textContent='저장 중...';acSaving=true;
     var p=(acMode==='edit'&&acItem)?D.update('contests',acItem.id,payload):D.create('contests',payload);
-    p.then(function(){acCloseForm();acOnSaved();}).catch(function(err){acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){acSaving=false;acCloseForm();acOnSaved();}).catch(function(err){acSaving=false;acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
@@ -462,7 +464,7 @@
   function renderActions(){
     var html='';
     if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
-    if(U.isAdmin()&&!all.length)html+='<button type="button" class="btn sm" id="acSeedBtn">불러오기 (운영 기록 이관, 최초 1회)</button>';
+    if(U.isAdmin())html+='<button type="button" class="btn sm" id="acSeedBtn">운영 기록 불러오기 (누락분 이관)</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('acWriteBtn'); if(wb)wb.addEventListener('click',function(){acOpenForm('create',null,reload);});
     var sb=document.getElementById('acSeedBtn'); if(sb)sb.addEventListener('click',importSeed);
@@ -533,26 +535,45 @@
     var card=e.target.closest&&e.target.closest('.ct-card');
     if(card&&e.target===card){e.preventDefault();location.href='archive-detail.html?id='+encodeURIComponent(card.getAttribute('data-id'));}
   });
+  /* 운영 /contests → /rework/contests diff 이관(§3-C, 런북 4-2): 제목+날짜가 같은 기록은
+     건너뛰므로 cutover 직전 운영 추가분만 반영된다(멱등 — 재클릭·부분 실패 후 재시도 안전).
+     category/tags/notes/total_teams까지 주입해 리워크 스키마와 정합(§3-C category 명시 요구). */
+  var acImporting=false;
   function importSeed(){
-    if(!U.isAdmin())return;
-    if(!confirm('운영 대회 기록을 관리용 저장소로 1회 이관합니다. 계속할까요?'))return;
+    if(!U.isAdmin()||acImporting)return;
+    if(!confirm('운영 대회 기록 중 이곳에 없는 것(제목+날짜 기준)만 이관합니다. 계속할까요?'))return;
+    var sb=document.getElementById('acSeedBtn');
+    acImporting=true; if(sb){sb.disabled=true;sb.textContent='이관 중...';}
+    function done(){acImporting=false; if(sb){sb.disabled=false;sb.textContent='운영 기록 불러오기 (누락분 이관)';}}
     fetch('https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/contests.json?v='+Date.now())
       .then(function(r){return r.json();}).then(function(d){
         d=d||{};
-        var keys=Object.keys(d);
-        if(!keys.length){alert('불러올 운영 기록이 없습니다.');return;}
-        var chain=Promise.resolve();
-        keys.forEach(function(k){
-          chain=chain.then(function(){
-            var o=d[k]||{};
-            return D.create('contests',{
-              title:o.title||'', date:o.date||'', rank:(o.rank!=null?o.rank:null),
-              members:o.members||[], opponents:o.opponents||[], games:o.games||{}, videos:o.videos||[]
-            });
+        var have={}; all.forEach(function(c){have[(c.title||'')+'|'+(c.date||'')]=1;});
+        var items=[];
+        Object.keys(d).forEach(function(k){
+          var o=d[k]||{};
+          if(have[(o.title||'')+'|'+(o.date||'')])return;
+          items.push({
+            category:o.category||'크루대전',
+            title:o.title||'', date:o.date||'', rank:(o.rank!=null?o.rank:null),
+            members:o.members||[], opponents:o.opponents||[], games:o.games||{}, videos:o.videos||[],
+            notes:o.notes||'', total_teams:(o.total_teams!=null?o.total_teams:null),
+            tags:o.tags||[]
           });
         });
-        chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
-      }).catch(function(err){alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
+        if(!items.length){done();alert('새로 이관할 운영 기록이 없습니다. (이미 모두 있음)');return;}
+        if(!confirm(items.length+'건을 이관합니다. 진행할까요?')){done();return;}
+        var ok=0,fails=[],chain=Promise.resolve();
+        items.forEach(function(p){chain=chain.then(function(){
+          return D.create('contests',p).then(function(){ok++;})
+            .catch(function(err){fails.push(p.title+' — '+(err&&err.message||err));});});});
+        chain.then(function(){
+          done();
+          if(fails.length)alert(ok+'건 이관, '+fails.length+'건 실패:\n'+fails.join('\n')+'\n\n버튼을 다시 누르면 실패분만 재시도됩니다.');
+          else alert(ok+'건 이관 완료.');
+          reload();
+        });
+      }).catch(function(err){done();alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
   }
   document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
   reload();

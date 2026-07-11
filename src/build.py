@@ -64,8 +64,10 @@ def head(title, page_css="", slug=None):
     desc = page_description(slug)
     # canonical: cleanUrls 기준 무확장 경로. 상세페이지(?id=)도 베이스 URL로 수렴.
     canonical = f'<link rel="canonical" href="{BASE_URL}/pages/{slug}">\n' if slug else ""
-    # 관리자 페이지는 검색엔진 비노출(클라 게이트만 있으므로 색인 자체를 차단)
-    robots = '<meta name="robots" content="noindex, nofollow">\n' if slug and slug.startswith("admin") else ""
+    # 관리자 페이지는 검색엔진 비노출(클라 게이트만 있으므로 색인 자체를 차단).
+    # 상세 5종(?id= 런타임 렌더)도 비노출 — 크롤러는 폴백 문구만 보게 되고 sitemap에도 없음(진입점이 SEO 담당).
+    noindex_details = ("archive-detail", "clip", "member", "notice", "schedule-detail")
+    robots = '<meta name="robots" content="noindex, nofollow">\n' if slug and (slug.startswith("admin") or slug in noindex_details) else ""
     return f"""<!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="utf-8">
@@ -667,8 +669,10 @@ _CLIP_JS_SHARED = """
       return chain;
     });
   }
+  var clSaving=false;
   if(clForm)clForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(clSaving)return;  /* 저장 요청 진행 중 재제출 방지(더블클릭 중복 생성) */
     var title=clForm.title.value.trim(), creator=clForm.creator.value.trim(), category=clForm.category.value;
     if(!title||!creator){clModalMsg.textContent='제목·제작자를 입력하세요.';return;}
     var payload={category:category,title:title,creator:creator,desc:clForm.desc.value.trim(),
@@ -677,14 +681,14 @@ _CLIP_JS_SHARED = """
     if(payload.img&&!/^https?:\\/\\//i.test(payload.img)){clModalMsg.textContent='이미지 URL은 http:// 또는 https:// 로 시작해야 합니다.';return;}
     var wantFeatured=!!(clForm.featured&&clForm.featured.checked&&U.isAdmin());
     if(U.isAdmin())payload.featured=wantFeatured;
-    clModalMsg.textContent='저장 중...';
+    clModalMsg.textContent='저장 중...';clSaving=true;
     var save=(clMode==='edit'&&clItem)?D.update('clips',clItem.id,payload):D.create('clips',payload);
     save.then(function(saved){
       if(!wantFeatured)return null;
       var myId=(clMode==='edit'&&clItem)?clItem.id:(saved&&saved.name);
       return unsetOtherFeatured(myId);
-    }).then(function(){clCloseForm();clOnSaved();})
-      .catch(function(err){clModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    }).then(function(){clSaving=false;clCloseForm();clOnSaved();})
+      .catch(function(err){clSaving=false;clModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 """
 
@@ -708,39 +712,52 @@ def build_clips():
   function renderActions(){
     var html='';
     if(U.isLoggedIn())html+='<button type="button" class="btn sm primary" id="clWriteBtn">+ 클립 추가</button>';
-    if(U.isAdmin()&&!ALL.length)html+='<button type="button" class="btn sm" id="clImportBtn">운영 아카이브에서 클립 불러오기 (최초 1회)</button>';
+    if(U.isAdmin())html+='<button type="button" class="btn sm" id="clImportBtn">운영 아카이브에서 클립 불러오기</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('clWriteBtn');if(wb)wb.addEventListener('click',function(){clOpenForm('create',null,reload);});
     var ib=document.getElementById('clImportBtn');if(ib)ib.addEventListener('click',importClips);
   }
   /* 운영 /contests의 videos 중 라벨에 '클립'/'편집'이 든 것만 골라 일괄 등록 (§2.5-4).
      클릭 시점의 운영 데이터를 그대로 읽으므로 cutover 직전 추가분도 포함됨.
+     이미 등록된 url은 건너뛰므로 재클릭·부분 실패 후 재시도가 안전하다(멱등).
      tags에 대회 제목을 넣어둠 — 아카이브 기록에 같은 태그를 달면 상세의 '관련 클립'으로 연결. */
+  var clImporting=false;
   function importClips(){
-    if(!U.isAdmin())return;
-    if(!confirm('운영 아카이브의 클립 영상만 골라 등록합니다. 계속할까요?'))return;
+    if(!U.isAdmin()||clImporting)return;
+    if(!confirm('운영 아카이브의 클립 영상만 골라 등록합니다. 이미 등록된 URL은 건너뜁니다. 계속할까요?'))return;
+    var ib=document.getElementById('clImportBtn');
+    clImporting=true; if(ib){ib.disabled=true;ib.textContent='불러오는 중...';}
+    function done(){clImporting=false; if(ib){ib.disabled=false;ib.textContent='운영 아카이브에서 클립 불러오기';}}
     fetch('https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/contests.json?v='+Date.now())
       .then(function(r){return r.json();}).then(function(d){
         d=d||{};
+        var have={}; ALL.forEach(function(c){if(c.url)have[c.url]=1;});
         var found=[];
         Object.keys(d).forEach(function(k){
           var o=d[k]||{}, vids=(o.videos||[]).filter(function(v){
             var lab=(v.label||'');return lab.indexOf('클립')>=0||lab.indexOf('편집')>=0;});
           vids.forEach(function(v,i){
+            if(!v.url||have[v.url])return;
             var suffix=(v.label&&v.label!=='클립')?' '+v.label:' 클립';
             if(vids.length>1)suffix+=' '+(i+1);
             found.push({category:'대회', title:(o.title||'')+suffix, creator:'고래상사',
-              desc:o.date||'', url:v.url||'', img:'',
+              desc:o.date||'', url:v.url, img:'',
               tags:(o.tags&&o.tags.length)?o.tags:(o.title?[o.title]:[])});
           });
         });
-        if(!found.length){alert('불러올 클립 영상이 없습니다.');return;}
-        if(!confirm(found.length+'개의 클립을 등록합니다. 진행할까요?'))return;
-        var chain=Promise.resolve();
-        found.forEach(function(p){chain=chain.then(function(){return D.create('clips',p);});});
-        chain.then(function(){alert('클립 '+found.length+'개 등록 완료.');reload();})
-             .catch(function(err){alert('등록 중 오류: '+(err&&err.message||err));reload();});
-      }).catch(function(err){alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
+        if(!found.length){done();alert('새로 불러올 클립이 없습니다. (이미 모두 등록됨)');return;}
+        if(!confirm(found.length+'개의 클립을 등록합니다. 진행할까요?')){done();return;}
+        var ok=0,fails=[],chain=Promise.resolve();
+        found.forEach(function(p){chain=chain.then(function(){
+          return D.create('clips',p).then(function(){ok++;})
+            .catch(function(err){fails.push(p.title+' — '+(err&&err.message||err));});});});
+        chain.then(function(){
+          done();
+          if(fails.length)alert('클립 '+ok+'개 등록, '+fails.length+'개 실패:\\n'+fails.join('\\n')+'\\n\\n버튼을 다시 누르면 실패분만 재시도됩니다.');
+          else alert('클립 '+ok+'개 등록 완료.');
+          reload();
+        });
+      }).catch(function(err){done();alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
   }
   function heroActionsHtml(c){
     var h='';
@@ -1160,8 +1177,10 @@ _ARCHIVE_JS_SHARED = r"""
   if(acModalCloseBtn)acModalCloseBtn.addEventListener('click',acCloseForm);
   if(acModalBg)acModalBg.addEventListener('click',function(e){if(e.target===acModalBg)acCloseForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&acModalBg&&!acModalBg.hidden)acCloseForm();});
+  var acSaving=false;
   if(acForm)acForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(acSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     if(!U.isAdmin()){acModalMsg.textContent='관리자만 저장할 수 있습니다.';return;}
     var title=acForm.title.value.trim();
     if(!title){acModalMsg.textContent='대회명을 입력하세요.';return;}
@@ -1184,9 +1203,9 @@ _ARCHIVE_JS_SHARED = r"""
       videos: videos,
       tags: parseMembers(acForm.tags.value)
     };
-    acModalMsg.textContent='저장 중...';
+    acModalMsg.textContent='저장 중...';acSaving=true;
     var p=(acMode==='edit'&&acItem)?D.update('contests',acItem.id,payload):D.create('contests',payload);
-    p.then(function(){acCloseForm();acOnSaved();}).catch(function(err){acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){acSaving=false;acCloseForm();acOnSaved();}).catch(function(err){acSaving=false;acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 """
 
@@ -1194,7 +1213,8 @@ _ARCHIVE_JS_SHARED = r"""
 def build_archive():
     """통합 아카이브 — WhaleData.list('contests')로 /rework/contests 실시간 로드.
     분류(category=크루대전|컨텐츠) 칩으로 필터. 크루대전은 순위/전적, 컨텐츠는 순위·전적 없이 표시.
-    관리자는 +기록 추가/수정/삭제 가능, 비어있을 때 운영 /contests.json에서 1회 이관하는 '불러오기' 버튼도 제공."""
+    관리자는 +기록 추가/수정/삭제 가능. '운영 기록 불러오기' 버튼 = 운영 /contests.json과의 diff 이관
+    (제목+날짜 중복 스킵, category/tags/notes/total_teams 주입 — §3-C, 런북 4-2를 UI 1클릭으로 대체)."""
     body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "통합 아카이브")
             + '<div class="n-actions img-ani bottom-top" id="aActions"></div>'
             + '<div class="pg-tools img-ani bottom-top">'
@@ -1211,7 +1231,7 @@ def build_archive():
   function renderActions(){
     var html='';
     if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
-    if(U.isAdmin()&&!all.length)html+='<button type="button" class="btn sm" id="acSeedBtn">불러오기 (운영 기록 이관, 최초 1회)</button>';
+    if(U.isAdmin())html+='<button type="button" class="btn sm" id="acSeedBtn">운영 기록 불러오기 (누락분 이관)</button>';
     actionsEl.innerHTML=html;
     var wb=document.getElementById('acWriteBtn'); if(wb)wb.addEventListener('click',function(){acOpenForm('create',null,reload);});
     var sb=document.getElementById('acSeedBtn'); if(sb)sb.addEventListener('click',importSeed);
@@ -1282,26 +1302,45 @@ def build_archive():
     var card=e.target.closest&&e.target.closest('.ct-card');
     if(card&&e.target===card){e.preventDefault();location.href='archive-detail.html?id='+encodeURIComponent(card.getAttribute('data-id'));}
   });
+  /* 운영 /contests → /rework/contests diff 이관(§3-C, 런북 4-2): 제목+날짜가 같은 기록은
+     건너뛰므로 cutover 직전 운영 추가분만 반영된다(멱등 — 재클릭·부분 실패 후 재시도 안전).
+     category/tags/notes/total_teams까지 주입해 리워크 스키마와 정합(§3-C category 명시 요구). */
+  var acImporting=false;
   function importSeed(){
-    if(!U.isAdmin())return;
-    if(!confirm('운영 대회 기록을 관리용 저장소로 1회 이관합니다. 계속할까요?'))return;
+    if(!U.isAdmin()||acImporting)return;
+    if(!confirm('운영 대회 기록 중 이곳에 없는 것(제목+날짜 기준)만 이관합니다. 계속할까요?'))return;
+    var sb=document.getElementById('acSeedBtn');
+    acImporting=true; if(sb){sb.disabled=true;sb.textContent='이관 중...';}
+    function done(){acImporting=false; if(sb){sb.disabled=false;sb.textContent='운영 기록 불러오기 (누락분 이관)';}}
     fetch('https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/contests.json?v='+Date.now())
       .then(function(r){return r.json();}).then(function(d){
         d=d||{};
-        var keys=Object.keys(d);
-        if(!keys.length){alert('불러올 운영 기록이 없습니다.');return;}
-        var chain=Promise.resolve();
-        keys.forEach(function(k){
-          chain=chain.then(function(){
-            var o=d[k]||{};
-            return D.create('contests',{
-              title:o.title||'', date:o.date||'', rank:(o.rank!=null?o.rank:null),
-              members:o.members||[], opponents:o.opponents||[], games:o.games||{}, videos:o.videos||[]
-            });
+        var have={}; all.forEach(function(c){have[(c.title||'')+'|'+(c.date||'')]=1;});
+        var items=[];
+        Object.keys(d).forEach(function(k){
+          var o=d[k]||{};
+          if(have[(o.title||'')+'|'+(o.date||'')])return;
+          items.push({
+            category:o.category||'크루대전',
+            title:o.title||'', date:o.date||'', rank:(o.rank!=null?o.rank:null),
+            members:o.members||[], opponents:o.opponents||[], games:o.games||{}, videos:o.videos||[],
+            notes:o.notes||'', total_teams:(o.total_teams!=null?o.total_teams:null),
+            tags:o.tags||[]
           });
         });
-        chain.then(function(){alert('이관 완료.');reload();}).catch(function(err){alert('이관 중 오류: '+(err&&err.message||err));reload();});
-      }).catch(function(err){alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
+        if(!items.length){done();alert('새로 이관할 운영 기록이 없습니다. (이미 모두 있음)');return;}
+        if(!confirm(items.length+'건을 이관합니다. 진행할까요?')){done();return;}
+        var ok=0,fails=[],chain=Promise.resolve();
+        items.forEach(function(p){chain=chain.then(function(){
+          return D.create('contests',p).then(function(){ok++;})
+            .catch(function(err){fails.push(p.title+' — '+(err&&err.message||err));});});});
+        chain.then(function(){
+          done();
+          if(fails.length)alert(ok+'건 이관, '+fails.length+'건 실패:\n'+fails.join('\n')+'\n\n버튼을 다시 누르면 실패분만 재시도됩니다.');
+          else alert(ok+'건 이관 완료.');
+          reload();
+        });
+      }).catch(function(err){done();alert('운영 기록 불러오기 실패: '+(err&&err.message||err));});
   }
   document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
   reload();
@@ -1514,7 +1553,7 @@ _SCHEDULE_JS_SHARED = ("""
       scForm.type.value=item.type||'개인방송';scForm.members.value=(item.members||[]).join(', ');
       scForm.desc.value=item.desc||'';
     } else {
-      scForm.date.value=new Date().toISOString().slice(0,10);
+      scForm.date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);  /* 로컬(KST) 오늘 — toISOString 단독은 UTC라 00~09시에 어제로 채워짐 */
     }
     scModalBg.hidden=false;
   }
@@ -1523,15 +1562,17 @@ _SCHEDULE_JS_SHARED = ("""
   if(scModalCloseBtn)scModalCloseBtn.addEventListener('click',scCloseForm);
   if(scModalBg)scModalBg.addEventListener('click',function(e){if(e.target===scModalBg)scCloseForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&scModalBg&&!scModalBg.hidden)scCloseForm();});
+  var scSaving=false;
   if(scForm)scForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(scSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     var date=scForm.date.value, time=scForm.time.value, title=scForm.title.value.trim(), type=scForm.type.value;
     if(!date||!time||!title){scModalMsg.textContent='날짜·시간·제목을 모두 입력하세요.';return;}
     var members=scForm.members.value.split(',').map(function(s){return s.trim();}).filter(Boolean);
     var payload={date:date,time:time,title:title,type:type,members:members,desc:scForm.desc.value.trim()};
-    scModalMsg.textContent='저장 중...';
+    scModalMsg.textContent='저장 중...';scSaving=true;
     var p=(scMode==='edit'&&scItem)?D.update('schedules',scItem.id,payload):D.create('schedules',payload);
-    p.then(function(){scCloseForm();scOnSaved();}).catch(function(err){scModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){scSaving=false;scCloseForm();scOnSaved();}).catch(function(err){scSaving=false;scModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 """)
 
@@ -1824,7 +1865,7 @@ _NOTICE_JS_SHARED = """
       nForm.body.value=(item.body||[]).join('\\n');
       if(nForm.pinned)nForm.pinned.checked=!!item.pinned;
     } else {
-      nForm.date.value=new Date().toISOString().slice(0,10);
+      nForm.date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);  /* 로컬(KST) 오늘 — toISOString 단독은 UTC라 00~09시에 어제로 채워짐 */
       if(nForm.pinned)nForm.pinned.checked=false;
     }
     nModalBg.hidden=false;
@@ -1834,16 +1875,18 @@ _NOTICE_JS_SHARED = """
   if(nModalCloseBtn)nModalCloseBtn.addEventListener('click',closeForm);
   if(nModalBg)nModalBg.addEventListener('click',function(e){if(e.target===nModalBg)closeForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nModalBg&&!nModalBg.hidden)closeForm();});
+  var nSaving=false;
   if(nForm)nForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(nSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     var title=nForm.title.value.trim(), date=nForm.date.value, cat=nForm.cat.value;
     var body=nForm.body.value.split('\\n').map(function(s){return s.trim();}).filter(Boolean);
     if(!title||!date||!body.length){nModalMsg.textContent='제목·날짜·본문을 모두 입력하세요.';return;}
     var payload={cat:cat,title:title,date:date,body:body};
     if(U.isAdmin())payload.pinned=!!(nForm.pinned&&nForm.pinned.checked);
-    nModalMsg.textContent='저장 중...';
+    nModalMsg.textContent='저장 중...';nSaving=true;
     var p=(formMode==='edit'&&formItem)?D.update('notices',formItem.id,payload):D.create('notices',payload);
-    p.then(function(){closeForm();onSaved();}).catch(function(err){nModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){nSaving=false;closeForm();onSaved();}).catch(function(err){nSaving=false;nModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 """
 
@@ -2571,7 +2614,7 @@ def build_news():
     if(!items.length){empty(elC,'등록된 클립이 없습니다.');return;}
     var sorted=items.slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     elC.innerHTML=sorted.slice(0,5).map(function(c){
-      var dt=c.createdAt?new Date(c.createdAt).toISOString().slice(5,10):'';
+      var dt=c.createdAt?new Date(c.createdAt-new Date().getTimezoneOffset()*60000).toISOString().slice(5,10):'';  /* 로컬(KST) 날짜 표시 */
       return row('clip.html?id='+encodeURIComponent(c.id),'#0fb5b0',c.category||'클립',c.title,dt);
     }).join('');
   }).catch(function(){empty(elC,'클립을 불러오지 못했습니다.');});

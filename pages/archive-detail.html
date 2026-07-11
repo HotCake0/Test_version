@@ -6,6 +6,7 @@
 <title>대회 상세 · 고래상사</title>
 <meta name="description" content="고래상사 콘텐츠 상세 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
 <link rel="canonical" href="https://www.goraesangsa.com/pages/archive-detail">
+<meta name="robots" content="noindex, nofollow">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="고래상사">
@@ -428,8 +429,10 @@
   if(acModalCloseBtn)acModalCloseBtn.addEventListener('click',acCloseForm);
   if(acModalBg)acModalBg.addEventListener('click',function(e){if(e.target===acModalBg)acCloseForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&acModalBg&&!acModalBg.hidden)acCloseForm();});
+  var acSaving=false;
   if(acForm)acForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(acSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     if(!U.isAdmin()){acModalMsg.textContent='관리자만 저장할 수 있습니다.';return;}
     var title=acForm.title.value.trim();
     if(!title){acModalMsg.textContent='대회명을 입력하세요.';return;}
@@ -452,9 +455,9 @@
       videos: videos,
       tags: parseMembers(acForm.tags.value)
     };
-    acModalMsg.textContent='저장 중...';
+    acModalMsg.textContent='저장 중...';acSaving=true;
     var p=(acMode==='edit'&&acItem)?D.update('contests',acItem.id,payload):D.create('contests',payload);
-    p.then(function(){acCloseForm();acOnSaved();}).catch(function(err){acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){acSaving=false;acCloseForm();acOnSaved();}).catch(function(err){acSaving=false;acModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 
   var el=document.getElementById('cDetail');

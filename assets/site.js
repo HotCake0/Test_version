@@ -192,10 +192,16 @@
   }
   function writeUrl(path) {
     return authParam().then(function (a) {
-      /* 로그인 상태인데 idToken이 없으면 개발용 로그인(조회 전용) — 서버가 어차피 401을
-         돌려주므로, 보내기 전에 사람이 읽을 수 있는 메시지로 끊는다. */
-      if (!a && currentUser()) throw new Error(
-        '개발용 로그인은 화면 미리보기 전용이라 저장 권한이 없습니다. 실서비스(goraesangsa.com)에서 SOOP 계정으로 로그인한 뒤 이용해 주세요.');
+      /* 로그인 상태인데 idToken이 없으면 쓰기 불가 — 서버가 어차피 401을 돌려주므로,
+         보내기 전에 사람이 읽을 수 있는 메시지로 끊는다. dev 로그인(id가 'dev:' 접두)과
+         실SOOP 로그인의 토큰 교환 실패(soop_fb 미생성)를 구분해 안내한다. */
+      if (!a && currentUser()) {
+        var u = currentUser();
+        var isDev = u && typeof u.id === 'string' && u.id.indexOf('dev:') === 0;
+        throw new Error(isDev
+          ? '개발용 로그인은 화면 미리보기 전용이라 저장 권한이 없습니다. 실서비스(goraesangsa.com)에서 SOOP 계정으로 로그인한 뒤 이용해 주세요.'
+          : '저장 권한 토큰 발급이 완료되지 않았습니다. 로그아웃 후 SOOP 계정으로 다시 로그인해 주세요.');
+      }
       return REWORK_BASE + path + (a ? '?' + a : '');
     });
   }

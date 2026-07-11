@@ -289,7 +289,7 @@
     if(!items.length){empty(elC,'등록된 클립이 없습니다.');return;}
     var sorted=items.slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     elC.innerHTML=sorted.slice(0,5).map(function(c){
-      var dt=c.createdAt?new Date(c.createdAt).toISOString().slice(5,10):'';
+      var dt=c.createdAt?new Date(c.createdAt-new Date().getTimezoneOffset()*60000).toISOString().slice(5,10):'';  /* 로컬(KST) 날짜 표시 */
       return row('clip.html?id='+encodeURIComponent(c.id),'#0fb5b0',c.category||'클립',c.title,dt);
     }).join('');
   }).catch(function(){empty(elC,'클립을 불러오지 못했습니다.');});

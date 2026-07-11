@@ -6,6 +6,7 @@
 <title>공지 상세 · 고래상사</title>
 <meta name="description" content="고래상사 공지 상세 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
 <link rel="canonical" href="https://www.goraesangsa.com/pages/notice">
+<meta name="robots" content="noindex, nofollow">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="고래상사">
@@ -304,7 +305,7 @@
       nForm.body.value=(item.body||[]).join('\n');
       if(nForm.pinned)nForm.pinned.checked=!!item.pinned;
     } else {
-      nForm.date.value=new Date().toISOString().slice(0,10);
+      nForm.date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);  /* 로컬(KST) 오늘 — toISOString 단독은 UTC라 00~09시에 어제로 채워짐 */
       if(nForm.pinned)nForm.pinned.checked=false;
     }
     nModalBg.hidden=false;
@@ -314,16 +315,18 @@
   if(nModalCloseBtn)nModalCloseBtn.addEventListener('click',closeForm);
   if(nModalBg)nModalBg.addEventListener('click',function(e){if(e.target===nModalBg)closeForm();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nModalBg&&!nModalBg.hidden)closeForm();});
+  var nSaving=false;
   if(nForm)nForm.addEventListener('submit',function(e){
     e.preventDefault();
+    if(nSaving)return;  /* 저장 요청 진행 중 재제출 방지 */
     var title=nForm.title.value.trim(), date=nForm.date.value, cat=nForm.cat.value;
     var body=nForm.body.value.split('\n').map(function(s){return s.trim();}).filter(Boolean);
     if(!title||!date||!body.length){nModalMsg.textContent='제목·날짜·본문을 모두 입력하세요.';return;}
     var payload={cat:cat,title:title,date:date,body:body};
     if(U.isAdmin())payload.pinned=!!(nForm.pinned&&nForm.pinned.checked);
-    nModalMsg.textContent='저장 중...';
+    nModalMsg.textContent='저장 중...';nSaving=true;
     var p=(formMode==='edit'&&formItem)?D.update('notices',formItem.id,payload):D.create('notices',payload);
-    p.then(function(){closeForm();onSaved();}).catch(function(err){nModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
+    p.then(function(){nSaving=false;closeForm();onSaved();}).catch(function(err){nSaving=false;nModalMsg.textContent='저장 실패: '+(err&&err.message||err);});
   });
 
   var detail=document.getElementById('nDetail');
