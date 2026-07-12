@@ -306,7 +306,9 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   var grid=document.getElementById('mGrid');if(!grid)return;
   [].forEach.call(grid.querySelectorAll('.mcard[data-idx]'),function(c){
     var idx=c.getAttribute('data-idx');
-    function go(){c.style.viewTransitionName='member-hero';location.href='member.html?i='+idx;}
+    function go(){/* bfcache 복원 카드에 이름이 남으면 중복으로 전환이 통째로 스킵됨 — 전체 클리어 후 부여 */
+      [].forEach.call(grid.querySelectorAll('.mcard'),function(o){o.style.viewTransitionName='';});
+      c.style.viewTransitionName='member-hero';location.href='member.html?i='+idx;}
     c.addEventListener('click',go);
     c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
   });

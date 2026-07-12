@@ -551,7 +551,9 @@ def build_members():
   var grid=document.getElementById('mGrid');if(!grid)return;
   [].forEach.call(grid.querySelectorAll('.mcard[data-idx]'),function(c){
     var idx=c.getAttribute('data-idx');
-    function go(){c.style.viewTransitionName='member-hero';location.href='member.html?i='+idx;}
+    function go(){/* bfcache 복원 카드에 이름이 남으면 중복으로 전환이 통째로 스킵됨 — 전체 클리어 후 부여 */
+      [].forEach.call(grid.querySelectorAll('.mcard'),function(o){o.style.viewTransitionName='';});
+      c.style.viewTransitionName='member-hero';location.href='member.html?i='+idx;}
     c.addEventListener('click',go);
     c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
   });
@@ -914,7 +916,7 @@ def build_clip():
     """클립 시청 상세 (clip) — WhaleData.list('clips')로 런타임 로드. ?id=Firebase키, 옛 ?i=인덱스는 폴백."""
     body = (
         page_head_block("CLIPS", "베스트 클립", "클립 시청")
-        + '<div class="cdetail img-ani bottom-top" id="cDetail"></div>'
+        + '<div class="cdetail img-ani bottom-top" id="cDetail"><div class="skel" style="aspect-ratio:16/9;margin-bottom:14px"></div><div class="skel skel-line" style="width:60%"></div></div>'
         + clip_form_modal())
 
     js = "<script>(function(){" + _CLIP_JS_SHARED + """
@@ -1754,7 +1756,7 @@ def build_schedule():
 def build_schedule_detail():
     """일정 상세 — WhaleData.list('schedules')로 런타임 로드. ?id=Firebase키, 옛 ?i=인덱스는 폴백."""
     body = (page_head_block("SCHEDULE", "방송 일정", "일정 상세")
-            + '<div class="img-ani bottom-top" id="sDetail"></div>'
+            + '<div class="img-ani bottom-top" id="sDetail"><div class="skel skel-line" style="width:50%"></div><div class="skel" style="height:180px"></div></div>'
             + schedule_form_modal())
     js = "<script>(function(){" + _SCHEDULE_JS_SHARED + """
   var detail=document.getElementById('sDetail');
@@ -2030,7 +2032,7 @@ def build_notices():
 
 def build_notice():
     body = (page_head_block("NOTICE", "공지사항", "공지 상세")
-            + '<article class="img-ani bottom-top" id="nDetail"></article>'
+            + '<article class="img-ani bottom-top" id="nDetail"><div class="skel skel-line" style="width:50%"></div><div class="skel" style="height:220px"></div></article>'
             + notice_form_modal())
     js = "<script>(function(){" + _NOTICE_JS_SHARED + """
   var detail=document.getElementById('nDetail');
@@ -2193,7 +2195,7 @@ def build_multiview():
               '<aside class="mv-side">'
               '<h3 class="mv-sec-h"><span class="live-dot"></span>지금 방송 중'
               '<span style="font-size:12px;font-weight:600;color:var(--ink-2)" id="mvLiveInfo"></span></h3>'
-              '<div class="mv-grid" id="mvGrid"></div></aside></div>')
+              '<div class="mv-grid" id="mvGrid">' + '<div class="skel skel-card"></div>'*4 + '</div></aside></div>')
     js = r"""<script>(function(){
   var META=window.WHALE_META||{},SU=window.STATUS_URL,SEARCH=window.SEARCH_URL;
   var grid=document.getElementById('mvGrid'),stage=document.getElementById('mvStage');
