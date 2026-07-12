@@ -29,9 +29,25 @@ button{font-family:inherit}
 :where(a,button,[role="button"],[tabindex="0"]):focus-visible{
   outline:2px solid var(--brand);outline-offset:2px}
 
+/* 페이지 간 크로스페이드 — View Transitions(크로미움 계열 프로그레시브 향상, 미지원=기존 하드컷) */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root){animation-duration:0s}
+}
+
 /* =========================================================
    고정 배경
    ========================================================= */
+/* 스킵 링크 — 키보드 포커스 시에만 화면 안으로 */
+.skip-link{position:fixed;left:16px;top:-64px;z-index:300;padding:12px 18px;border-radius:11px;
+  background:var(--brand);color:#fff;font-weight:700;font-size:14px;
+  transition:top .2s var(--ease)}
+.skip-link:focus{top:16px}
+/* 필름 그레인 — 다크 대형 그라데이션의 밴딩 제거 + 질감. 정적 1장이라 성능비용 없음 */
+body::after{content:"";position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px}
 .wavebg{position:fixed;inset:0;z-index:-2;background:var(--bg)}
 .veil{position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
@@ -40,17 +56,18 @@ button{font-family:inherit}
     linear-gradient(180deg,rgba(7,10,20,.74),rgba(7,10,20,.88))}
 
 /* =========================================================
-   스크롤 리빌 — css_animation.css 원본 수치 그대로
+   스크롤 리빌 — 원본은 1s였으나 현대 표준(400~600ms)에 맞춰 .65s로 단축
+   (2026-07-12 모션 비교 분석: 1s는 콘텐츠 대기감을 줌)
    ========================================================= */
 .img-ani,.img-ani2,.copy-ani{
-  -webkit-transition:all 1s cubic-bezier(0,.72,.44,.99);
-  transition:all 1s cubic-bezier(0,.72,.44,.99);
+  -webkit-transition:all .65s cubic-bezier(0,.72,.44,.99);
+  transition:all .65s cubic-bezier(0,.72,.44,.99);
   opacity:0}
-.tran01{transition:all 1s cubic-bezier(0,.72,.44,.99) .5s!important}
-.tran02{transition:all 1s cubic-bezier(0,.72,.44,.99) 1s!important}
-.tran03{transition:all 1s cubic-bezier(0,.72,.44,.99) 1.5s!important}
-.tran04{transition:all 1s cubic-bezier(0,.72,.44,.99) 2s!important}
-.tran05{transition:all 1s cubic-bezier(0,.72,.44,.99) 2.5s!important}
+.tran01{transition:all .65s cubic-bezier(0,.72,.44,.99) .5s!important}
+.tran02{transition:all .65s cubic-bezier(0,.72,.44,.99) 1s!important}
+.tran03{transition:all .65s cubic-bezier(0,.72,.44,.99) 1.5s!important}
+.tran04{transition:all .65s cubic-bezier(0,.72,.44,.99) 2s!important}
+.tran05{transition:all .65s cubic-bezier(0,.72,.44,.99) 2.5s!important}
 .tran-de01{transition-delay:.1s!important}
 .tran-de02{transition-delay:.2s!important}
 .tran-de03{transition-delay:.3s!important}
@@ -81,6 +98,8 @@ html:not(.js-anim) .img-ani,html:not(.js-anim) .img-ani2,html:not(.js-anim) .cop
   box-shadow:0 8px 26px rgba(47,99,255,.4)}
 .btn.primary:hover{background:#3f70ff;box-shadow:0 10px 30px rgba(47,99,255,.55)}
 .btn.sm{padding:8px 14px;font-size:14px}
+/* 터치 기기에서 44px 최소 타깃 보장(WCAG·HIG) — 데스크톱 시각 크기는 유지 */
+@media(pointer:coarse){.btn.sm,.btn-login{min-height:44px}}
 .btn.ghost{background:transparent;border-color:transparent;color:var(--ink-2)}
 .btn.ghost:hover{color:#fff;background:var(--surface-2);border-color:var(--line-2)}
 
@@ -228,10 +247,27 @@ html:not(.js-anim) .img-ani,html:not(.js-anim) .img-ani2,html:not(.js-anim) .cop
   padding:clamp(28px,6vw,96px);padding-bottom:clamp(80px,10vw,140px);
   opacity:0;transition:opacity .8s var(--ease)}
 .hero-container.on{opacity:1}
+/* 히어로 캐스케이드 — h1→본문→버튼→스트립 순차 등장(요소 단위 스태거) */
+.hero-container h1,.hero-container p,.hero-container .hero-btns,.hero-container .hero-strip{
+  opacity:0;transform:translateY(26px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.hero-container.on h1{transition-delay:.05s}
+.hero-container.on p{transition-delay:.17s}
+.hero-container.on .hero-btns{transition-delay:.29s}
+.hero-container.on .hero-strip{transition-delay:.41s}
+.hero-container.on h1,.hero-container.on p,.hero-container.on .hero-btns,.hero-container.on .hero-strip{
+  opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){
   .hero-container{opacity:1!important}
+  .hero-container h1,.hero-container p,.hero-container .hero-btns,.hero-container .hero-strip{
+    opacity:1!important;transform:none!important;transition:none!important}
   .intro-logo,.intro-clip{display:none}
 }
+/* JS 미실행 폴백 — .on이 영영 안 붙어도 히어로가 보이게 */
+html:not(.js-anim) .hero-container,
+html:not(.js-anim) .hero-container h1,html:not(.js-anim) .hero-container p,
+html:not(.js-anim) .hero-container .hero-btns,html:not(.js-anim) .hero-container .hero-strip{
+  opacity:1!important;transform:none!important;transition:none!important}
 .badge{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;
   padding:7px 14px;border-radius:999px;
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);margin-bottom:20px}
@@ -241,9 +277,29 @@ html:not(.js-anim) .img-ani,html:not(.js-anim) .img-ani2,html:not(.js-anim) .cop
 @media(prefers-reduced-motion:reduce){.badge .dot{animation:none}}
 .sec01 h1{margin:0 0 18px;font-size:clamp(36px,5.5vw,80px);font-weight:900;
   letter-spacing:-.045em;line-height:1.05;word-break:keep-all}
-.sec01 h1 .g{color:var(--accent)}
+/* 셔머 강조 텍스트 — 디자인 시스템 §2 정의 구현(그동안 단색 액센트로 미구현 상태였음) */
+.sec01 h1 .g{
+  background:linear-gradient(90deg,#7fffd4,#8ab4ff,#7fffd4);
+  background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shimmer 6s linear infinite}
+@keyframes shimmer{to{background-position:-200% center}}
+@media(prefers-reduced-motion:reduce){.sec01 h1 .g{animation:none}}
 .sec01 p{margin:0 0 28px;font-size:clamp(16px,1.4vw,20px);color:#c3cee6;max-width:580px}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+/* 히어로 일정 스트립 — 오늘 방송(라이브 톤) / 다음 방송 안내 */
+.hero-strip{display:inline-flex;align-items:center;gap:9px;margin-top:26px;
+  padding:9px 16px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--ink-2);
+  background:rgba(255,255,255,.07);border:1px solid var(--line-2);backdrop-filter:blur(8px)}
+.hero-strip[hidden]{display:none}
+.hero-strip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.hero-strip.is-today{color:var(--ink);border-color:rgba(52,211,153,.4)}
+.hero-strip.is-today .dot{background:#34d399;animation:pulse 1.8s infinite}
+@media(prefers-reduced-motion:reduce){.hero-strip .dot{animation:none}}
+/* 오늘 방송이 있는 날만 Primary CTA에 글로우 펄스(모션 의미 부여) */
+.btn.primary.live-glow{animation:ctaGlow 2.4s ease-in-out infinite}
+@keyframes ctaGlow{0%,100%{box-shadow:0 8px 26px rgba(47,99,255,.4)}50%{box-shadow:0 8px 36px rgba(47,99,255,.72)}}
+@media(prefers-reduced-motion:reduce){.btn.primary.live-glow{animation:none}}
 .scroll-ind{position:absolute;bottom:32px;right:clamp(24px,4vw,64px);z-index:10;
   display:flex;flex-direction:column;align-items:center;gap:6px;
   font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--ink-2);
@@ -289,8 +345,16 @@ html:not(.js-anim) .img-ani,html:not(.js-anim) .img-ani2,html:not(.js-anim) .cop
 .slide-box.n03 .slide-bg{background:linear-gradient(to top,rgba(8,2,18,.6),transparent 56%),linear-gradient(135deg,#3a0fa6,#9333ff,#5a14c0)}
 .slide-box.n04 .slide-bg{background:linear-gradient(to top,rgba(16,8,2,.6),transparent 56%),linear-gradient(135deg,#7a4a00,#ffb220,#9a3800)}
 .slide-box.n05 .slide-bg{background:linear-gradient(to top,rgba(16,2,10,.6),transparent 56%),linear-gradient(135deg,#7a0a3c,#ff3d92,#a80a44)}
-.slide-bg::after{content:attr(data-icon);position:absolute;bottom:-10px;right:10px;
-  font-size:clamp(100px,18vw,220px);opacity:.05;line-height:1;pointer-events:none}
+/* 카드 워터마크 — 이모지(data-icon) 대신 Lucide SVG(플랫폼 무관 렌더링, 토큰 색 제어) */
+.slide-bg::after{content:"";position:absolute;bottom:20px;right:20px;
+  width:clamp(90px,15vw,190px);height:clamp(90px,15vw,190px);
+  background-size:contain;background-repeat:no-repeat;background-position:center;
+  opacity:.08;pointer-events:none}
+.slide-box.n01 .slide-bg::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 19.1C1 15.2 1 8.8 4.9 4.9'/%3E%3Cpath d='M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Cpath d='M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5'/%3E%3Cpath d='M19.1 4.9C23 8.8 23 15.2 19.1 19.1'/%3E%3C/svg%3E")}
+.slide-box.n02 .slide-bg::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E")}
+.slide-box.n03 .slide-bg::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z'/%3E%3Cpath d='m6.2 5.3 3.1 3.9'/%3E%3Cpath d='m12.4 3.4 3.1 4'/%3E%3Cpath d='M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z'/%3E%3C/svg%3E")}
+.slide-box.n04 .slide-bg::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='21' r='1'/%3E%3Ccircle cx='19' cy='21' r='1'/%3E%3Cpath d='M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12'/%3E%3C/svg%3E")}
+.slide-box.n05 .slide-bg::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3Cpath d='M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3Cpath d='M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3C/svg%3E")}
 /* 대각선 오버레이 와이프 — clip-path는 compositor 전용(border-width는 layout 비용이라 07-11 폐기).
    덮개 폴리곤(0 0,200% 0,0 200%)이 .on에서 좌상단 점으로 붕괴 → 대각선 엣지로 카드 공개 */
 .overlay{position:absolute;inset:0;z-index:1;border-radius:18px;
@@ -303,6 +367,19 @@ html:not(.js-anim) .img-ani,html:not(.js-anim) .img-ani2,html:not(.js-anim) .cop
 .slide-box.box_left  .overlay{border-top-color:transparent;border-left-color:transparent}
 .slide-box.on .overlay{clip-path:polygon(0 0,0 0,0 0)}
 .slide-box .project_title{display:none}
+/* 커서 스포트라이트 — 포인터를 따라오는 라이트(호버 기기 + 모션 허용 시만) */
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .slide-box::before,.create-cont::before{content:"";position:absolute;inset:0;z-index:1;
+    border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s var(--ease);
+    background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(138,180,255,.16),transparent 65%)}
+  .slide-box:hover::before,.creator-card:hover .create-cont::before{opacity:1}
+}
+/* 핀 진행 바 — 가로 스크롤 구간 진행도(데스크톱 핀 전용) */
+.pin-bar{position:absolute;left:var(--pad);right:var(--pad);bottom:26px;height:2px;z-index:5;
+  background:var(--line);border-radius:2px;overflow:hidden}
+.pin-bar span{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left;
+  background:linear-gradient(90deg,var(--brand),var(--accent));border-radius:2px}
+@media(max-width:989px){.pin-bar{display:none}}
 .txt-bx{position:relative;z-index:2;display:flex;align-items:flex-end;gap:20px}
 /* 카드 순번 — 사내 문서 워터마크처럼 은은한 솔리드 채움 */
 .slide-num{font-size:clamp(80px,12vw,160px);font-weight:900;letter-spacing:-.06em;

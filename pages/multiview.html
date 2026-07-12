@@ -11,13 +11,15 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="멀티뷰 시청 · 고래상사">
 <meta property="og:description" content="고래상사 멀티뷰 시청 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/favicon.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <script>if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('js-anim');</script>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/site.css">
 <style>
 .pg-wrap{max-width:var(--maxw);margin:0 auto;padding:calc(72px + clamp(40px,7vw,110px)) var(--pad) clamp(80px,10vw,140px);min-height:70vh}
@@ -79,7 +81,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .crew-metric .n{font-size:clamp(24px,3vw,38px);font-weight:900;letter-spacing:-.02em;color:var(--ink)}
 .crew-metric .u{font-size:12px;color:var(--ink-2);margin-top:4px}
 .crew-visual{aspect-ratio:4/5;border-radius:18px;background:linear-gradient(135deg,#0b2e8f,#2f6bff,#0a44cc);position:relative;overflow:hidden;box-shadow:var(--shadow)}
-.crew-visual::after{content:"🐋";position:absolute;right:6%;bottom:2%;font-size:clamp(120px,20vw,240px);opacity:.14;line-height:1}
+.crew-visual::after{content:"";position:absolute;right:6%;bottom:4%;width:clamp(120px,20vw,240px);height:clamp(120px,20vw,240px);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3Cpath d='M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3Cpath d='M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3C/svg%3E") center/contain no-repeat;opacity:.14}
 /* 부서 리스트 */
 .dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:clamp(28px,4vw,48px)}
 .dept-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px;transition:border-color .25s,transform .25s}
@@ -279,6 +281,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .mv-empty .big{font-size:clamp(36px,6vw,64px);opacity:.5;margin-bottom:14px}
 @media(prefers-reduced-motion:reduce){.mv-badge .d,.mv-sec-h .live-dot{animation:none}}
 </style></head><body>
+<a class="skip-link" href="#main">본문 바로가기</a>
 <div class="wavebg" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div><header id="header"><div class="header-in">
     <a class="h-logo" href="../index.html">고래<span class="lk">상사</span></a>
@@ -291,7 +294,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
         aria-expanded="false" aria-controls="gnbOverlay"><span></span><span></span><span></span></button>
-    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li><li><a href="stats.html"><span class="sn">3-2</span>통계 · 전적</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a class="active" href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">동시 시청</span><h1 class="pg-en">MULTIVIEW</h1><p class="pg-sub">멀티뷰 시청</p></header><div class="mv-bar img-ani bottom-top"><span class="cnt">선택 <b id="mvCnt">0</b> / 4</span><button class="btn sm" id="mvFullBtn" type="button" title="재생 영역 전체화면">⛶ 전체화면</button><form class="mv-search" id="mvSearchForm" autocomplete="off"><input type="text" id="mvSearch" placeholder="외부 스트리머 닉네임 검색 (숲)"><button class="btn sm primary" type="submit">검색</button></form></div><div class="mv-layout img-ani bottom-top"><div class="mv-stage is-empty" id="mvStage"></div><aside class="mv-side"><h3 class="mv-sec-h"><span class="live-dot"></span>지금 방송 중<span style="font-size:12px;font-weight:600;color:var(--ink-2)" id="mvLiveInfo"></span></h3><div class="mv-grid" id="mvGrid"></div></aside></div></main><footer class="site-footer">
+    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li><li><a href="stats.html"><span class="sn">3-2</span>통계 · 전적</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a class="active" href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main id="main" class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">동시 시청</span><h1 class="pg-en">MULTIVIEW</h1><p class="pg-sub">멀티뷰 시청</p></header><div class="mv-bar img-ani bottom-top"><span class="cnt">선택 <b id="mvCnt">0</b> / 4</span><button class="btn sm" id="mvFullBtn" type="button" title="재생 영역 전체화면">⛶ 전체화면</button><form class="mv-search" id="mvSearchForm" autocomplete="off"><input type="text" id="mvSearch" placeholder="외부 스트리머 닉네임 검색 (숲)"><button class="btn sm primary" type="submit">검색</button></form></div><div class="mv-layout img-ani bottom-top"><div class="mv-stage is-empty" id="mvStage"></div><aside class="mv-side"><h3 class="mv-sec-h"><span class="live-dot"></span>지금 방송 중<span style="font-size:12px;font-weight:600;color:var(--ink-2)" id="mvLiveInfo"></span></h3><div class="mv-grid" id="mvGrid"></div></aside></div></main><footer class="site-footer">
   <div class="footer-in">
     <span class="footer-logo">고래<span class="lk">상사</span></span>
     <div class="footer-links">
@@ -310,7 +313,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     <button class="login-close" id="loginClose" type="button" aria-label="닫기">×</button>
     <h2 id="loginTitle">로그인</h2>
     <p class="sub">숲(SOOP) 계정으로 로그인합니다. 관리자 권한은 숲 아이디로 확인됩니다.</p>
-    <button class="btn primary login-soop" id="soopLoginBtn" type="button">🔵 숲(SOOP) 계정으로 로그인</button>
+    <button class="btn primary login-soop" id="soopLoginBtn" type="button">숲(SOOP) 계정으로 로그인</button>
     <p class="login-msg" id="loginMsg" role="status" aria-live="polite"></p>
     <details class="dev-login">
       <summary>개발용 로그인 (로컬 테스트)</summary>
@@ -334,7 +337,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   function renderStage(){
     if(sel.length===0){
       stage.className='mv-stage is-empty';
-      stage.innerHTML='<div class="mv-stage-ph"><div class="big">🐳</div>'
+      stage.innerHTML='<div class="mv-stage-ph"><div class="big"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></div>'
         +'오른쪽 목록에서 방송을 선택하면<br>여기에서 최대 <b>4개</b>까지 동시에 볼 수 있어요.</div>';
     }else{
       stage.className=stageCls(sel.length);
@@ -368,12 +371,12 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     return '<div class="mv-card" data-id="'+esc(m.id)+'" role="button" tabindex="0">'
       +'<div class="mv-thumb">'+thumb+ava
       +'<span class="mv-badge"><span class="d"></span>LIVE</span>'
-      +'<span class="mv-view">👁 '+(m.viewers||0).toLocaleString()+'</span>'
+      +'<span class="mv-view"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> '+(m.viewers||0).toLocaleString()+'</span>'
       +'<span class="mv-chk">✔</span></div>'
       +'<div class="mv-info"><div class="nm">'+esc(m.name)+'</div><div class="tt">'+esc(m.title||'방송 중')+'</div></div></div>';
   }
   function renderGrid(live){
-    if(!live.length){grid.innerHTML='<div class="mv-empty" style="grid-column:1/-1"><div class="big">🌙</div>'
+    if(!live.length){grid.innerHTML='<div class="mv-empty" style="grid-column:1/-1"><div class="big"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>'
       +'현재 방송 중인 멤버가 없습니다.<br>방송이 시작되면 자동으로 표시됩니다.</div>';info.textContent='';return;}
     info.textContent='· '+live.length+'명';
     grid.innerHTML=live.map(card).join('');

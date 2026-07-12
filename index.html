@@ -10,18 +10,22 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="고래상사 — 공식 홈페이지">
 <meta property="og:description" content="고래상사 크루 공식 홈페이지 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/favicon.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <script>if('scrollRestoration' in history)history.scrollRestoration='manual';if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('js-anim');</script>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8.4.7/swiper-bundle.min.css"
+      integrity="sha384-OVtDJ2WfU22geHR8xWErSSHJMaH21QOP9w33a+A2MzyE4uxDS2/5rhIw9YZkWv5R" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
 
+<a class="skip-link" href="#main">본문 바로가기</a>
 <div class="wavebg" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div>
 
@@ -112,6 +116,7 @@
 </div>
 
 <!-- 커스텀 커서 레이블 -->
+<main id="main">
 <!-- ===================================================
      SEC01 — 풀스크린 히어로
      =================================================== -->
@@ -130,8 +135,11 @@
     <h1>회사 버추얼 크루<br><span class="g">고래상사</span>에 오신 걸 환영합니다</h1>
     <p>방송, 클립, 멤버 정보를 한곳에서. 16인 크루의 모든 콘텐츠를 고래상사 공식 홈페이지에서 만나보세요.</p>
     <div class="hero-btns">
-      <a class="btn primary" href="#sec03">▶ 멤버 보러 가기</a>
+      <a class="btn primary" href="#sec03"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>멤버 보러 가기</a>
       <a class="btn" href="#sec04">최신 클립 보기</a>
+    </div>
+    <div class="hero-strip" id="heroStrip" hidden>
+      <span class="dot" aria-hidden="true"></span><span id="heroStripTxt"></span>
     </div>
   </div>
   <div class="scroll-ind" aria-hidden="true"><span class="arr">↓</span>SCROLL</div>
@@ -146,10 +154,11 @@
     <p class="sub-txt">고래상사 크루들의 다양한 활동을 만나보세요.</p>
   </div>
   <div class="wrap2" id="sectionPin">
+    <div class="pin-bar" aria-hidden="true"><span id="pinBarFill"></span></div>
     <div class="slide-wrap">
       <div class="slide-cont" id="slideCont">
         <div class="slide-box box_left n01" id="slide01">
-          <div class="slide-bg" data-icon="📡"></div>
+          <div class="slide-bg"></div>
           <span class="overlay"></span>
           <div class="project_title">라이브 방송 ↗</div>
           <div class="txt-bx">
@@ -161,7 +170,7 @@
           </div>
         </div>
         <div class="slide-box box_right n02" id="slide02">
-          <div class="slide-bg" data-icon="🐋"></div>
+          <div class="slide-bg"></div>
           <span class="overlay"></span>
           <div class="project_title">멤버 매니지먼트 ↗</div>
           <div class="txt-bx">
@@ -173,7 +182,7 @@
           </div>
         </div>
         <div class="slide-box box_right n03 on_lr" id="slide03">
-          <div class="slide-bg" data-icon="🎬"></div>
+          <div class="slide-bg"></div>
           <span class="overlay"></span>
           <div class="project_title">콘텐츠 제작 ↗</div>
           <div class="txt-bx">
@@ -185,7 +194,7 @@
           </div>
         </div>
         <div class="slide-box box_right n04" id="slide04">
-          <div class="slide-bg" data-icon="🛒"></div>
+          <div class="slide-bg"></div>
           <span class="overlay"></span>
           <div class="project_title">굿즈·커머스 ↗</div>
           <div class="txt-bx">
@@ -197,7 +206,7 @@
           </div>
         </div>
         <div class="slide-box box_right n05" id="slide05">
-          <div class="slide-bg" data-icon="🌊"></div>
+          <div class="slide-bg"></div>
           <span class="overlay"></span>
           <div class="project_title">팬 커뮤니티 ↗</div>
           <div class="txt-bx">
@@ -244,7 +253,7 @@
              style="background:linear-gradient(135deg,#1f2060,#2040a0)"></div>
         <img id="origImg" src="img/시상식.jpg" alt="제1회 고래상사 시상식 하이라이트"
              onerror="this.style.display='none'">
-        <span class="orig-play" aria-hidden="true">▶</span>
+        <span class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
       </a>
       <ul class="orig-list img-ani right-left" id="origList">
         <li><a class="orig-item active" href="pages/clips.html"
@@ -289,6 +298,7 @@
     </div>
   </div>
 </section>
+</main>
 
 <!-- ===== 푸터 ===== -->
 <footer class="site-footer">
@@ -343,7 +353,7 @@
     <button class="login-close" id="loginClose" type="button" aria-label="닫기">×</button>
     <h2 id="loginTitle">로그인</h2>
     <p class="sub">숲(SOOP) 계정으로 로그인합니다. 관리자 권한은 숲 아이디로 확인됩니다.</p>
-    <button class="btn primary login-soop" id="soopLoginBtn" type="button">🔵 숲(SOOP) 계정으로 로그인</button>
+    <button class="btn primary login-soop" id="soopLoginBtn" type="button">숲(SOOP) 계정으로 로그인</button>
     <p class="login-msg" id="loginMsg" role="status" aria-live="polite"></p>
     <details class="dev-login">
       <summary>개발용 로그인 (로컬 테스트)</summary>
@@ -358,11 +368,13 @@
   </div>
 </div>
 
-<!-- CDN 라이브러리 -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+<!-- CDN 라이브러리 — 버전 고정 + SRI(CDN 변조 방어) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+        integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+        integrity="sha384-Z3REaz79l2IaAZqJsSABtTbhjgOUYyV3p90XNnAPCSHg3EMTz1fouunq9WZRtj3d" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@8.4.7/swiper-bundle.min.js"
+        integrity="sha384-kLg4yw7ysk2F34aYhHIrdq/AXIkHzZ808L3af45jUqWQoMPN8VnJneCjOR8+THSG" crossorigin="anonymous"></script>
 
 <script>
 /* =========================================================
@@ -710,25 +722,41 @@
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
-          /* 진행도에 따라 카드 순차 활성화 */
+          /* 진행도에 따라 카드 순차 활성화 + 하단 진행 바 */
           var prog = self.progress;
           cards.forEach(function (card, i) {
             if (prog >= (i / numCards) - 0.02) card.classList.add('on');
           });
+          var fill = document.getElementById('pinBarFill');
+          if (fill) fill.style.transform = 'scaleX(' + prog + ')';
         }
       }
     });
 
-    /* box_right 카드 오프셋 기반 활성화 (원본 263~282행) */
-    window.addEventListener('scroll', function () {
-      document.querySelectorAll('.slide-box.box_right').forEach(function (el) {
-        if (el.getBoundingClientRect().left <= window.innerWidth * 0.8) el.classList.add('on');
+    /* box_right 카드 활성화 (원본 263~282행) — 좌측 엣지가 뷰포트 80%를 지나면 on.
+       스크롤마다 rect 전수 측정(layout thrash) 대신 IO once-only. transform 이동도 IO가 감지 */
+    var rightIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('on'); rightIO.unobserve(en.target); }
       });
-    }, { passive: true });
+    }, { rootMargin: '0px -20% 0px 0px' });
+    document.querySelectorAll('.slide-box.box_right').forEach(function (el) { rightIO.observe(el); });
 
   } else {
     /* 모바일 / reduced-motion: 모두 즉시 on */
     document.querySelectorAll('.slide-box').forEach(function (el) { el.classList.add('on'); });
+  }
+
+  /* -------------------------------------------------------
+     히어로 미세 패럴랙스 — 장식 레이어만(워터마크·오브 컨테이너).
+     오브 자체는 CSS float 애니메이션이 transform을 쓰므로 컨테이너를 움직인다
+     ------------------------------------------------------- */
+  if (isDesktop && !PRM && window.gsap) {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.to('.hero-mark', { yPercent: 16, ease: 'none',
+      scrollTrigger: { trigger: '#sec01', start: 'top top', end: 'bottom top', scrub: true } });
+    gsap.to('.sec01-bg', { yPercent: 7, ease: 'none',
+      scrollTrigger: { trigger: '#sec01', start: 'top top', end: 'bottom top', scrub: true } });
   }
 
   /* -------------------------------------------------------
@@ -757,6 +785,17 @@
       + '</div>';
     memberTrack.appendChild(slide);
   });
+
+  /* 카드 커서 스포트라이트 — 포인터 위치를 CSS 변수로 전달(호버 기기 전용) */
+  if (matchMedia('(hover:hover)').matches) {
+    document.querySelectorAll('.slide-box, .creator-card .create-cont').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
 
   /* Swiper 8 초기화 */
   var memberSwiper = new Swiper('#memberSwiper', {
@@ -939,6 +978,25 @@
         var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
         var up=items.filter(function(e){return e.date>=iso;})
                     .sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0);}).slice(0,4);
+        /* 히어로 일정 스트립 — 오늘 방송이 있으면 라이브 톤(점멸+CTA 글로우), 없으면 다음 방송 안내 */
+        var strip=document.getElementById('heroStrip'),stripTxt=document.getElementById('heroStripTxt');
+        if(strip&&stripTxt){
+          var today=items.filter(function(e){return e.date===iso;})
+                         .sort(function(a,b){return (a.time||'')<(b.time||'')?-1:1;});
+          if(today.length){
+            var t0=today[0];
+            stripTxt.textContent='오늘 방송 '+today.length+'건'
+              +(t0.time?' · '+t0.time:'')+(t0.title?' '+t0.title:'');
+            strip.classList.add('is-today');strip.hidden=false;
+            var cta=document.querySelector('.hero-btns .btn.primary');
+            if(cta)cta.classList.add('live-glow');
+          }else if(up.length){
+            var n0=up[0];
+            stripTxt.textContent='다음 방송 '+n0.date.slice(5).replace('-','.')
+              +(n0.time?' '+n0.time:'')+(n0.title?' · '+n0.title:'');
+            strip.hidden=false;
+          }
+        }
         if(!up.length){msgRow('예정된 방송 일정이 없습니다. 캘린더에서 확인해 보세요.');return;}
         box.textContent='';
         var days=['일','월','화','수','목','금','토'];

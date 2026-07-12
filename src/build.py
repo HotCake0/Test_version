@@ -80,15 +80,18 @@ def head(title, page_css="", slug=None):
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="{esc(ttl)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:image" content="{BASE_URL}/favicon.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="{BASE_URL}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <script>if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('js-anim');</script>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/site.css">
 {css}</head><body>
+<a class="skip-link" href="#main">본문 바로가기</a>
 <div class="wavebg" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div>"""
 
@@ -159,7 +162,7 @@ def login_modal():
     <button class="login-close" id="loginClose" type="button" aria-label="닫기">×</button>
     <h2 id="loginTitle">로그인</h2>
     <p class="sub">숲(SOOP) 계정으로 로그인합니다. 관리자 권한은 숲 아이디로 확인됩니다.</p>
-    <button class="btn primary login-soop" id="soopLoginBtn" type="button">🔵 숲(SOOP) 계정으로 로그인</button>
+    <button class="btn primary login-soop" id="soopLoginBtn" type="button">숲(SOOP) 계정으로 로그인</button>
     <p class="login-msg" id="loginMsg" role="status" aria-live="polite"></p>
     <details class="dev-login">
       <summary>개발용 로그인 (로컬 테스트)</summary>
@@ -219,7 +222,7 @@ def write(slug, title, body, page_css="", scripts="", need_member_modal=False):
     mm = member_modal() if need_member_modal else ""
     doc = (head(title, page_css, slug)
            + header_and_drawer(slug)
-           + '<main class="pg-wrap">' + body + '</main>'
+           + '<main id="main" class="pg-wrap">' + body + '</main>'
            + footer() + mm + tail(scripts))
     with open(os.path.join(OUT, f"{slug}.html"), "w", encoding="utf-8") as f:
         f.write(doc)
@@ -286,7 +289,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .crew-metric .n{font-size:clamp(24px,3vw,38px);font-weight:900;letter-spacing:-.02em;color:var(--ink)}
 .crew-metric .u{font-size:12px;color:var(--ink-2);margin-top:4px}
 .crew-visual{aspect-ratio:4/5;border-radius:18px;background:linear-gradient(135deg,#0b2e8f,#2f6bff,#0a44cc);position:relative;overflow:hidden;box-shadow:var(--shadow)}
-.crew-visual::after{content:"🐋";position:absolute;right:6%;bottom:2%;font-size:clamp(120px,20vw,240px);opacity:.14;line-height:1}
+.crew-visual::after{content:"";position:absolute;right:6%;bottom:4%;width:clamp(120px,20vw,240px);height:clamp(120px,20vw,240px);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3Cpath d='M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3Cpath d='M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/%3E%3C/svg%3E") center/contain no-repeat;opacity:.14}
 /* 부서 리스트 */
 .dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:clamp(28px,4vw,48px)}
 .dept-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px;transition:border-color .25s,transform .25s}
@@ -583,7 +586,7 @@ def build_member():
     var soopHref = live ? safeHttp(st.live_url, 'https://play.sooplive.co.kr/'+sid)
                         : ('https://www.sooplive.co.kr/station/'+sid);
     var soopBtn = '<a class="btn sm '+(live?'primary':'')+'" href="'+esc(soopHref)+'" target="_blank" rel="noopener">'+
-                  (live?'▶ 방송 보러가기':'SOOP 방송국 →')+'</a>';
+                  (live?'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>방송 보러가기':'SOOP 방송국 →')+'</a>';
     var stats=(m.stats||[]).map(function(s,k){
       return '<div class="stat"><div class="n" id="ds'+k+'">0</div><div class="u">'+esc(s.u)+'</div></div>';}).join('');
     var el=document.getElementById('mDetail');
@@ -788,7 +791,7 @@ def build_clips():
     var feat=ALL.filter(function(c){return c.featured;})[0]||ALL[0];
     hero.innerHTML='<section class="clips-hero">'
       +'<a class="orig-feat" href="clip.html?id='+encodeURIComponent(feat.id)+'" aria-label="'+esc(feat.title)+' 시청">'
-      +bgOf(feat)+'<div class="orig-play" aria-hidden="true">▶</div></a>'
+      +bgOf(feat)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></a>'
       +'<div class="clips-hero-info">'
       +heroActionsHtml(feat)
       +'<div class="ch-cat">'+esc(feat.category||'')+' · 대표 클립</div>'
@@ -798,7 +801,7 @@ def build_clips():
       +(feat.duration?'<span class="ch-dur">'+esc(feat.duration)+'</span>':'')
       +'<span>'+fmtViews(feat.views)+' 조회</span></div>'
       +(feat.desc?'<p class="ch-desc">'+esc(feat.desc)+'</p>':'')
-      +'<a class="btn primary" href="clip.html?id='+encodeURIComponent(feat.id)+'">▶ 클립 시청</a>'
+      +'<a class="btn primary" href="clip.html?id='+encodeURIComponent(feat.id)+'"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>클립 시청</a>'
       +'</div></section>';
   }
   function renderChips(){
@@ -823,7 +826,7 @@ def build_clips():
   function card(c){
     return '<article class="ccard img-ani bottom-top" data-id="'+esc(c.id)+'" data-cat="'+esc(c.category||'')+'" role="button" tabindex="0" aria-label="'+esc(c.title)+' 클립 시청">'
       +(c.featured?'<span class="ccard-feat">★ 대표</span>':'')
-      +'<div class="ccard-thumb">'+bgOf(c)+'<div class="cplay" aria-hidden="true">▶</div></div>'
+      +'<div class="ccard-thumb">'+bgOf(c)+'<div class="cplay" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>'
       +'<div class="ccard-info"><div class="ccard-title">'+esc(c.title)+'</div>'
       +'<div class="ccard-meta"><span>'+esc(c.creator)+'</span>'
       +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
@@ -930,7 +933,7 @@ def build_clip():
       manage+='<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
     }
     detail.innerHTML=
-      '<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true">▶</div></div>'
+      '<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>'
       +'<div class="cm-cat">'+esc(c.category||'')+'</div>'
       +'<h2 class="cdetail-title">'+esc(c.title)+'</h2>'
       +'<div class="cdetail-meta"><span>제작: '+esc(c.creator)+'</span>'
@@ -938,7 +941,7 @@ def build_clip():
       +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
       +'<span>'+fmtViews(c.views)+' 조회</span></div>'
       +(c.desc?'<p class="cdetail-desc">'+esc(c.desc)+'</p>':'')
-      +(c.url?'<div style="margin:0 0 20px"><a class="btn sm primary" href="'+esc(safeUrl(c.url))+'" target="_blank" rel="noopener">▶ 원본 영상 보기</a></div>':'')
+      +(c.url?'<div style="margin:0 0 20px"><a class="btn sm primary" href="'+esc(safeUrl(c.url))+'" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>원본 영상 보기</a></div>':'')
       +'<div class="cdetail-nav"><button class="btn sm" id="cPrev">← 이전 클립</button>'
       +'<button class="btn sm" id="cNext">다음 클립 →</button>'
       +manage
@@ -1234,8 +1237,8 @@ def build_archive():
             + '<div class="n-actions img-ani bottom-top" id="aActions"></div>'
             + '<div class="pg-tools img-ani bottom-top">'
               '<button class="chip active" data-f="all">전체</button>'
-              '<button class="chip" data-f="크루대전">🏆 크루대전</button>'
-              '<button class="chip" data-f="컨텐츠">🎬 컨텐츠</button>'
+              '<button class="chip" data-f="크루대전">크루대전</button>'
+              '<button class="chip" data-f="컨텐츠">컨텐츠</button>'
               '<span class="pg-count" id="aCount"></span></div>'
             + '<div class="agrid img-ani bottom-top" id="aGrid">'
               '<div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div>'
@@ -1263,8 +1266,8 @@ def build_archive():
     var cast=(c.members||[]).slice(0,6).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
     var more=(c.members||[]).length>6?'<span class="ct-chip">+'+((c.members||[]).length-6)+'</span>':'';
     var badge=isCrew
-      ? '<span class="ct-rank '+(win?'win':'lose')+'">'+(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>'
-      : '<span class="ct-cat">🎬 컨텐츠</span>';
+      ? '<span class="ct-rank '+(win?'win':'lose')+'">'+(win?'우승':(c.rank?c.rank+'위':'참가'))+'</span>'
+      : '<span class="ct-cat">컨텐츠</span>';
     var meta=isCrew
       ? '<div class="ct-meta"><span class="ct-wl">전적 <span class="w">'+r.w+'승</span> <span class="l">'+r.l+'패</span></span></div>'
       : '';
@@ -1416,7 +1419,7 @@ def build_archive_detail():
       var media = emb
         ? '<div class="rc-media"><iframe src="'+esc(emb)+'" loading="lazy" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" title="'+esc(cl.title||'클립')+'"></iframe></div>'
         : '<a class="rc-media rc-static" href="clip.html?id='+encodeURIComponent(cl.id)+'">'
-            +(cl.img?'<img src="'+esc(safeUrl(cl.img))+'" alt="'+esc(cl.title||'')+'" loading="lazy" onerror="this.style.display=\'none\'">':'<span class="rc-play">▶</span>')
+            +(cl.img?'<img src="'+esc(safeUrl(cl.img))+'" alt="'+esc(cl.title||'')+'" loading="lazy" onerror="this.style.display=\'none\'">':'<span class="rc-play"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>')
           +'</a>';
       return '<div class="rc-card">'+media
         +'<a class="rc-t" href="clip.html?id='+encodeURIComponent(cl.id)+'">'+esc(cl.title||'클립')+'</a>'
@@ -1443,7 +1446,7 @@ def build_archive_detail():
     var g=c.games||{},games=Object.keys(g).map(function(k){var x=g[k];
       return '<div class="cd-game"><span>'+esc(x.name)+'</span><span class="cd-res '+(x.result?'w':'l')+'">'+(x.result?'승':'패')+'</span></div>';}).join('');
     var opp=(c.opponents||[]).map(function(o){return '<span class="op">'+esc(o.name)+(o.result===true?' <span style=color:var(--accent)>승</span>':o.result===false?' <span style=color:var(--hot)>패</span>':'')+'</span>';}).join('');
-    var vids=(c.videos||[]).map(function(v){return '<a class="btn sm primary" href="'+esc(safeUrl(v.url))+'" target="_blank" rel="noopener">▶ '+esc(v.label||'영상')+'</a>';}).join('');
+    var vids=(c.videos||[]).map(function(v){return '<a class="btn sm primary" href="'+esc(safeUrl(v.url))+'" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>'+esc(v.label||'영상')+'</a>';}).join('');
     var cast=(c.members||[]).map(function(m){return '<span class="ct-chip">'+esc(m)+'</span>';}).join('');
     var manage='';
     if(U.isAdmin()){
@@ -1452,7 +1455,7 @@ def build_archive_detail():
     }
     el.innerHTML=
       '<div class="ct-top" style="margin-bottom:14px">'
-        +(isCrew?'<span class="ct-rank '+(win?'win':'lose')+'">'+(win?'🏆 우승':(c.rank?c.rank+'위':'참가'))+'</span>':'<span class="ct-cat">🎬 컨텐츠</span>')
+        +(isCrew?'<span class="ct-rank '+(win?'win':'lose')+'">'+(win?'우승':(c.rank?c.rank+'위':'참가'))+'</span>':'<span class="ct-cat">컨텐츠</span>')
         +'<span class="ct-date">'+esc(c.date||'')+'</span></div>'
       +'<h2 class="adetail-title">'+esc(c.title||'')+'</h2>'
       +(vids?'<div class="cd-vids">'+vids+'</div>':'')
@@ -1599,7 +1602,7 @@ def build_schedule():
         page_head_block("SCHEDULE", "방송 일정", "일정 캘린더")
         + '<div class="n-actions img-ani bottom-top" id="scActions"></div>'
         + '<div class="pg-tools img-ani bottom-top"><div class="sview">'
-          '<button class="chip active" data-v="cal">📅 달력</button>'
+          '<button class="chip active" data-v="cal"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> 달력</button>'
           '<button class="chip" data-v="list">☰ 목록</button></div></div>'
         + '<div id="calView" class="img-ani bottom-top"><div class="cal">'
           '<div class="cal-nav"><button id="calPrev" aria-label="이전 달">‹</button>'
@@ -1773,7 +1776,7 @@ def build_schedule_detail():
     document.getElementById('sDetail').innerHTML=
       '<div class="cm-cat" style="color:'+tcOf(e.type)+'">'+esc(e.type)+'</div>'
       +'<h2 class="adetail-title" style="font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-.03em;margin:6px 0 0">'+esc(e.title)+'</h2>'
-      +'<div class="sdetail-meta"><span>🗓 '+esc(dateStr)+'</span></div>'
+      +'<div class="sdetail-meta"><span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> '+esc(dateStr)+'</span></div>'
       +'<div class="sdetail-cast">'+cast+'</div>'
       +(e.desc?'<p class="sdetail-desc">'+esc(e.desc)+'</p>':'')
       +'<div class="sdetail-nav"><button class="btn sm" id="sPrev">← 이전 일정</button>'
@@ -1950,7 +1953,7 @@ def build_notices():
     } else {
       list.innerHTML=sorted.map(function(n){
         return '<div class="nrow" data-cat="'+esc(n.cat)+'" data-id="'+esc(n.id)+'" role="button" tabindex="0">'
-          +(n.pinned?'<span class="npin" title="상단 고정">📌</span>':'')
+          +(n.pinned?'<span class="npin" title="상단 고정"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg></span>':'')
           +'<span class="ncat" style="--tc:'+tcOf(n.cat)+'">'+esc(n.cat)+'</span>'
           +'<span class="ntitle">'+esc(n.title)+'</span>'
           +'<span class="ndate">'+esc(n.date)+'</span>'
@@ -2041,7 +2044,7 @@ def build_notice():
     }
     detail.innerHTML=
       '<span class="ndetail-cat" style="--tc:'+tcOf(n.cat)+'">'+esc(n.cat)+'</span>'
-      +'<h2 class="ndetail-title">'+(n.pinned?'📌 ':'')+esc(n.title)+'</h2>'
+      +'<h2 class="ndetail-title">'+(n.pinned?'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg> ':'')+esc(n.title)+'</h2>'
       +'<div class="ndetail-date">'+esc(n.date)+(n.ownerNick?' · '+esc(n.ownerNick):'')+'</div>'
       +'<div class="ndetail-body">'+paras+'</div>'
       +'<div class="ndetail-nav"><button class="btn sm" id="nPrev" type="button">← 이전 글</button>'
@@ -2177,7 +2180,7 @@ def build_multiview():
   function renderStage(){
     if(sel.length===0){
       stage.className='mv-stage is-empty';
-      stage.innerHTML='<div class="mv-stage-ph"><div class="big">🐳</div>'
+      stage.innerHTML='<div class="mv-stage-ph"><div class="big"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg></div>'
         +'오른쪽 목록에서 방송을 선택하면<br>여기에서 최대 <b>4개</b>까지 동시에 볼 수 있어요.</div>';
     }else{
       stage.className=stageCls(sel.length);
@@ -2211,12 +2214,12 @@ def build_multiview():
     return '<div class="mv-card" data-id="'+esc(m.id)+'" role="button" tabindex="0">'
       +'<div class="mv-thumb">'+thumb+ava
       +'<span class="mv-badge"><span class="d"></span>LIVE</span>'
-      +'<span class="mv-view">👁 '+(m.viewers||0).toLocaleString()+'</span>'
+      +'<span class="mv-view"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> '+(m.viewers||0).toLocaleString()+'</span>'
       +'<span class="mv-chk">✔</span></div>'
       +'<div class="mv-info"><div class="nm">'+esc(m.name)+'</div><div class="tt">'+esc(m.title||'방송 중')+'</div></div></div>';
   }
   function renderGrid(live){
-    if(!live.length){grid.innerHTML='<div class="mv-empty" style="grid-column:1/-1"><div class="big">🌙</div>'
+    if(!live.length){grid.innerHTML='<div class="mv-empty" style="grid-column:1/-1"><div class="big"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>'
       +'현재 방송 중인 멤버가 없습니다.<br>방송이 시작되면 자동으로 표시됩니다.</div>';info.textContent='';return;}
     info.textContent='· '+live.length+'명';
     grid.innerHTML=live.map(card).join('');
@@ -2359,7 +2362,7 @@ def build_admin_dashboard():
 def build_admin_login():
     inner = (
         '<div class="adm-note">관리자 권한은 숲(SOOP) 계정으로 확인됩니다. 아래 버튼 또는 상단 로그인으로 인증하세요.</div>'
-        '<div style="max-width:420px"><button class="btn primary" id="admLogin2" style="width:100%;justify-content:center;padding:14px">🔵 숲(SOOP) 계정으로 로그인</button>'
+        '<div style="max-width:420px"><button class="btn primary" id="admLogin2" style="width:100%;justify-content:center;padding:14px">숲(SOOP) 계정으로 로그인</button>'
         '<p style="color:var(--ink-2);font-size:13px;margin-top:16px;line-height:1.7">권한 계정만 접근할 수 있습니다. '
         '관리자(admin)는 전체 관리, 편집자(editor)는 일정·공지 관리가 가능합니다.</p></div>')
     # 로그인 페이지는 게이트 없이 항상 로그인 유도
@@ -2592,13 +2595,13 @@ def build_news():
 
     body = (page_head_block("NEWS", "고래상사 메인", "최신 소식") + hero
             + '<div class="news-cols img-ani bottom-top">'
-              '<div class="news-panel"><h3>📢 공지사항<a href="notices.html">전체 →</a></h3>'
+              '<div class="news-panel"><h3><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> 공지사항<a href="notices.html">전체 →</a></h3>'
               '<div id="newsN"><div class="news-empty">불러오는 중...</div></div></div>'
-              '<div class="news-panel"><h3>🎬 새 클립<a href="clips.html">전체 →</a></h3>'
+              '<div class="news-panel"><h3><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg> 새 클립<a href="clips.html">전체 →</a></h3>'
               '<div id="newsC"><div class="news-empty">불러오는 중...</div></div></div>'
               '</div>'
               '<div style="height:clamp(24px,3vw,36px)"></div>'
-              '<div class="news-panel img-ani bottom-top"><h3>🗓 다가오는 방송<a href="schedule.html">캘린더 →</a></h3>'
+              '<div class="news-panel img-ani bottom-top"><h3><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> 다가오는 방송<a href="schedule.html">캘린더 →</a></h3>'
               '<div id="newsS"><div class="news-empty">불러오는 중...</div></div></div>')
 
     js = """<script>(function(){
