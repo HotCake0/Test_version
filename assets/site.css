@@ -19,7 +19,7 @@ html,body{margin:0;padding:0}
 html{overflow-x:clip;background:var(--bg)}
 @media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 h1,h2,h3{text-wrap:balance}
-body{font-family:'Pretendard',system-ui,-apple-system,sans-serif;
+body{font-family:'Pretendard',system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;
   background:transparent;color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
@@ -32,8 +32,28 @@ button{font-family:inherit}
 /* 페이지 간 크로스페이드 — View Transitions(크로미움 계열 프로그레시브 향상, 미지원=기존 하드컷) */
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+/* 4R: 공유 요소 전환 — 멤버 카드 초상 → 상세 초상 모핑(지원 브라우저 한정, 목록 쪽 이름은 클릭 시 JS 부여) */
+::view-transition-old(member-hero),::view-transition-new(member-hero){animation-duration:.32s}
 @media(prefers-reduced-motion:reduce){
-  ::view-transition-old(root),::view-transition-new(root){animation-duration:0s}
+  ::view-transition-old(root),::view-transition-new(root),
+  ::view-transition-old(member-hero),::view-transition-new(member-hero){animation-duration:0s}
+}
+
+/* 4R: 스켈레톤 로딩 — 런타임 fetch 자리를 미리 차지(CLS 방지)하고 셔머로 진행감 표시 */
+.skel{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+  background:linear-gradient(100deg,transparent 32%,rgba(255,255,255,.07) 50%,transparent 68%);
+  animation:skelSweep 1.5s infinite}
+@keyframes skelSweep{to{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){.skel::after{animation:none}}
+.skel-card{aspect-ratio:16/9}
+.skel-row{height:64px;margin-bottom:10px;border-radius:12px}
+.skel-line{height:34px;margin-bottom:10px;border-radius:8px}
+
+/* 4R: press 피드백 — 클릭/탭 순간 미세 축소(모션 허용 시) */
+@media(prefers-reduced-motion:no-preference){
+  .btn:active,.btn-login:active,.chip:active{transform:scale(.97)}
+  .mcard:active,.ccard:active,.arow:active,.orig-item:active{transform:scale(.985)}
 }
 
 /* =========================================================

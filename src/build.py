@@ -270,6 +270,11 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .mcard .card-tag{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;background:rgba(255,255,255,.14);padding:3px 9px;border-radius:999px;color:rgba(255,255,255,.82)}
 .mcard.is-live{border-color:var(--hot)}
 .mcard.is-live:hover{box-shadow:0 14px 44px rgba(255,77,77,.32)}
+/* 4R: 멤버 카드 3D 틸트+글레어 — transform은 JS 인라인(members nav 스크립트), 여기선 글레어·전이만 */
+.mcard.is-tilt{transition:border-color .3s var(--ease),box-shadow .3s var(--ease);will-change:transform}
+.mcard::after{content:"";position:absolute;inset:0;z-index:2;opacity:0;pointer-events:none;transition:opacity .25s;
+  background:radial-gradient(340px circle at var(--gx,50%) var(--gy,50%),rgba(255,255,255,.13),transparent 62%)}
+.mcard.is-tilt::after{opacity:1}
 .mlive{position:absolute;top:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;
   font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 9px;border-radius:7px;background:var(--hot);color:#fff;
   box-shadow:0 4px 14px rgba(255,77,77,.5)}
@@ -303,10 +308,15 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .stub h2{font-size:clamp(22px,3vw,32px);font-weight:900;color:var(--ink);margin:0 0 12px;letter-spacing:-.02em}
 .stub p{font-size:15px;line-height:1.7;margin:0 auto;max-width:440px}
 .stub .btn{margin-top:26px}
+/* 4R: 빈 상태 — 아이콘+제목+안내 */
+.n-empty{grid-column:1/-1;text-align:center;padding:clamp(40px,8vw,90px) 20px;color:var(--ink-2)}
+.n-empty svg{width:44px;height:44px;opacity:.4;margin:0 auto 14px;display:block}
+.n-empty b{display:block;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.n-empty span{font-size:13.5px}
 /* 멤버 상세 */
 .mdetail{display:grid;grid-template-columns:.9fr 1.3fr;gap:clamp(24px,4vw,56px);align-items:start}
 @media(max-width:820px){.mdetail{grid-template-columns:1fr}}
-.mdetail .portrait{aspect-ratio:3/4;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid var(--line-2)}
+.mdetail .portrait{aspect-ratio:3/4;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow);border:1px solid var(--line-2);view-transition-name:member-hero}
 .mdetail .portrait .ava-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:clamp(56px,9vw,120px);font-weight:900;color:rgba(255,255,255,.9)}
 .mdetail .portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .mdetail .dept-label{font-size:12px;font-weight:800;letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
@@ -421,7 +431,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 # ---------- 멤버 카드 컴포넌트 ----------
 
 def member_card(m, idx, tag="mcard"):
-    img = (f'<img class="ava-img" src="../{esc(m["img"])}" alt="{esc(m["name"])}" '
+    img = (f'<img class="ava-img" loading="lazy" decoding="async" src="../{esc(m["img"])}" alt="{esc(m["name"])}" '
            f'onerror="this.style.display=\'none\'">') if m.get("img") else ""
     return (f'<article class="{tag}" data-idx="{idx}" data-soop="{esc(m.get("soop",""))}" '
             f'role="button" tabindex="0" aria-label="{esc(m["name"])} 프로필 보기">'
@@ -541,10 +551,24 @@ def build_members():
   var grid=document.getElementById('mGrid');if(!grid)return;
   [].forEach.call(grid.querySelectorAll('.mcard[data-idx]'),function(c){
     var idx=c.getAttribute('data-idx');
-    function go(){location.href='member.html?i='+idx;}
+    function go(){c.style.viewTransitionName='member-hero';location.href='member.html?i='+idx;}
     c.addEventListener('click',go);
     c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
   });
+  /* 4R: 3D 틸트+글레어 — 호버 가능 기기 + 모션 허용 시에만. transform은 인라인이라 :hover translateY를 대체 */
+  if(matchMedia('(hover:hover)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    grid.addEventListener('pointermove',function(e){
+      var c=e.target.closest('.mcard');if(!c)return;
+      var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+      c.classList.add('is-tilt');
+      c.style.transform='perspective(900px) translateY(-4px) rotateX('+((.5-y)*6).toFixed(2)+'deg) rotateY('+((x-.5)*6).toFixed(2)+'deg)';
+      c.style.setProperty('--gx',(x*100).toFixed(1)+'%');c.style.setProperty('--gy',(y*100).toFixed(1)+'%');
+    });
+    grid.addEventListener('pointerout',function(e){
+      var c=e.target.closest('.mcard');if(!c||(e.relatedTarget&&c.contains(e.relatedTarget)))return;
+      c.classList.remove('is-tilt');c.style.transform='';
+    });
+  }
 })();</script>"""
     write("members", "멤버 목록", body, PAGE_CSS,
           scripts=members_json_script() + filt + live + nav)
@@ -574,7 +598,7 @@ def build_member():
     var m=M[i];if(!m)return;
     document.title=m.name+' · 고래상사';
     var st=STATUS[m.soop]||{}, live=!!st.is_live, sid=encodeURIComponent(m.soop||'');
-    var img=m.img?'<img src="'+esc(m.img)+'" alt="'+esc(m.name)+'" onerror="this.style.display=\\'none\\'">':'';
+    var img=m.img?'<img loading="lazy" decoding="async" src="'+esc(m.img)+'" alt="'+esc(m.name)+'" onerror="this.style.display=\\'none\\'">':'';
     // 방송중이면 초상 대신 라이브 임베드(멀티뷰와 동일한 play.sooplive.com/{id}/embed)
     var media = live
       ? '<div class="media-live"><div class="embed">'+
@@ -653,7 +677,7 @@ _CLIP_JS_SHARED = """
   // 쉼표 구분 문자열 <-> 태그 배열 (아카이브와 연결하는 키. 대소문자 무시 매칭은 소비측에서 처리)
   function parseTags(s){return (s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
   function bgOf(c){
-    return c.img?'<img src="'+esc(c.img)+'" alt="'+esc(c.title)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display=\\'none\\'">'
+    return c.img?'<img loading="lazy" decoding="async" src="'+esc(c.img)+'" alt="'+esc(c.title)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display=\\'none\\'">'
       :'<div style="position:absolute;inset:0;background:'+esc(c.grad||'linear-gradient(135deg,#0f1730,#2f63ff)')+'"></div>';
   }
   var clModalBg=document.getElementById('clModalBg'), clModalTitle=document.getElementById('clModalTitle'),
@@ -719,7 +743,7 @@ def build_clips():
         + '<div class="n-actions img-ani bottom-top" id="cActions"></div>'
         + '<div id="cHero" class="img-ani bottom-top"></div>'
         + '<div class="pg-tools img-ani bottom-top" id="cChips"></div>'
-        + '<div class="cgrid img-ani bottom-top" id="cGrid">불러오는 중...</div>'
+        + '<div class="cgrid img-ani bottom-top" id="cGrid">' + '<div class="skel skel-card"></div>'*8 + '</div>'
         + clip_form_modal())
 
     js = "<script>(function(){" + _CLIP_JS_SHARED + """
@@ -837,7 +861,7 @@ def build_clips():
     var filtered=activeFilter==='all'?ALL:ALL.filter(function(c){return c.category===activeFilter;});
     var count=document.getElementById('cCount');
     if(count)count.textContent=(activeFilter==='all'?'전체':activeFilter)+' '+filtered.length+'개';
-    grid.innerHTML=filtered.length?filtered.map(card).join(''):'<div class="nlist-msg" style="grid-column:1/-1">'+(ALL.length?'해당 분류의 클립이 없습니다.':'등록된 클립이 없습니다.')+'</div>';
+    grid.innerHTML=filtered.length?filtered.map(card).join(''):(ALL.length?'<div class="nlist-msg" style="grid-column:1/-1">해당 분류의 클립이 없습니다.</div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg><b>아직 등록된 클립이 없습니다</b><span>로그인하면 첫 클립을 직접 등록할 수 있습니다.</span></div>');
   }
   function reload(){
     return D.list('clips').then(function(items){
@@ -1241,7 +1265,7 @@ def build_archive():
               '<button class="chip" data-f="컨텐츠">컨텐츠</button>'
               '<span class="pg-count" id="aCount"></span></div>'
             + '<div class="agrid img-ani bottom-top" id="aGrid">'
-              '<div class="stub" style="grid-column:1/-1"><p>대회 기록을 불러오는 중…</p></div></div>'
+            + '<div class="skel skel-row" style="height:110px"></div>'*4 + '</div>'
             + archive_form_modal())
     js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
@@ -1284,7 +1308,7 @@ def build_archive():
       if(filt==='all')return true;
       return (c.category||'크루대전')===filt;});
     count.textContent=arr.length+'건';
-    grid.innerHTML=arr.length?arr.map(card).join(''):'<div class="stub" style="grid-column:1/-1"><p>해당 기록이 없습니다.</p></div>';
+    grid.innerHTML=arr.length?arr.map(card).join(''):(all.length?'<div class="stub" style="grid-column:1/-1"><p>해당 분류의 기록이 없습니다.</p></div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><b>아직 기록이 없습니다</b><span>크루대전·컨텐츠 기록이 등록되면 여기에 표시됩니다.</span></div>');
   }
   function reload(){
     return D.list('contests').then(function(items){
@@ -1370,7 +1394,7 @@ def build_archive_detail():
     """기록 상세 (크루대전/컨텐츠 공용) — WhaleData.list('contests') 후 ?id=로 find (클립 상세 패턴과 동일).
     분류=컨텐츠면 순위·상대·게임 섹션은 표시하지 않음. 태그가 겹치는 클립을 '관련 클립'으로 임베드."""
     body = (page_head_block("ARCHIVE", "콘텐츠 아카이브", "기록 상세")
-            + '<div class="img-ani bottom-top" id="cDetail"><div class="stub"><p>불러오는 중…</p></div></div>'
+            + '<div class="img-ani bottom-top" id="cDetail"><div class="skel" style="height:120px;margin-bottom:14px"></div><div class="skel" style="height:320px"></div></div>'
             + archive_form_modal())
     js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
   var el=document.getElementById('cDetail');
@@ -1665,7 +1689,7 @@ def build_schedule():
   function renderList(){
     var sorted=sortSchedules(S);
     var W=['일','월','화','수','목','금','토'];
-    if(!sorted.length){lv.innerHTML='<div class="nlist-msg">등록된 일정이 없습니다.</div>';return;}
+    if(!sorted.length){lv.innerHTML='<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg><b>아직 등록된 일정이 없습니다</b><span>일정이 등록되면 목록과 캘린더에 표시됩니다.</span></div>';return;}
     lv.innerHTML=sorted.map(function(e){
       var dt=new Date(e.date+'T00:00:00');
       var badge=(e.date.slice(5).replace('-','.'))+' ('+W[dt.getDay()]+')';
@@ -1913,7 +1937,7 @@ def build_notices():
     body = (page_head_block("NOTICE", "공지사항", "공지사항")
             + '<div class="pg-tools img-ani bottom-top" id="nChips"></div>'
             + '<div class="n-actions img-ani bottom-top" id="nActions"></div>'
-            + '<div class="nlist img-ani bottom-top" id="nList">불러오는 중...</div>'
+            + '<div class="nlist img-ani bottom-top" id="nList">' + '<div class="skel skel-row"></div>'*4 + '</div>'
             + notice_form_modal())
     js = "<script>(function(){" + _NOTICE_JS_SHARED + """
   var list=document.getElementById('nList'), chipsWrap=document.getElementById('nChips'),
@@ -1949,7 +1973,7 @@ def build_notices():
     var filtered=activeFilter==='all'?ALL:ALL.filter(function(n){return n.cat===activeFilter;});
     var sorted=sortNotices(filtered);
     if(!sorted.length){
-      list.innerHTML='<div class="nlist-msg">'+(ALL.length?'해당 분류의 공지가 없습니다.':'등록된 공지가 없습니다.')+'</div>';
+      list.innerHTML=ALL.length?'<div class="nlist-msg">해당 분류의 공지가 없습니다.</div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><b>아직 등록된 공지가 없습니다</b><span>새 소식이 올라오면 여기에 표시됩니다.</span></div>';
     } else {
       list.innerHTML=sorted.map(function(n){
         return '<div class="nrow" data-cat="'+esc(n.cat)+'" data-id="'+esc(n.id)+'" role="button" tabindex="0">'
@@ -2208,7 +2232,7 @@ def build_multiview():
     renderStage();
   }
   function card(m){
-    var thumb=m.thumbnail?'<img src="'+esc(m.thumbnail)+'" alt="'+esc(m.name)+'" onerror="this.style.display=\'none\'">':'';
+    var thumb=m.thumbnail?'<img loading="lazy" decoding="async" src="'+esc(m.thumbnail)+'" alt="'+esc(m.name)+'" onerror="this.style.display=\'none\'">':'';
     var ava='<div class="ava" style="background:'+(m.color||'#1f2a52')+'">'
       +(m.img?'<img src="'+esc(m.img)+'" onerror="this.style.display=\'none\'">':esc(m.initials||''))+'</div>';
     return '<div class="mv-card" data-id="'+esc(m.id)+'" role="button" tabindex="0">'
@@ -2460,7 +2484,7 @@ def build_stats():
     body = (page_head_block("STATS", "콘텐츠 아카이브", "통계 · 전적")
             + '<div class="st-tiles img-ani bottom-top" id="stTiles"></div>'
             + '<div class="st-cols img-ani bottom-top">'
-              '<div class="st-panel"><h3>사원별 대회 성적</h3><p class="st-cap">참여율 순 · 승률은 참여 대회 기준</p><div id="stMembers"><div class="st-empty">불러오는 중...</div></div></div>'
+              '<div class="st-panel"><h3>사원별 대회 성적</h3><p class="st-cap">참여율 순 · 승률은 참여 대회 기준</p><div id="stMembers"><div class="skel skel-line"></div><div class="skel skel-line"></div><div class="skel skel-line"></div><div class="skel skel-line"></div></div></div>'
               '<div class="st-panel"><h3>게임별 승패</h3><p class="st-cap">크루대전에서 치른 종목별 전적</p><div id="stGames"></div></div>'
               '</div>'
             + '<div class="st-gap"></div>'
@@ -2596,13 +2620,13 @@ def build_news():
     body = (page_head_block("NEWS", "고래상사 메인", "최신 소식") + hero
             + '<div class="news-cols img-ani bottom-top">'
               '<div class="news-panel"><h3><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> 공지사항<a href="notices.html">전체 →</a></h3>'
-              '<div id="newsN"><div class="news-empty">불러오는 중...</div></div></div>'
+              '<div id="newsN"><div class="skel skel-line" style="height:44px"></div><div class="skel skel-line" style="height:44px"></div></div></div>'
               '<div class="news-panel"><h3><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg> 새 클립<a href="clips.html">전체 →</a></h3>'
-              '<div id="newsC"><div class="news-empty">불러오는 중...</div></div></div>'
+              '<div id="newsC"><div class="skel skel-line" style="height:44px"></div><div class="skel skel-line" style="height:44px"></div></div></div>'
               '</div>'
               '<div style="height:clamp(24px,3vw,36px)"></div>'
               '<div class="news-panel img-ani bottom-top"><h3><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.12em"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> 다가오는 방송<a href="schedule.html">캘린더 →</a></h3>'
-              '<div id="newsS"><div class="news-empty">불러오는 중...</div></div></div>')
+              '<div id="newsS"><div class="skel skel-line" style="height:44px"></div><div class="skel skel-line" style="height:44px"></div></div></div>')
 
     js = """<script>(function(){
   var D=window.WhaleData;
