@@ -11,7 +11,7 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="크루대전 기록 · 고래상사">
 <meta property="og:description" content="고래상사 통합 아카이브 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image" content="https://www.goraesangsa.com/og-archive.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -486,7 +486,8 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   });
 
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
-  var all=[], filt='all';
+  var qsF=new URLSearchParams(location.search).get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
+  var all=[], filt=(qsF==='크루대전'||qsF==='컨텐츠')?qsF:'all';
   function renderActions(){
     var html='';
     if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
@@ -537,7 +538,10 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   }
   [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(c){c.addEventListener('click',function(){
     document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.remove('active')});
-    c.classList.add('active');filt=c.getAttribute('data-f');render();});});
+    c.classList.add('active');filt=c.getAttribute('data-f');
+    if(history.replaceState)history.replaceState(null,'',filt==='all'?location.pathname:'?f='+encodeURIComponent(filt));
+    render();});});
+  if(filt!=='all')document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-f')===filt);});  // §2.6-3: 진입 시 칩 동기화
   function removeRecord(item){
     if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
     D.remove('contests',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});

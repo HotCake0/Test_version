@@ -11,7 +11,7 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="통계 · 전적 · 고래상사">
 <meta property="og:description" content="고래상사 통계 · 전적 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image" content="https://www.goraesangsa.com/og-archive.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -381,7 +381,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
         +'<span class="val">'+s.w+'승 '+s.l+'패 <span class="st-badge '+badgeCls(p)+'">'+p+'%</span></span></div>';
     }).join(''):'<div class="st-empty">상대 크루 기록이 없습니다.</div>';
   }).catch(function(err){
-    elM.innerHTML='<div class="st-empty">통계를 불러오지 못했습니다: '+esc(err&&err.message||err)+'</div>';
+    elM.innerHTML='<div class="st-empty">통계를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>';  // §2.6-4: err.message 노출 순화
   });
 })();</script>
 </body></html>

@@ -11,7 +11,7 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="베스트 클립 · 고래상사">
 <meta property="og:description" content="고래상사 베스트 클립 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image" content="https://www.goraesangsa.com/og-clips.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -350,7 +350,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 
   var hero=document.getElementById('cHero'), grid=document.getElementById('cGrid'),
       chipsWrap=document.getElementById('cChips'), actionsEl=document.getElementById('cActions');
-  var ALL=[], activeFilter='all';
+  var ALL=[], activeFilter=new URLSearchParams(location.search).get('f')||'all';  // §2.6-3: ?f= 복원
 
   function renderActions(){
     var html='';
@@ -431,12 +431,15 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   }
   function renderChips(){
     var cats=[];ALL.forEach(function(c){if(c.category&&cats.indexOf(c.category)<0)cats.push(c.category);});
+    if(activeFilter!=='all'&&cats.indexOf(activeFilter)<0)activeFilter='all';  // §2.6-3: 무효 ?f= 방어
     var html='<button type="button" class="chip'+(activeFilter==='all'?' active':'')+'" data-f="all">전체</button>'
       +cats.map(function(c){return '<button type="button" class="chip'+(activeFilter===c?' active':'')+'" data-f="'+esc(c)+'">'+esc(c)+'</button>';}).join('')
       +'<span class="pg-count" id="cCount"></span>';
     chipsWrap.innerHTML=html;
     [].slice.call(chipsWrap.querySelectorAll('.chip')).forEach(function(c){
-      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');renderChips();renderGrid();});
+      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');
+        if(history.replaceState)history.replaceState(null,'',activeFilter==='all'?location.pathname:'?f='+encodeURIComponent(activeFilter));
+        renderChips();renderGrid();});
     });
   }
   function cardActionsHtml(c){

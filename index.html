@@ -998,6 +998,23 @@
               +(n0.time?' '+n0.time:'')+(n0.title?' · '+n0.title:'');
             strip.hidden=false;
           }
+          /* §2.6-1: 일정 기반 '추정'을 /status 실측으로 승격 — 실제 방송 중이면 LIVE 확정 표기.
+             status 실패/오프라인이면 위 추정 문구 유지(폴백). textContent만 사용(피드 값 이스케이프 불요). */
+          fetch(FIREBASE_BASE+'/status.json?v='+Date.now())
+            .then(function(res){return res.ok?res.json():null;})
+            .then(function(st){
+              if(!st||!st.members)return;
+              var live=Object.keys(st.members).map(function(k){return st.members[k]||{};})
+                                              .filter(function(m){return m.is_live;});
+              if(!live.length)return;
+              live.sort(function(a,b){return (b.viewers||0)-(a.viewers||0);});
+              var top=live[0],v=Number(top.viewers)||0;
+              stripTxt.textContent='LIVE '+live.length+'명 방송 중 · '+(top.name||'')
+                +(v?' '+v.toLocaleString()+'명 시청':'');
+              strip.classList.add('is-today');strip.hidden=false;
+              var cta2=document.querySelector('.hero-btns .btn.primary');
+              if(cta2)cta2.classList.add('live-glow');
+            }).catch(function(){});
         }
         if(!up.length){msgRow('예정된 방송 일정이 없습니다. 캘린더에서 확인해 보세요.');return;}
         box.textContent='';

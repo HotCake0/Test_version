@@ -68,6 +68,14 @@ def head(title, page_css="", slug=None):
     # 상세 5종(?id= 런타임 렌더)도 비노출 — 크롤러는 폴백 문구만 보게 되고 sitemap에도 없음(진입점이 SEO 담당).
     noindex_details = ("archive-detail", "clip", "member", "notice", "schedule-detail")
     robots = '<meta name="robots" content="noindex, nofollow">\n' if slug and (slug.startswith("admin") or slug in noindex_details) else ""
+    # §2.6-6: 그룹별 og:image — 공유 미리보기를 페이지 그룹에 맞게 차별화(파일은 og_images.py로 생성)
+    og_map = {"crew": "crew", "members": "crew", "member": "crew",
+              "archive": "archive", "archive-detail": "archive", "stats": "archive",
+              "clips": "clips", "clip": "clips",
+              "schedule": "schedule", "schedule-detail": "schedule",
+              "multiview": "multiview",
+              "news": "notice", "notices": "notice", "notice": "notice"}
+    og_img = f"og-{og_map[slug]}.png" if slug in og_map else "og.png"
     return f"""<!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="utf-8">
@@ -80,7 +88,7 @@ def head(title, page_css="", slug=None):
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="{esc(ttl)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:image" content="{BASE_URL}/og.png">
+<meta property="og:image" content="{BASE_URL}/{og_img}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -751,7 +759,7 @@ def build_clips():
     js = "<script>(function(){" + _CLIP_JS_SHARED + """
   var hero=document.getElementById('cHero'), grid=document.getElementById('cGrid'),
       chipsWrap=document.getElementById('cChips'), actionsEl=document.getElementById('cActions');
-  var ALL=[], activeFilter='all';
+  var ALL=[], activeFilter=new URLSearchParams(location.search).get('f')||'all';  // §2.6-3: ?f= 복원
 
   function renderActions(){
     var html='';
@@ -832,12 +840,15 @@ def build_clips():
   }
   function renderChips(){
     var cats=[];ALL.forEach(function(c){if(c.category&&cats.indexOf(c.category)<0)cats.push(c.category);});
+    if(activeFilter!=='all'&&cats.indexOf(activeFilter)<0)activeFilter='all';  // §2.6-3: 무효 ?f= 방어
     var html='<button type="button" class="chip'+(activeFilter==='all'?' active':'')+'" data-f="all">전체</button>'
       +cats.map(function(c){return '<button type="button" class="chip'+(activeFilter===c?' active':'')+'" data-f="'+esc(c)+'">'+esc(c)+'</button>';}).join('')
       +'<span class="pg-count" id="cCount"></span>';
     chipsWrap.innerHTML=html;
     [].slice.call(chipsWrap.querySelectorAll('.chip')).forEach(function(c){
-      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');renderChips();renderGrid();});
+      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');
+        if(history.replaceState)history.replaceState(null,'',activeFilter==='all'?location.pathname:'?f='+encodeURIComponent(activeFilter));
+        renderChips();renderGrid();});
     });
   }
   function cardActionsHtml(c){
@@ -958,8 +969,10 @@ def build_clip():
       manage+='<button class="btn sm" id="cDetEdit" type="button">✏️ 수정</button>';
       manage+='<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
     }
+    var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // §2.6-2: 인라인 재생(검증 통과 시)
     detail.innerHTML=
-      '<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>'
+      (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
+          :'<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>')
       +'<div class="cm-cat">'+esc(c.category||'')+'</div>'
       +'<h2 class="cdetail-title">'+esc(c.title)+'</h2>'
       +'<div class="cdetail-meta"><span>제작: '+esc(c.creator)+'</span>'
@@ -1271,7 +1284,8 @@ def build_archive():
             + archive_form_modal())
     js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
-  var all=[], filt='all';
+  var qsF=new URLSearchParams(location.search).get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
+  var all=[], filt=(qsF==='크루대전'||qsF==='컨텐츠')?qsF:'all';
   function renderActions(){
     var html='';
     if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
@@ -1322,7 +1336,10 @@ def build_archive():
   }
   [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(c){c.addEventListener('click',function(){
     document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.remove('active')});
-    c.classList.add('active');filt=c.getAttribute('data-f');render();});});
+    c.classList.add('active');filt=c.getAttribute('data-f');
+    if(history.replaceState)history.replaceState(null,'',filt==='all'?location.pathname:'?f='+encodeURIComponent(filt));
+    render();});});
+  if(filt!=='all')document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-f')===filt);});  // §2.6-3: 진입 시 칩 동기화
   function removeRecord(item){
     if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
     D.remove('contests',item.id).then(reload).catch(function(err){alert('삭제 실패: '+(err&&err.message||err));});
@@ -1403,32 +1420,9 @@ def build_archive_detail():
   var id=new URLSearchParams(location.search).get('id');
   var cur=null, allClips=[];
   // 영상 URL -> 임베드(미리보기) URL. 운영본 contest.js getEmbedUrl 규칙 이식.
-  // ⚠️보안: 부분일치(indexOf)는 evil.com/sooplive.com 류 우회가 되므로 new URL로 호스트를
-  // 엄격 검증(정확일치 또는 .접미사)하고, 원본을 그대로 넘기지 않고 검증된 조각으로 재조립한다.
-  function hostMatch(h,d){return h===d||h.slice(-(d.length+1))==='.'+d;}
-  function embedUrlOf(u){
-    var pu;
-    try{pu=new URL((u==null?'':String(u)).trim());}catch(e){return null;}
-    if(pu.protocol!=='https:'&&pu.protocol!=='http:')return null;
-    var host=pu.hostname.toLowerCase();
-    // YouTube — 검증된 videoId(문자/숫자/-/_)로만 재조립
-    if(hostMatch(host,'youtu.be')){
-      var sid=pu.pathname.replace(/^\/+/,'').split('/')[0];
-      return /^[\w-]{6,}$/.test(sid)?'https://www.youtube.com/embed/'+sid:null;
-    }
-    if(hostMatch(host,'youtube.com')||hostMatch(host,'youtube-nocookie.com')){
-      var vid=pu.searchParams.get('v');
-      if(!vid){var me=pu.pathname.match(/^\/embed\/([\w-]{6,})/);if(me)vid=me[1];}
-      return (vid&&/^[\w-]{6,}$/.test(vid))?'https://www.youtube.com/embed/'+vid:null;
-    }
-    // SOOP VOD — 숫자 player id로만 재조립(원본 패스스루 금지)
-    if(hostMatch(host,'sooplive.com')||hostMatch(host,'sooplive.co.kr')){
-      var pm=pu.pathname.match(/\/player\/(\d+)/);
-      if(pm)return 'https://'+host+'/player/'+pm[1]+'/embed';
-      if(/\/embed(\/|$)/.test(pu.pathname))return 'https://'+host+pu.pathname;
-    }
-    return null;
-  }
+  // 임베드 변환은 공유 헬퍼(assets/site.js `WhaleEmbed`)로 승격(§2.6-2) — 검증 로직 동일
+  // (new URL 호스트 엄격검증+검증 조각 재조립). C-2 보안 재검증은 site.js의 WhaleEmbed 대상.
+  var embedUrlOf=window.WhaleEmbed||function(){return null;};
   function tagsOf(x){return (x&&x.tags)||[];}
   function relatedOf(contest){
     var ct=tagsOf(contest).map(function(t){return String(t).toLowerCase();});
@@ -1944,7 +1938,7 @@ def build_notices():
     js = "<script>(function(){" + _NOTICE_JS_SHARED + """
   var list=document.getElementById('nList'), chipsWrap=document.getElementById('nChips'),
       actionsEl=document.getElementById('nActions');
-  var ALL=[], activeFilter='all';
+  var ALL=[], activeFilter=new URLSearchParams(location.search).get('f')||'all';  // §2.6-3: ?f= 복원
 
   function renderActions(){
     var html='';
@@ -1954,12 +1948,15 @@ def build_notices():
   }
   function renderChips(){
     var cats=[];ALL.forEach(function(n){if(cats.indexOf(n.cat)<0)cats.push(n.cat);});
+    if(activeFilter!=='all'&&cats.indexOf(activeFilter)<0)activeFilter='all';  // §2.6-3: 무효 ?f= 방어
     var html='<button type="button" class="chip'+(activeFilter==='all'?' active':'')+'" data-f="all">전체</button>'
       +cats.map(function(c){return '<button type="button" class="chip'+(activeFilter===c?' active':'')+'" data-f="'+esc(c)+'">'+esc(c)+'</button>';}).join('')
       +'<span class="pg-count" id="nCount"></span>';
     chipsWrap.innerHTML=html;
     [].slice.call(chipsWrap.querySelectorAll('.chip')).forEach(function(c){
-      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');renderChips();renderRows();});
+      c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');
+        if(history.replaceState)history.replaceState(null,'',activeFilter==='all'?location.pathname:'?f='+encodeURIComponent(activeFilter));
+        renderChips();renderRows();});
     });
   }
   function rowActionsHtml(n){
@@ -2582,7 +2579,7 @@ def build_stats():
         +'<span class="val">'+s.w+'승 '+s.l+'패 <span class="st-badge '+badgeCls(p)+'">'+p+'%</span></span></div>';
     }).join(''):'<div class="st-empty">상대 크루 기록이 없습니다.</div>';
   }).catch(function(err){
-    elM.innerHTML='<div class="st-empty">통계를 불러오지 못했습니다: '+esc(err&&err.message||err)+'</div>';
+    elM.innerHTML='<div class="st-empty">통계를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>';  // §2.6-4: err.message 노출 순화
   });
 })();</script>"""
     write("stats", "통계 · 전적", body, STATS_CSS, scripts=js)

@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="대회 상세 · 고래상사">
 <meta property="og:description" content="고래상사 콘텐츠 상세 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image" content="https://www.goraesangsa.com/og-archive.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -490,32 +490,9 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   var id=new URLSearchParams(location.search).get('id');
   var cur=null, allClips=[];
   // 영상 URL -> 임베드(미리보기) URL. 운영본 contest.js getEmbedUrl 규칙 이식.
-  // ⚠️보안: 부분일치(indexOf)는 evil.com/sooplive.com 류 우회가 되므로 new URL로 호스트를
-  // 엄격 검증(정확일치 또는 .접미사)하고, 원본을 그대로 넘기지 않고 검증된 조각으로 재조립한다.
-  function hostMatch(h,d){return h===d||h.slice(-(d.length+1))==='.'+d;}
-  function embedUrlOf(u){
-    var pu;
-    try{pu=new URL((u==null?'':String(u)).trim());}catch(e){return null;}
-    if(pu.protocol!=='https:'&&pu.protocol!=='http:')return null;
-    var host=pu.hostname.toLowerCase();
-    // YouTube — 검증된 videoId(문자/숫자/-/_)로만 재조립
-    if(hostMatch(host,'youtu.be')){
-      var sid=pu.pathname.replace(/^\/+/,'').split('/')[0];
-      return /^[\w-]{6,}$/.test(sid)?'https://www.youtube.com/embed/'+sid:null;
-    }
-    if(hostMatch(host,'youtube.com')||hostMatch(host,'youtube-nocookie.com')){
-      var vid=pu.searchParams.get('v');
-      if(!vid){var me=pu.pathname.match(/^\/embed\/([\w-]{6,})/);if(me)vid=me[1];}
-      return (vid&&/^[\w-]{6,}$/.test(vid))?'https://www.youtube.com/embed/'+vid:null;
-    }
-    // SOOP VOD — 숫자 player id로만 재조립(원본 패스스루 금지)
-    if(hostMatch(host,'sooplive.com')||hostMatch(host,'sooplive.co.kr')){
-      var pm=pu.pathname.match(/\/player\/(\d+)/);
-      if(pm)return 'https://'+host+'/player/'+pm[1]+'/embed';
-      if(/\/embed(\/|$)/.test(pu.pathname))return 'https://'+host+pu.pathname;
-    }
-    return null;
-  }
+  // 임베드 변환은 공유 헬퍼(assets/site.js `WhaleEmbed`)로 승격(§2.6-2) — 검증 로직 동일
+  // (new URL 호스트 엄격검증+검증 조각 재조립). C-2 보안 재검증은 site.js의 WhaleEmbed 대상.
+  var embedUrlOf=window.WhaleEmbed||function(){return null;};
   function tagsOf(x){return (x&&x.tags)||[];}
   function relatedOf(contest){
     var ct=tagsOf(contest).map(function(t){return String(t).toLowerCase();});

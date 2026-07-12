@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="고래상사">
 <meta property="og:title" content="클립 시청 · 고래상사">
 <meta property="og:description" content="고래상사 클립 시청 — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서.">
-<meta property="og:image" content="https://www.goraesangsa.com/og.png">
+<meta property="og:image" content="https://www.goraesangsa.com/og-clips.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -387,8 +387,10 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       manage+='<button class="btn sm" id="cDetEdit" type="button">✏️ 수정</button>';
       manage+='<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
     }
+    var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // §2.6-2: 인라인 재생(검증 통과 시)
     detail.innerHTML=
-      '<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>'
+      (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
+          :'<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>')
       +'<div class="cm-cat">'+esc(c.category||'')+'</div>'
       +'<h2 class="cdetail-title">'+esc(c.title)+'</h2>'
       +'<div class="cdetail-meta"><span>제작: '+esc(c.creator)+'</span>'
