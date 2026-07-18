@@ -110,6 +110,14 @@
   ③Vercel 보안 헤더 4종(vercel.json headers — nosniff/SAMEORIGIN/Referrer-Policy/Permissions-Policy, cutover 배포 시 적용).
   → **규칙 v2는 같은 날 사용자가 게시 완료, 원격 검증 4/4 PASS**(§5-2). 07-18 보안 일괄의 잔여 대기 항목 0.
 
+### 0-7. 2026-07-19 D-15 전수 검수 (부록 E-3 + §8 웹 재검증)
+- **로컬 전부 PASS**: 빌드 재현성(19페이지, diff 0) · `node --check site.js` · **인라인 스크립트 46개 전수 구문검사 0실패**(22개 HTML).
+- **원격 전부 PASS**: 워커 `/auth/firebase` 401 · 규칙 v2 생존 재확인(indexOn 쿼리 200 + 무토큰 POST 401) ·
+  워커 cron 신선(updated_at 45초 전, 라이브 9/16 집계 정상) · apex→www 307 · SOOP 3도메인 200 · vercel.json=§3-B 일치.
+- **§8-4 전축 웹 검증 일치**(공식 문서 대조): Firebase Spark 1GB/10GB/100동접 · REST 동접 미집계 ·
+  CF Workers 10만req/일·10ms · Vercel Hobby 100GB·비상업 · Analytics 5만 이벤트(구 2,500 → 상향 확인).
+- 유일 보완: **Vercel Hobby 에지 요청 100만/월 축이 표에 누락** → §8-4에 행 추가(추정 ~10% 사용, 합격). **코드 수정 0건 — 프리즈 유지.**
+
 ---
 
 ## 1. 즉시 뒷정리 — 보안 (cutover 무관, 지금 바로)
@@ -698,6 +706,7 @@ RTDB 컬렉션 실측(2026-07-18 curl):
 | **Firebase Auth** | 커스텀토큰 무료 | 미미 | 미미 | ✅ |
 | **Cloudflare Workers Free** | 10만req/일·10ms CPU | cron 288 + 로그인 수십 (<1%) | <2% | ✅ |
 | **Vercel Hobby** 대역폭 | 100GB/월 | ~3GB 추정(초방문 1.9MB×1,591) | ~5GB | ✅ 정적+CDN이라 튼튼 |
+| **Vercel Hobby** 에지 요청 (07-19 검수 추가) | 100만/월 | ~10만 추정(PV당 자산 15~30req, 재방문 캐시) | ~15만 | ✅ 여유 ~7배 — F-6 월점검 ② Usage에서 함께 확인 |
 | **Vercel Hobby** 성격 | 비상업 한정 | 팬사이트·비영리 | 동일 | ✅ 약관 적합 |
 | **Vercel Analytics Hobby** | 5만 이벤트/월 | 3.1천 (6%) | ~10% | ✅ |
 
