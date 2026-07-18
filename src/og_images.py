@@ -2,7 +2,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import os
 
-OUT = "/mnt/c/Users/kyefy/OneDrive/바탕 화면/개인자료/04_WCHP/고래상사 리워크"
+OUT = "/mnt/c/Users/kyefy/OneDrive/바탕 화면/개인자료/03_WCHP/고래상사 리워크"
 BOLD = "/mnt/c/Windows/Fonts/malgunbd.ttf"
 W, H = 1200, 630
 
