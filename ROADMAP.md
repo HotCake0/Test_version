@@ -1,4 +1,4 @@
-# 고래상사 리워크 — 로드맵 v4.0 (2026-07-18 용량·부하 검수판)
+# 고래상사 리워크 — 로드맵 v4.1 (2026-07-18 실행 스펙판)
 
 > 리워크가 운영(goraesangsa.com)을 대체하는 순간(cutover)까지, 그리고 그 이후의 전체 계획.
 > 각 항목에 **실행자 / 선행조건 / 절차 / 합격 기준**을 명시한다. 진행하면서 체크박스를 갱신할 것.
@@ -12,6 +12,9 @@
 > 읽기/쓰기/트래픽/무료플랜 전수 검수 + 50인 동시수정 시나리오 + 성장 한계선 계산.
 > 결론을 §5에 역주입(C+ 스팸방어 상세, E-7~9 성장 대응, F-6 쿼터 모니터링) + Q7 신설 + 리스크 3종 추가.
 > og 7종 삭제사고 복원(og_images.py 재생성 + og.png git 복원, §0-6).
+> **v4.1(2026-07-18 실행 스펙판)**: 어느 실행자(Sonnet 포함)가 이어받아도 동일 작업이 가능하도록 —
+> **부록 E**(실행자 공통 규약: 빌드·보안 불변식·표준 검증 절차·함정 전수) + **부록 F**(Phase C~F 실행 스펙:
+> worker.js/build.py/site.js **행 단위 코드 앵커**·함수 스케치·재사용 패턴) 신설, §4 런북에 실행 명령 블록 삽입(4-1 백업·4-4 스모크).
 
 ---
 
@@ -373,10 +376,19 @@
 | 10:30 | 4-6 모니터링 개시 | Claude+사용자 | 24h 집중 | 롤백 트리거 3종 감시 |
 | (실패 시) | 4-7 롤백 = Vercel Instant Rollback | 사용자 | 5분 | 데이터는 그대로 둬도 안전 |
 
+> ⚙️**실행자 규약**: 런북의 Claude 몫을 수행하는 모델은 시작 전 **부록 E**(공통 규약·함정)를 반드시 읽을 것.
+
 - [ ] **4-1. 백업 (T-0h)** — Claude + 사용자
   - 코드: 운영 레포에 태그 `prod-final-YYYYMMDD` (또는 로컬 `Whale-Corp-main` zip — 이미 로컬 사본 있음).
   - 데이터: RTDB 전체 export — Firebase 콘솔 → RTDB → 데이터 탭 → ⋮ → "JSON 내보내기"
     (또는 Claude가 `GET /.json` 덤프). **합격: 파일 열어 최상위 키 6종 확인.**
+  - Claude 실행 명령(백업은 레포/OneDrive 밖에!):
+    ```bash
+    B="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app"
+    curl -s "$B/.json" -o ~/Downloads/rtdb-backup-$(date +%Y%m%d).json
+    python3 -c "import json;d=json.load(open('$HOME/Downloads/rtdb-backup-$(date +%Y%m%d).json'));print(sorted(d.keys()))"
+    # 기대: ['contests','crews','permissions','rework','schedules','status'] 6종
+    ```
 - [ ] **4-2. 데이터 최신화** — ⚠️07-11 재설계: Claude는 쓰기 수단 없음(키 삭제) → **전부 4-5 실로그인 후 UI 1클릭/입력으로 이동**
   - §3-C 아카이브 diff 재이관 → **4-5-6 '운영 기록 불러오기' 버튼**(07-11 diff·멱등 승격, category/tags/notes/total_teams 주입).
   - ~~일정 이관 73건~~ **취소됨(Q2, 2026-07-10)** — 일정은 4-5 실로그인 후 관리자 UI로 **예정 일정부터 신규 입력**(§2-A-4 참조).
@@ -385,6 +397,21 @@
 - [ ] **4-4. 스모크 테스트 (전환 직후 10분)** — Claude(curl+Playwright)
   - `https://www.goraesangsa.com/` 및 `pages/*` 19페이지 HTTP 200 + 콘솔 에러 0.
   - 리다이렉트 6종(§3-B) 30x → 목적지 200. apex→www 유지. `/auth/callback` 200(코드 없이=문구 정상).
+  - 실행 명령(전부 기대값과 다르면 즉시 4-7 판단):
+    ```bash
+    H="https://www.goraesangsa.com"
+    for p in "" pages/crew pages/members pages/member pages/archive pages/archive-detail \
+             pages/clips pages/clip pages/schedule pages/schedule-detail pages/multiview pages/news \
+             pages/notices pages/notice pages/stats pages/admin pages/admin-login pages/admin-clips \
+             pages/admin-members pages/admin-notices; do
+      curl -s -o /dev/null -w "%{http_code} /$p\n" "$H/$p"; done          # 전부 200 (상세페이지는 id 없이도 폴백 200)
+    for s in CCTV schedule contest ranking admin; do
+      curl -s -o /dev/null -w "%{http_code} → %{redirect_url}  /$s\n" "$H/$s"; done  # 30x + §3-B 목적지
+    curl -s -o /dev/null -w "%{http_code}\n" https://goraesangsa.com      # 307/308 (apex→www)
+    curl -s -o /dev/null -w "%{http_code}\n" "$H/auth/callback"           # 200
+    curl -sI "$H/" | grep -i -E "x-content-type|x-frame|referrer-policy"  # 07-18 보안 헤더 3+종 존재
+    ```
+  - 콘솔 에러 0 확인은 Playwright 순회(부록 E-3 헤드리스 절차, 오탐 2종 제외 후 0이어야 함).
   - `/status` 데이터로 멀티뷰/멤버 LIVE 뱃지 렌더(워커 cron 무영향 증거).
   - **NEW: 아카이브 카테고리 칩 필터 동작 + 관련클립 임베드 렌더 스팟 체크.**
 - [ ] **4-5. 실로그인 검증 (사용자 + Claude 안내)** — **Phase B의 첫 실전 검증 지점**
@@ -421,7 +448,7 @@
 | **E** | 수시(수요 기반) | 기능/콘텐츠 확장 + **성장 대응(E-7~9, 트리거 기반)** | §5-4 | push만 |
 | **F** | D+1주부터 상시 | 운영 위생(백업 자동화·키 로테이션·Lighthouse·**쿼터 모니터링 F-6**) | §5-5 | 워커 cron 1회 |
 
-### 5-1. Phase C — 운영 데이터 경로 보안 강제 ⭐권장 1순위
+### 5-1. Phase C — 운영 데이터 경로 보안 강제 ⭐권장 1순위 (**실행 스펙 = 부록 F-C**: 코드 앵커·함수 스케치·순서 고정)
 현재 `.write:true`인 4경로를 조인다. 전제: cutover 완료(운영본 무토큰 쓰기 소멸 후).
 **v4.0 용량 근거 추가(§8-5 #1)**: 이 경로는 보안 구멍이면서 동시에 **무료쿼터 폭탄 벡터** — 익명 대량 PUT만으로
 저장 1GB·다운로드 10GB를 태울 수 있는 유일한 지점. 보안+용량 양면에서 cutover 후 첫 작업으로 유지.
@@ -481,7 +508,7 @@
   - 검증: 상한 초과 payload POST → 401/400, 정상 폼 4종 저장 → 200 (부록 C-1에 +4케이스).
 - ownerNick 위조는 무해(판정은 ownerId)라 보류.
 
-### 5-3. 관리자 페이지 실연동 (Phase D — v3.2 실행 명세)
+### 5-3. 관리자 페이지 실연동 (Phase D — v3.2 실행 명세, **D-1 코드 앵커 = 부록 F-D**)
 - **D-1. admin-clips/notices(-members) 테이블 실연동** (Claude, ~반나절): 데모 alert → `WhaleData` 실 CRUD.
   - 절차: build.py admin-* 목업 테이블을 `D.list()` 런타임 렌더로 교체(기존 CRUD 페이지 패턴 재사용) +
     체크박스 일괄 선택→일괄 삭제(admin 토큰, 항목별 실패 집계 — 이관 버튼의 부분실패 패턴 재사용) +
@@ -496,7 +523,7 @@
   (idToken 검증→admin claim 확인→§5-1의 SA access_token 재사용해 쓰기). admin-members 페이지에 역할 부여/회수.
   - 배포: 워커 1회(사용자 대시보드). 합격: editor 추가/제거 반영 + "재로그인해야 claim 갱신" 안내 노출(§7 리스크 대응).
 
-### 5-4. 기능/콘텐츠 (Phase E — v3.2 실행 명세, 수요 기반 수시)
+### 5-4. 기능/콘텐츠 (Phase E — v3.2 실행 명세, 수요 기반 수시. **E-2·7·8·9 코드 앵커 = 부록 F-E**)
 - ~~통계 페이지 재구현~~ ✅**앞당겨 완료(07-11, §2.5-2 `pages/stats.html`)**. 잔여: 현역/퇴사 필터 등 세분화는 수요 시.
 - ~~news 실데이터 전환~~ ✅**앞당겨 완료(07-11, §2.5-3 런타임 전환)**.
 - **E-1. 클립 임베드 플레이어 확대** → **§2.6-2로 앞당김 후보 승격**(cutover 전 가능). 미착수 시 여기 잔존:
@@ -536,7 +563,7 @@
     confirm. (정식판은 RTDB REST `X-Firebase-ETag`/`if-match` 412 — 경량판으로 부족하면 승격.)
   - 합격: 탭 2개로 같은 공지 동시 수정 → 늦은 쪽에 경고 노출, 단독 수정은 마찰 없음.
 
-### 5-5. 운영 위생 (Phase F — v3.2 실행 명세, 상시)
+### 5-5. 운영 위생 (Phase F — v3.2 실행 명세, 상시. **F-1 cron 분기·R2 절차 = 부록 F-F**)
 - **F-1. RTDB 주간 백업 자동화** (Claude 코드 + 사용자 워커 배포, ~2h): 워커 scheduled에 주1회 분기 추가 →
   `GET /.json`(§5-1 SA access_token 재사용) → **Cloudflare R2 put 권장**(GitHub 커밋안은 토큰 관리 부담이 커서 차선).
   - 합격: R2 버킷에 주1회 `backup-YYYY-MM-DD.json` 적재, 파일 열어 최상위 키 확인. 보존 8주 롤링.
@@ -798,3 +825,110 @@ curl -s "https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/re
 # embedUrlOf 보안 재검증(부록 C-2) / 규칙 매트릭스(부록 C-1)
 #   → "임베드 보안 테스트 돌려줘" / "검증 매트릭스 다시 돌려줘"
 ```
+
+## 부록 E. 실행자 공통 규약 (v4.1 신설 — 어느 모델/사람이 이어받아도 동일하게 작업하기 위한 규약)
+
+> **모든 코드 작업 전에 이 부록을 먼저 읽을 것.** 아래 함정은 전부 실제로 밟았던 것들이다.
+
+### E-1. 저장소·빌드 규약
+- 레포 루트 = `/mnt/c/Users/kyefy/OneDrive/바탕 화면/개인자료/03_WCHP/고래상사 리워크` (WSL). 브랜치 `main`=origin/main, `git push`만.
+- **`pages/*.html`은 산출물 — 직접 수정 절대 금지.** 수정은 `src/build.py`(페이지 생성)·`src/content/*.json`(시드)에만.
+  단 **`index.html`(홈)만 예외적으로 손수정 파일**(취약 — 인라인 검증본. head/스크립트 수정 시 특히 조심).
+- 수정 후 반드시 `python3 src/build.py` 재빌드 → **pages/ 변경분을 소스와 같은 커밋에 포함**(재빌드 누락이 단골 사고).
+- 공유 자산 `assets/site.css`(디자인 단일소스)·`assets/site.js`(WhaleUI/WhaleData)는 빌드 대상 아님 — 직접 수정.
+- 워커 소스 = `03_WCHP/whale-auth-worker/worker.js`(**레포 밖**). 배포 = 사용자가 Cloudflare 대시보드에 전문 붙여넣기(Claude는 코드만 작성).
+
+### E-2. 코드 작성 규칙 (보안 불변식 — 위반 금지)
+- 사용자 입력을 HTML에 넣을 땐 **반드시 `esc()`**, href에 넣을 땐 **반드시 `safeUrl()`**, 임베드는 **반드시 `WhaleEmbed`**(site.js 402행) — 원본 문자열 패스스루 신설 금지.
+- 동적 텍스트는 가급적 `textContent` 조립(innerHTML 지양). 새 외부 링크는 `target="_blank" rel="noopener"` 필수.
+- build.py의 JS 템플릿 중 **`_CLIP_JS_SHARED`(681행)는 비raw 문자열 — JS의 `\n`은 `\\n`, 정규식 `\/`는 `\\/`로 써야 함**(r-string 아님 주의. 다른 템플릿도 접두사 확인 후 작업).
+- 날짜 생성은 KST 기준(`Asia/Seoul`) — `new Date().toISOString()` 날짜 절단은 UTC라 하루 밀림(07-11에 3곳 수정한 전례).
+
+### E-3. 표준 검증 절차 (코드 변경 시 이 순서로 전부 실행 — 하나라도 실패 시 커밋 금지)
+```bash
+python3 src/build.py                    # ①재빌드 성공(19페이지) 확인
+git diff --stat                         # ②의도한 파일만 변경됐는지
+node --check assets/site.js             # ③(site.js 만졌으면)
+# ④인라인 스크립트 전수 구문검사(20페이지 45개±): scratchpad에 스크립트 작성 —
+#   각 html에서 /<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/g 로 추출 → 임시파일 → node --check
+# ⑤(임베드/URL 로직 만졌으면) 부록 C-2 10케이스 재실행: site.js에서 window.WhaleEmbed~})(); 블록만
+#   문자열 추출 → new Function('window',src)(w) 로 평가(전체 IIFE 실행은 matchMedia 없어 실패함)
+python3 -m http.server 8792             # ⑥로컬 스팟 확인(사용자 몫 — "화면 안 바뀌면 Ctrl+Shift+R" 안내)
+```
+- 헤드리스 브라우저 필요 시(콘솔에러 순회 등): sudo 없이 `apt-get download libnspr4 libnss3 libasound2t64` → `dpkg-deb -x` 추출 → `LD_LIBRARY_PATH=<추출경로>/usr/lib/x86_64-linux-gnu` + Playwright Chromium(§2-B-2). 오탐 2종 무시: SOOP autoplay 차단, WSL 시계오차 TLS(`liveimg.afreecatv.com`).
+
+### E-4. RTDB 조작 표준 패턴
+```bash
+B="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app"
+curl -s "$B/rework.json?shallow=true"                       # 컬렉션 훑기
+curl -s "$B/rework/contests.json?shallow=true" | python3 -c "import json,sys;print(len(json.load(sys.stdin)))"  # 건수
+curl -s "$B/.json" -o ~/Downloads/rtdb-$(date +%Y%m%d).json # 전체 백업(레포/OneDrive 밖에 저장!)
+```
+- 쓰기는 Claude에게 수단 없음(SA 키 삭제됨) — **쓰기가 필요한 검증·이관은 전부 "사용자 실로그인 후 UI 버튼"으로 설계**돼 있다(런북 4-5). 이 전제를 깨는 절차를 새로 만들지 말 것.
+- 규칙 게시도 사용자 콘솔 몫: Firebase 콘솔 → Realtime Database → 규칙 탭 → `src/firebase-rules.json` 붙여넣기 → 게시. 롤백 = `src/firebase-rules.v1.json` 재게시.
+
+### E-5. 자주 밟는 함정 (사고 이력 전수)
+| 함정 | 증상 | 대응 |
+|---|---|---|
+| "작업이 날아갔다" | 이전 배포/캐시 착시가 대부분 | **grep으로 파일 사실확인 먼저**, Ctrl+Shift+R |
+| OneDrive 동기화 | 파일 삭제·잠김(07-18 og 7종 실제 발생) | 대량 부산물 금지, `git status`로 수시 확인, 복원은 git이 원본 |
+| 재빌드 누락 | 소스만 커밋되고 pages/ 옛것 | 커밋 전 `git status`에 pages/ 포함 확인 |
+| WSL에서 lighthouse 등 | `C:\Users\...` 리터럴 폴더 부산물 | 실행 후 `ls -d 'C:'*` 확인·삭제 |
+| admin-* 페이지 착각 | admin-clips 등은 **데모 목업**(Phase D-1 전까지) | 실 CRUD는 공개 페이지(clips 등)에 있음 |
+| 시드 JSON 착각 | `src/content/clips*.json`은 admin 데모·news 미리보기 전용 | 실데이터는 전부 RTDB `/rework/*` |
+
+---
+
+## 부록 F. Phase C~F 실행 스펙 (v4.1 — 코드 앵커·스케치 포함, §5의 실행판)
+
+### F-C. Phase C — 운영 경로 잠금 (실행 순서 고정: 워커 먼저, 규칙 나중)
+1. **워커에 SA 인증 추가** (Claude 코드 작성 → 사용자 대시보드 배포):
+   - 앵커: `worker.js` — `importSaKey()` 115행(PEM 로드), `mintCustomToken()` 128행(RS256 서명 — 이 서명 로직 재사용),
+     `updateStatus()` 261행(267행 `PUT` 부분이 수정 지점), `scheduled()` 286행.
+   - 추가 함수 스케치(모듈 스코프 캐시로 1h 재사용):
+     ```js
+     let gTok=null, gExp=0;
+     async function saAccessToken(env){
+       if(gTok && Date.now() < gExp - 60000) return gTok;
+       const now = Math.floor(Date.now()/1000);
+       const jwt = await signRS256({                       // mintCustomToken의 서명부를 함수로 추출해 공용화
+         iss: env.FIREBASE_SA_EMAIL, iat: now, exp: now+3600,
+         aud: "https://oauth2.googleapis.com/token",
+         scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/firebase.database"
+       }, env.FIREBASE_SA_KEY);
+       const r = await fetch("https://oauth2.googleapis.com/token", { method:"POST",
+         headers: {"Content-Type":"application/x-www-form-urlencoded"},
+         body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion="+jwt });
+       const d = await r.json(); gTok = d.access_token; gExp = Date.now() + d.expires_in*1000; return gTok;
+     }
+     ```
+   - `updateStatus` 267행 PUT URL을 `.../status.json?access_token=${await saAccessToken(env)}`로 교체.
+2. **cron 1주기(5분) 후 확인**: `curl -s "$B/status/updated_at.json"` 2회(5분 간격) → 값 증가 = SA 쓰기 성공.
+3. **규칙 잠금**: `src/firebase-rules.json` 상단 4행을 `"status"/"contests"/"schedules"/"crews": { ".read": true, ".write": false }`로 교정 → 커밋 → 사용자 게시(E-4 절차).
+4. **검증 3종**(C-1 확장분): 무토큰 `PUT $B/status.json` → 401 / 무토큰 `PUT $B/contests.json` → 401 / 다음 cron 후 updated_at 갱신 유지.
+5. 실패 시 롤백: 규칙만 이전판 재게시(워커 SA 인증은 규칙과 무관하게 동작하므로 순서를 지켰다면 중단 구간 없음).
+
+### F-D. Phase D-1 — admin 테이블 실연동 (앵커·재사용 패턴)
+- 앵커: `build.py` — `ADMIN_GATE_JS` 2334행(게이트·authchange 이벤트 — 그대로 재사용), `admin_gate()` 2348행,
+  `build_admin_dashboard()` 2356행, `admin_table()` 2397행(목업 테이블 생성부 — 교체 대상).
+- 재사용 패턴: 목록 렌더+폼 모달 = `build_notices()` 1932행 구조 복제 / 일괄삭제의 항목별 실패 집계 = 클립 이관 버튼(795행 부근 `ok++/fails.push` 체인) 패턴.
+- 절차: admin_table의 정적 rows를 `D.list()` 런타임 렌더로 교체 → 행 체크박스+전체선택 → "선택 삭제" 버튼(admin 토큰, 실패 집계) → 데모 시드 참조 제거.
+- 합격: admin에서 CRUD·일괄삭제 → 공개 페이지 즉시 반영 / 일반 계정 게이트 차단 유지 / 표준 검증 절차(부록 E-3) 전부 PASS.
+
+### F-E. Phase E 성장 항목 코드 지점 (트리거는 §5-4에 정의됨)
+- **E-7(limitToLast)**: `site.js` `list()` 213행 — `list(col, n)` 시그니처로 확장, n 있으면
+  `'.json?orderBy="createdAt"&limitToLast='+n` (규칙 `.indexOn`은 07-18 v2에 이미 게시됨 — 규칙 작업 불필요).
+  적용 우선순위: news(30이면 충분) → clips(200+"더 보기").
+- **E-8(TTL 캐시)**: 같은 `list()` — sessionStorage `{ts,data}` 60초 캐시, `create/update/remove`(219~240행) 성공 시 해당 col 캐시 삭제. `?v=Date.now()` 버스터 제거.
+- **E-9(낙관적 잠금)**: `update()` 229행 — 호출부가 `expectedUpdatedAt` 전달 시 저장 직전
+  `GET /{col}/{id}/updatedAt.json`(~15B) 비교 → 불일치면 reject('다른 사용자가 방금 수정했습니다...').
+- **E-2(멤버 스탯)**: worker.js `scheduled()` 286행에 주1회 분기(아래 F-F cron 분기 방식 공용) → SOOP stationinfo 16인 →
+  `PUT /memberstats.json?access_token=...`(F-C의 saAccessToken 재사용). 클라는 member 상세(587행 build_member)에서 fetch+폴백.
+
+### F-F. Phase F-1 — 주간 백업 (cron 분기 방식 확정)
+1. 사용자: Cloudflare 대시보드 → R2 버킷 생성(`whale-backup`) → 워커 설정 → R2 바인딩 추가(변수명 `BACKUP_BUCKET`).
+2. 사용자: 워커 트리거에 cron 표현식 **추가**(기존 `*/5 * * * *` 유지 + `0 18 * * 0` = KST 월요일 03:00).
+3. Claude 코드: `scheduled(event)`에서 `event.cron === "0 18 * * 0"`이면 백업 분기 —
+   `GET ${env.FIREBASE_URL}/.json?access_token=...` → `env.BACKUP_BUCKET.put('backup-'+dateKST+'.json', body)` →
+   8주 초과분 `list()+delete()` 롤링.
+4. 합격: 첫 실행 후 R2에 파일 존재 + 열어서 최상위 키 6종 확인. 이후 F-6 월점검 때 최신 백업 날짜 확인 항목 추가.
