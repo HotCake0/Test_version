@@ -553,6 +553,13 @@
   - [P3] pages CRUD 목록 `불러오기 실패: err.message` 노출 → stats처럼 고정 안내문 순화(§2.6-4 잔여).
   - [P3] 빈 상태 카피 통일("아직 등록된"/"등록된") / stats 승패 팔레트 정합화 검토(dataviz 상태색 규칙과 상충 주의).
   - (기존 §5-3 중복 지적 재확인) 헬프/온보딩 H10=1점·aria-live·검색/정렬.
+- **E-6b. 죽은 코드 정리(07-19 ponytail-audit, 전부 런타임 영향 0 — 프리즈라 cutover 후 F-5로 이월)** — grep 검증 완료:
+  - `assets/site.js:284~343` 멤버 프로필 모달(`fillModal/openMember/closeMember/countUp/escH` ~60줄) — site.js 로드 페이지 중 `#memberModalBg` 마크업 가진 곳 0, index.html은 site.js 미로드(인라인 재구현)라 완전 사문. `if(memberModalBg&&MEMBERS.length)` 가드라 제거해도 무동작 변화.
+  - `src/build.py:188 member_modal()` + `write()`의 `need_member_modal` 파라미터 — 항상 False, True 호출 0(멤버카드 클릭이 `member.html?i=idx` 이동으로 바뀐 뒤 남은 잔재). 위 모달과 세트로 제거.
+  - `src/build.py:1115 archive_json_script()` + `WHALE_ARCHIVE` — 호출자 0(아카이브는 `WhaleData.list('contests')` 런타임 렌더). 사문.
+  - `src/build.py:2736~2742 build_stub` 루프 — **`build_stub` 함수 미정의인데 전 페이지가 `done`이라 stub_count=0으로 절대 실행 안 돼 크래시 안 남**(휴면 지뢰: 향후 SITE groups에 미구현 페이지 추가 시 NameError). 루프 삭제 or 스텁 구현 택1.
+  - (감사 오판 기각) `.project_title` — §2.6-4에서 "실존 마크업의 의도적 숨김"으로 이미 조사·보류 결정, 죽은 코드 아님.
+  - 순효과 ~-90줄. 순수 삭제라 리스크 낮으나 프리즈 방침(§2.6-4 "실익 없어 보류") 준수해 D-Day 후 일괄.
 - **E-7. 목록 페이지네이션(limitToLast)** (Claude, ~반나절) — §8-5 #3 성장 대응 1탄.
   - **착수 트리거(둘 중 먼저)**: clips 300건 초과 **또는** news 페이지 payload 150KB 초과(F-6 월점검에서 측정). 그 전엔 YAGNI.
   - 절차: ①규칙에 `.indexOn: ["createdAt"]`(clips/notices/schedules — 없으면 쿼리가 전체스캔 경고+거부) 게시
