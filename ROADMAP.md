@@ -101,6 +101,10 @@
   `src/og_images.py` 재실행으로 6종 바이트 동일 복원 + 홈 `og.png`는 git HEAD에서 복원. 경로수정(04→03) 2파일은 커밋 반영.
 - **RTDB payload 실측(curl, §8-1 표)**: 운영+rework 전체 합산 **~39KB** — 텍스트 전용이라 극소.
 - 코드 프리즈 유지(2.6-8 이후 코드 무변경). §8 검수 결론: **D-Day 전 코드 변경 불필요** — 용량 대응은 전부 cutover 후 Phase에 배치.
+- **07-18 보안 일괄(사용자 지시로 프리즈 해제, 소폭)**: ①이미지 저장 방지 보강(site.css `img` user-drag/touch-callout/user-select —
+  iOS 길게누르기 저장 구멍 해소, JS 차단과 세트) ②**RTDB 규칙 v2 준비**(§5-2 앞당김 — 필드 화이트리스트+길이 상한+pinned/featured
+  서버 강제+`.indexOn`. 파일 `src/firebase-rules.json`, 이전판 백업 `src/firebase-rules.v1.json`. **게시는 사용자 콘솔 몫 — 아래 §5-2 절차**)
+  ③Vercel 보안 헤더 4종(vercel.json headers — nosniff/SAMEORIGIN/Referrer-Policy/Permissions-Policy, cutover 배포 시 적용).
 
 ---
 
@@ -386,6 +390,7 @@
   0. **§1-4 처리**: admin 로그인 상태에서 `/rework/notices`의 dev 테스트 공지("테스트", ownerId `dev:핫케이크_`) 삭제 — 개시 공지 게시 전에 먼저.
   1. 관리자(울산큰고래 or editor 핫케이크_) SOOP 로그인 → Session Storage `soop_user`(role) + `soop_fb`(idToken) 확인.
   2. 공지 작성→수정→pinned 토글→삭제 / 클립 작성→featured 토글→**태그 넣고 관련아카이브 노출 확인** / 일정 작성 / 아카이브 수정→**카테고리 전환 확인**. 전부 성공.
+     ⚠️**규칙 v2(07-18) 게시된 상태라면**: 여기서 정상 저장이 401나면 규칙 상한 오탐 — `src/firebase-rules.v1.json` 재게시(§5-2 롤백)로 즉시 복구 후 Claude 진단.
   3. 일반 SOOP 계정(권한 미등록) 로그인 → 본인 글 작성/수정 성공, 남의 글 버튼 미노출.
   4. (심화) 일반 계정 콘솔 강제 호출: `fetch('.../rework/notices/<남의글키>.json?auth='+idToken,{method:'DELETE'})` → 401.
   - **실패 시**: `soop_fb` 없음=교환 실패(워커/키), 쓰기 401=토큰첨부/규칙. Claude 호출 진단.
@@ -430,7 +435,26 @@
 - **`/permissions`** — 현행 유지(`.write:false`).
 - 배포: 워커 재배포 1회 + 규칙 게시 1회. 검증 매트릭스에 status/운영경로 시나리오 추가(부록 C-1 +3종).
 
-### 5-2. RTDB 규칙 정제
+### 5-2. RTDB 규칙 정제 — ✅**규칙 파일 v2 작성 완료(2026-07-18 앞당김), 잔여 = 사용자 게시 1회**
+
+**게시 절차(사용자, 5분 — 지금 해도 안전: 리워크 오리진 쓰기는 어차피 잠김, 운영 경로는 무변경)**:
+1. Firebase 콘솔 → Realtime Database → **규칙 탭** → 기존 내용 전체 선택·삭제 → `src/firebase-rules.json` 내용 붙여넣기 → **게시**.
+2. 편집기가 문법 오류를 표시하면 게시하지 말고 Claude에 알릴 것(특히 `$i.matches` 라인).
+3. **롤백**: 문제 시 `src/firebase-rules.v1.json`을 같은 방법으로 재게시(1분). D-Day 4-5 검증에서 정상 폼 저장이 401나면 이 롤백 먼저.
+
+**v2 내용(설계 근거)**:
+- clips/schedules/notices 3컬렉션: **필드 화이트리스트**(`$other:false` — 스키마 외 필드 저장 차단) + `hasChildren` 필수필드 +
+  **길이 상한**(title≤200·creator/cat/category/type≤50·desc≤2000·url/img≤500+https강제·body 문단≤2000×200개·
+  tags 100자×20개(⚠️태그=대회 제목 설계라 30자는 이관 깨뜨림 — 실측 최장 21자, 여유 100) · members 50자×20개) +
+  **타입 강제**(pinned/featured isBoolean·date `YYYY-MM-DD` 정규식·createdAt/updatedAt isNumber).
+- **pinned/featured 서버 강제**(기존 구멍 해소): 비admin은 기존값 유지 or false만 허용 — 콘솔 위조로 자기 글 고정 불가.
+  admin의 unsetOtherFeatured(남의 클립 featured:false PATCH)는 admin 분기로 통과 확인.
+- `.indexOn: ["createdAt"]` 3컬렉션 선탑재(E-7 limitToLast 대비 — 게시만으로 무해).
+- **contests는 의도적 제외**: admin 전용 쓰기 유지(공격면 없음) + 중첩 구조(games/opponents/videos) 화이트리스트가
+  D-Day 이관 버튼을 깨뜨릴 위험 > 실익. Phase C+ 정식 회차에서 재검토.
+- 검증: 폼 4종 payload를 필드 단위로 교차 대조 완료(클립 폼=이관 버튼 동일 7필드+owner4, 일정 6+owner4, 공지 4+pinned+owner4).
+
+(이하 원 명세 — 이력 보존)
 - **pinned/featured 관리자 전용 강제** (현재 클라 게이팅만 — owner가 자기 글 pinned 지정 가능한 구멍):
   ```
   notices/$id/.validate 추가:
@@ -724,6 +748,10 @@ YouTube: `[\w-]{6,}` videoId 검증 후 `https://www.youtube.com/embed/{id}` / S
 | 9 | 일반 A: POST /rework/contests | 401 |
 | 10 | admin: contests 생성·삭제 | 200/200 |
 | 11 | 무토큰 GET /rework/clips | 200 (읽기 공개) |
+| 12 | (v2 규칙) 일반 A: title 201자 POST | 401/400 (길이 상한) |
+| 13 | (v2 규칙) 일반 A: 스키마 외 필드 `{title:'x', evil:'y', ...}` POST | 401/400 ($other 차단) |
+| 14 | (v2 규칙) 일반 A: 본인 공지 `pinned:true` PATCH | 401/400 (admin 전용) — admin은 200 |
+| 15 | (v2 규칙) 정상 폼 payload 4종(클립·일정·공지·이관 클립) | 200 (상한 오탐 없음 — **D-Day 4-5에서 필수 확인**) |
 스크립트는 세션 휘발(scratchpad). "검증 매트릭스 다시 돌려줘"로 재작성. ⚠️§1-1 키 보류 중이라 실행하려면 현행 키 사용(폐기 전).
 Phase C 이후 +3종: 무토큰 PUT /status 401, 무토큰 PUT /contests 401, 워커 cron 후 updated_at 갱신.
 

@@ -627,3 +627,8 @@ html:not(.js-anim) .hero-container .hero-btns,html:not(.js-anim) .hero-container
 .login-msg{margin:12px 0 0;font-size:13px;text-align:center;color:#bdd0ff;min-height:18px}
 .login-alt{margin:14px 0 0;text-align:center;font-size:13px;color:var(--ink-2)}
 .login-alt a{color:#bdd0ff;font-weight:600}
+
+/* ---- 이미지 저장 방지 보강 (site.js contextmenu/dragstart 차단과 세트) ----
+   -webkit-touch-callout: iOS 길게누르기 "이미지 저장" 메뉴 차단(JS contextmenu 미발화 구간).
+   user-drag/user-select: 드래그 저장·선택 복사 차단. 완전 차단은 불가(스크린샷·개발자도구) — 우발적 저장 방지 목적. */
+img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}

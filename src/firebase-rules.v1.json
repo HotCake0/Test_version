@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "status":      { ".read": true, ".write": true },
+    "contests":    { ".read": true, ".write": true },
+    "schedules":   { ".read": true, ".write": true },
+    "crews":       { ".read": true, ".write": true },
+    "permissions": { ".read": true, ".write": false },
+
+    "rework": {
+      ".read": true,
+
+      "clips": {
+        "$id": {
+          ".write": "auth != null && (auth.token.admin === true || (!data.exists() ? newData.child('ownerId').val() === auth.uid : data.child('ownerId').val() === auth.uid))",
+          ".validate": "auth.token.admin === true || newData.child('ownerId').val() === auth.uid"
+        }
+      },
+      "schedules": {
+        "$id": {
+          ".write": "auth != null && (auth.token.admin === true || (!data.exists() ? newData.child('ownerId').val() === auth.uid : data.child('ownerId').val() === auth.uid))",
+          ".validate": "auth.token.admin === true || newData.child('ownerId').val() === auth.uid"
+        }
+      },
+      "notices": {
+        "$id": {
+          ".write": "auth != null && (auth.token.admin === true || (!data.exists() ? newData.child('ownerId').val() === auth.uid : data.child('ownerId').val() === auth.uid))",
+          ".validate": "auth.token.admin === true || newData.child('ownerId').val() === auth.uid"
+        }
+      },
+      "contests": {
+        ".write": "auth != null && auth.token.admin === true"
+      }
+    }
+  }
+}

@@ -10,21 +10,59 @@
       ".read": true,
 
       "clips": {
+        ".indexOn": ["createdAt"],
         "$id": {
           ".write": "auth != null && (auth.token.admin === true || (!data.exists() ? newData.child('ownerId').val() === auth.uid : data.child('ownerId').val() === auth.uid))",
-          ".validate": "auth.token.admin === true || newData.child('ownerId').val() === auth.uid"
+          ".validate": "(auth.token.admin === true || newData.child('ownerId').val() === auth.uid) && newData.hasChildren(['title','ownerId','ownerNick','createdAt','updatedAt'])",
+          "title":     { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+          "creator":   { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "category":  { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "desc":      { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "url":       { ".validate": "newData.isString() && newData.val().length <= 500 && (newData.val().length === 0 || newData.val().matches(/^https?:\\/\\//))" },
+          "img":       { ".validate": "newData.isString() && newData.val().length <= 500 && (newData.val().length === 0 || newData.val().matches(/^https?:\\/\\//))" },
+          "tags":      { "$i": { ".validate": "$i.matches(/^1?[0-9]$/) && newData.isString() && newData.val().length <= 100" } },
+          "featured":  { ".validate": "newData.isBoolean() && (auth.token.admin === true || newData.val() === (data.exists() ? data.val() : false))" },
+          "ownerId":   { ".validate": "newData.isString() && newData.val().length <= 100" },
+          "ownerNick": { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "createdAt": { ".validate": "newData.isNumber()" },
+          "updatedAt": { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
         }
       },
       "schedules": {
+        ".indexOn": ["createdAt"],
         "$id": {
           ".write": "auth != null && (auth.token.admin === true || (!data.exists() ? newData.child('ownerId').val() === auth.uid : data.child('ownerId').val() === auth.uid))",
-          ".validate": "auth.token.admin === true || newData.child('ownerId').val() === auth.uid"
+          ".validate": "(auth.token.admin === true || newData.child('ownerId').val() === auth.uid) && newData.hasChildren(['title','date','ownerId','ownerNick','createdAt','updatedAt'])",
+          "title":     { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+          "date":      { ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)" },
+          "time":      { ".validate": "newData.isString() && (newData.val().length === 0 || newData.val().matches(/^\\d{2}:\\d{2}$/))" },
+          "type":      { ".validate": "newData.isString() && newData.val().length <= 20" },
+          "desc":      { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "members":   { "$i": { ".validate": "$i.matches(/^1?[0-9]$/) && newData.isString() && newData.val().length <= 50" } },
+          "groupId":   { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "ownerId":   { ".validate": "newData.isString() && newData.val().length <= 100" },
+          "ownerNick": { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "createdAt": { ".validate": "newData.isNumber()" },
+          "updatedAt": { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
         }
       },
       "notices": {
+        ".indexOn": ["createdAt"],
         "$id": {
           ".write": "auth != null && (auth.token.admin === true || (!data.exists() ? newData.child('ownerId').val() === auth.uid : data.child('ownerId').val() === auth.uid))",
-          ".validate": "auth.token.admin === true || newData.child('ownerId').val() === auth.uid"
+          ".validate": "(auth.token.admin === true || newData.child('ownerId').val() === auth.uid) && newData.hasChildren(['title','date','body','ownerId','ownerNick','createdAt','updatedAt'])",
+          "title":     { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+          "cat":       { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "date":      { ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)" },
+          "body":      { "$i": { ".validate": "($i.matches(/^\\d{1,2}$/) || $i.matches(/^1\\d{2}$/)) && newData.isString() && newData.val().length <= 2000" } },
+          "pinned":    { ".validate": "newData.isBoolean() && (auth.token.admin === true || newData.val() === (data.exists() ? data.val() : false))" },
+          "ownerId":   { ".validate": "newData.isString() && newData.val().length <= 100" },
+          "ownerNick": { ".validate": "newData.isString() && newData.val().length <= 50" },
+          "createdAt": { ".validate": "newData.isNumber()" },
+          "updatedAt": { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
         }
       },
       "contests": {
