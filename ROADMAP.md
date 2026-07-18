@@ -105,6 +105,7 @@
   iOS 길게누르기 저장 구멍 해소, JS 차단과 세트) ②**RTDB 규칙 v2 준비**(§5-2 앞당김 — 필드 화이트리스트+길이 상한+pinned/featured
   서버 강제+`.indexOn`. 파일 `src/firebase-rules.json`, 이전판 백업 `src/firebase-rules.v1.json`. **게시는 사용자 콘솔 몫 — 아래 §5-2 절차**)
   ③Vercel 보안 헤더 4종(vercel.json headers — nosniff/SAMEORIGIN/Referrer-Policy/Permissions-Policy, cutover 배포 시 적용).
+  → **규칙 v2는 같은 날 사용자가 게시 완료, 원격 검증 4/4 PASS**(§5-2). 07-18 보안 일괄의 잔여 대기 항목 0.
 
 ---
 
@@ -435,7 +436,11 @@
 - **`/permissions`** — 현행 유지(`.write:false`).
 - 배포: 워커 재배포 1회 + 규칙 게시 1회. 검증 매트릭스에 status/운영경로 시나리오 추가(부록 C-1 +3종).
 
-### 5-2. RTDB 규칙 정제 — ✅**규칙 파일 v2 작성 완료(2026-07-18 앞당김), 잔여 = 사용자 게시 1회**
+### 5-2. RTDB 규칙 정제 — ✅**v2 게시 완료(2026-07-18 사용자 게시 + Claude 원격 검증 4/4)**
+
+**게시 검증(무토큰 원격, 07-18)**: ①읽기 공개 200 ②무토큰 POST 401 ③**`orderBy="createdAt"` 쿼리 200 — `.indexOn`은 v2에만
+있으므로 v2 반영의 결정적 증거** ④운영 경로 무영향 200. 인증 케이스(C-1 #12~15 상한·pinned 위조·$other)는 토큰 수단이
+없어 **D-Day 4-5에서 실로그인으로 확인**(정상 저장 401 시 v1 롤백 — 런북에 기재됨).
 
 **게시 절차(사용자, 5분 — 지금 해도 안전: 리워크 오리진 쓰기는 어차피 잠김, 운영 경로는 무변경)**:
 1. Firebase 콘솔 → Realtime Database → **규칙 탭** → 기존 내용 전체 선택·삭제 → `src/firebase-rules.json` 내용 붙여넣기 → **게시**.
