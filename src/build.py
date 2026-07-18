@@ -530,6 +530,8 @@ def build_members():
     live = """<script>(function(){
   var URL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
   var grid=document.getElementById('mGrid');
+  // live_url은 외부(status 피드) 값 → http/https만 허용, 아니면 신뢰 URL로 폴백(href javascript: 차단, member.html safeHttp와 동일)
+  function safeHttp(u,fb){try{var p=new URL(u,location.href);return (p.protocol==='http:'||p.protocol==='https:')?u:fb;}catch(e){return fb;}}
   function apply(map){
     var cards=[].slice.call(grid.querySelectorAll('.mcard'));
     cards.forEach(function(card){
@@ -537,7 +539,8 @@ def build_members():
       var badge=card.querySelector('.mlive');
       if(s&&s.is_live){
         card.classList.add('is-live');
-        badge.hidden=false;badge.href=s.live_url||('https://www.sooplive.co.kr/station/'+id);
+        var fb='https://www.sooplive.co.kr/station/'+encodeURIComponent(id);
+        badge.hidden=false;badge.href=safeHttp(s.live_url,fb)||fb;
         badge.querySelector('.mv-n').textContent=(s.viewers||0).toLocaleString();
         card.setAttribute('data-live','1');
       }else{card.classList.remove('is-live');badge.hidden=true;card.removeAttribute('data-live');}
