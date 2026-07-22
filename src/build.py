@@ -829,10 +829,10 @@ def build_clips():
     var hemb=window.WhaleEmbed?window.WhaleEmbed(feat.url):null;
     var heroBg=hemb
       ?'<iframe src="'+esc(hemb)+'" title="'+esc(feat.title||'클립')+'" loading="lazy" tabindex="-1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none"></iframe>'
-      :bgOf(feat);
+      :bgOf(feat)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>';
     hero.innerHTML='<section class="clips-hero">'
       +'<a class="orig-feat" href="clip.html?id='+encodeURIComponent(feat.id)+'" aria-label="'+esc(feat.title)+' 시청">'
-      +heroBg+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></a>'
+      +heroBg+'</a>'
       +'<div class="clips-hero-info">'
       +heroActionsHtml(feat)
       +'<div class="ch-cat">'+esc(feat.category||'')+' · 대표 클립</div>'
@@ -871,10 +871,10 @@ def build_clips():
     var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // 포스터만 표시(재생 X). pointer-events:none로 클릭은 카드가 받아 상세로 이동(façade)
     var media=emb
       ?'<iframe src="'+esc(emb)+'" title="'+esc(c.title||'클립')+'" loading="lazy" tabindex="-1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none"></iframe>'
-      :bgOf(c);
+      :bgOf(c)+'<div class="cplay" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>';
     return '<article class="ccard img-ani bottom-top" data-id="'+esc(c.id)+'" data-cat="'+esc(c.category||'')+'" role="button" tabindex="0" aria-label="'+esc(c.title)+' 클립 시청">'
       +(c.featured?'<span class="ccard-feat">★ 대표</span>':'')
-      +'<div class="ccard-thumb">'+media+'<div class="cplay" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>'
+      +'<div class="ccard-thumb">'+media+'</div>'
       +'<div class="ccard-info"><div class="ccard-title">'+esc(c.title)+'</div>'
       +'<div class="ccard-meta"><span>'+esc(c.creator)+'</span>'
       +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
