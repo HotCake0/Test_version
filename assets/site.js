@@ -263,6 +263,24 @@
     window.addEventListener('load', imgEvent);
   }
 
+  /* 동적 렌더(Firebase clips·schedules·notices·archive 목록)로 나중에 추가되는 .img-ani도 리빌.
+     위 observe는 초기 DOM만 잡아, 목록 카드가 opacity:0으로 숨은 채 남던 문제 보완. */
+  if ('MutationObserver' in window) {
+    new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        Array.prototype.forEach.call(m.addedNodes, function (n) {
+          if (n.nodeType !== 1) return;
+          var els = (n.classList && n.classList.contains('img-ani')) ? [n] : [];
+          if (n.querySelectorAll) els = els.concat($$('.img-ani', n));
+          els.forEach(function (el) {
+            if (!PRM && revealIO) revealIO.observe(el);
+            else el.classList.add('img-aniload');
+          });
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
   /* ---- 헤더 중앙 바로가기 — 현재 섹션 표시 ---- */
   $$('.h-nav a').forEach(function (a) {
     var key = (a.getAttribute('href') || '').replace('.html', '');
