@@ -8,7 +8,7 @@
     "w-019237": {"id":"w-019237","type":"column","parentId":"w-019236","childrenIds":["w-019238","w-01923c","w-019243","w-01925a","w-019275"],"layout":{"gap":40}},
     "w-019238": {"id":"w-019238","type":"column","parentId":"w-019237","childrenIds":["w-019239","w-01923a","w-01923b"],"layout":{"gap":8}},
     "w-019239": {"id":"w-019239","type":"text","parentId":"w-019238","childrenIds":[],"label":"고래상사 크루 소개","size":"md"},
-    "w-01923a": {"id":"w-01923a","type":"text","parentId":"w-019238","childrenIds":[],"label":"우리는 회사 역할극이라는 독특한 콘셉트로 뭉친 크리에이터 집단입니다.","size":"sm"},
+    "w-01923a": {"id":"w-01923a","type":"text","parentId":"w-019238","childrenIds":[],"label":"우리는 회사라는 독특한 콘셉트로 뭉친 크리에이터 집단입니다.","size":"sm"},
     "w-01923b": {"id":"w-01923b","type":"text","parentId":"w-019238","childrenIds":[],"label":"각자의 직책과 부서를 맡아 콘텐츠를 제작하며, 시청자와 함께 고래상사를 만들어갑니다.","size":"sm"},
     "w-01923c": {"id":"w-01923c","type":"column","parentId":"w-019237","childrenIds":["w-01923d","w-01923e"],"layout":{"gap":12}},
     "w-01923d": {"id":"w-01923d","type":"text","parentId":"w-01923c","childrenIds":[],"label":"크루 미션","size":"md"},

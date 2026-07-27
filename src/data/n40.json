@@ -17,7 +17,7 @@
     "w-018b3c": {"id":"w-018b3c","type":"row","parentId":"w-018b3b","childrenIds":["w-018b3d","w-018b41"],"layout":{"align":"center"}},
     "w-018b3d": {"id":"w-018b3d","type":"box","parentId":"w-018b3c","childrenIds":["w-018b3e","w-018b3f","w-018b40"]},
     "w-018b3e": {"id":"w-018b3e","type":"text","parentId":"w-018b3d","childrenIds":[],"label":"업데이트","size":"sm"},
-    "w-018b3f": {"id":"w-018b3f","type":"text","parentId":"w-018b3d","childrenIds":[],"label":"고래상사 공식 팬 굿즈 사전 신청 오픈","size":"md"},
+    "w-018b3f": {"id":"w-018b3f","type":"text","parentId":"w-018b3d","childrenIds":[],"label":"고래상사 팬 굿즈 사전 신청 오픈","size":"md"},
     "w-018b40": {"id":"w-018b40","type":"text","parentId":"w-018b3d","childrenIds":[],"label":"2025.06.28","size":"sm"},
     "w-018b41": {"id":"w-018b41","type":"button","parentId":"w-018b3c","childrenIds":[],"label":"자세히 보기","action":{"type":"navigate","targetPageNodeId":"n41"}},
     "w-018b42": {"id":"w-018b42","type":"box","parentId":"w-018b32","childrenIds":["w-018b43"],"attributes":{"outlined":""}},

@@ -41,7 +41,7 @@
     "w-018b24": {"id":"w-018b24","type":"row","parentId":"w-018b17","childrenIds":["w-018b25","w-018b26","w-018b27"]},
     "w-018b25": {"id":"w-018b25","type":"text","parentId":"w-018b24","childrenIds":[],"label":"설명","size":"sm"},
     "w-018b26": {"id":"w-018b26","type":"spacer","parentId":"w-018b24","childrenIds":[],"label":"1","spacerSize":"1"},
-    "w-018b27": {"id":"w-018b27","type":"text","parentId":"w-018b24","childrenIds":[],"label":"고래상사의 역동적인 회사 역할극을 감상하세요.","size":"sm"},
+    "w-018b27": {"id":"w-018b27","type":"text","parentId":"w-018b24","childrenIds":[],"label":"고래상사의 역동적인 회사 생활을 감상하세요.","size":"sm"},
     "w-018b28": {"id":"w-018b28","type":"row","parentId":"w-018b02","childrenIds":["w-018b29","w-018b2a"],"layout":{"gap":8,"justify":"end"}},
     "w-018b29": {"id":"w-018b29","type":"button","parentId":"w-018b28","childrenIds":[],"label":"수정","variant":"secondary","action":{"type":"navigate","targetPageNodeId":"n45"}},
     "w-018b2a": {"id":"w-018b2a","type":"button","parentId":"w-018b28","childrenIds":[],"label":"삭제","variant":"danger","action":{"type":"open-modal","targetOverlayId":"delete-schedule"}},

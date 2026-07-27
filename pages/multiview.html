@@ -43,6 +43,14 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .chip:hover{border-color:var(--brand);color:var(--ink)}
 .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
 .pg-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.pg-search{font:inherit;font-size:13px;padding:8px 16px;border-radius:999px;min-height:36px;flex:0 1 240px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
+.pg-search::placeholder{color:var(--ink-2)}
+.pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+.pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.pg-select.on{border-color:var(--brand);color:var(--ink)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -313,7 +321,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       <a class="btn sm ghost" href="../index.html">메인으로</a>
     </div>
   </div>
-  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 역할극 버추얼 크루 · 16인.</div>
+  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 버추얼 크루 · 16인.</div>
 </footer>
 <div class="scroll-topwrp" id="scrollTopWrp">
   <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="맨 위로 이동">
@@ -336,6 +344,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     </details>
   </div>
 </div>
+<script src="../assets/embed.js"></script>
 <script src="../assets/site.js"></script>
 <script>window.WHALE_META={"bach023": {"name": "울산큰고래", "color": "linear-gradient(135deg,#0d1a4a,#2f63ff)", "initials": "고", "img": "../img/울산큰고래.png"}, "gyeonjahee": {"name": "견자희", "color": "linear-gradient(135deg,#0a1e20,#0fb5b0)", "initials": "부", "img": "../img/견자희.png"}, "melodingding": {"name": "멜로딩딩", "color": "linear-gradient(135deg,#0a1025,#3b82f6)", "initials": "멜", "img": "../img/멜로딩딩.png"}, "kimmaren77": {"name": "김마렌", "color": "linear-gradient(135deg,#2a0a0a,#ff4d4d)", "initials": "게", "img": "../img/김마렌.png"}, "doki0818": {"name": "감자가비", "color": "linear-gradient(135deg,#1a1800,#ffcb45)", "initials": "컨", "img": "../img/감자가비.png"}, "xpdpfv2": {"name": "이지수", "color": "linear-gradient(135deg,#150a30,#8b5cf6)", "initials": "이", "img": "../img/이지수.png"}, "gatgdf": {"name": "쏭이", "color": "linear-gradient(135deg,#0a0a22,#6366f1)", "initials": "쏭", "img": "../img/쏭이.png"}, "joaras2": {"name": "조아라", "color": "linear-gradient(135deg,#0a1a10,#10b981)", "initials": "조", "img": "../img/조아라.png"}, "soyoung6056": {"name": "빡쏘", "color": "linear-gradient(135deg,#1a0a18,#ec4899)", "initials": "빡", "img": "../img/빡쏘.png"}, "poippoi52": {"name": "희희덕", "color": "linear-gradient(135deg,#0a1a0a,#22c55e)", "initials": "희", "img": "../img/희희덕.png"}, "ducke77": {"name": "밀크티냠", "color": "linear-gradient(135deg,#1a1200,#f59e0b)", "initials": "밀", "img": "../img/밀크티냠.png"}, "nlov555jij": {"name": "삐요코", "color": "linear-gradient(135deg,#0a1a1a,#14b8a6)", "initials": "삐", "img": "../img/삐요코.png"}, "chae1hana": {"name": "채하나", "color": "linear-gradient(135deg,#1a0a00,#f97316)", "initials": "채", "img": "../img/채하나.png"}, "nororo": {"name": "묵아", "color": "linear-gradient(135deg,#0a1820,#06b6d4)", "initials": "묵", "img": "../img/묵아.png"}, "peuhaha": {"name": "프하", "color": "linear-gradient(135deg,#160a22,#a855f7)", "initials": "프", "img": "../img/프하.png"}, "sellkey": {"name": "셀키", "color": "linear-gradient(135deg,#1a0808,#ef4444)", "initials": "셀", "img": "../img/셀키.png"}};window.STATUS_URL="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/status.json";window.SEARCH_URL="https://whale-status-worker.kyefyx.workers.dev/search/bj";</script><script>(function(){
   var META=window.WHALE_META||{},SU=window.STATUS_URL,SEARCH=window.SEARCH_URL;

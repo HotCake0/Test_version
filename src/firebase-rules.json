@@ -9,6 +9,12 @@
     "rework": {
       ".read": true,
 
+      "clipviews": {
+        "$id": {
+          ".write": "$id.matches(/^-[A-Za-z0-9_-]{19}$/) && newData.isNumber() && newData.val() === (data.exists() ? data.val() + 1 : 1)"
+        }
+      },
+
       "clips": {
         ".indexOn": ["createdAt"],
         "$id": {

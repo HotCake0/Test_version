@@ -44,6 +44,14 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .chip:hover{border-color:var(--brand);color:var(--ink)}
 .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
 .pg-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.pg-search{font:inherit;font-size:13px;padding:8px 16px;border-radius:999px;min-height:36px;flex:0 1 240px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
+.pg-search::placeholder{color:var(--ink-2)}
+.pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+.pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.pg-select.on{border-color:var(--brand);color:var(--ink)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -355,7 +363,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       <a class="btn sm ghost" href="../index.html">메인으로</a>
     </div>
   </div>
-  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 역할극 버추얼 크루 · 16인.</div>
+  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 버추얼 크루 · 16인.</div>
 </footer>
 <div class="scroll-topwrp" id="scrollTopWrp">
   <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="맨 위로 이동">
@@ -378,6 +386,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     </details>
   </div>
 </div>
+<script src="../assets/embed.js"></script>
 <script src="../assets/site.js"></script>
 <script>(function(){
   var U=window.WhaleUI, D=window.WhaleData;
@@ -494,8 +503,16 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   // (new URL 호스트 엄격검증+검증 조각 재조립). C-2 보안 재검증은 site.js의 WhaleEmbed 대상.
   var embedUrlOf=window.WhaleEmbed||function(){return null;};
   function tagsOf(x){return (x&&x.tags)||[];}
+  /* 이 기록을 클립과 묶는 키워드 — 태그 + 제목.
+     운영 기록에는 tags가 없고(15건 전부), 클립 tags에는 대회 제목이 그대로 들어 있어
+     제목을 키워드로 함께 쓰지 않으면 '관련 클립'이 영원히 0건이 된다. */
+  function keywordsOf(contest){
+    var ks=tagsOf(contest).slice();
+    if(contest&&contest.title)ks.push(contest.title);
+    return ks;
+  }
   function relatedOf(contest){
-    var ct=tagsOf(contest).map(function(t){return String(t).toLowerCase();});
+    var ct=keywordsOf(contest).map(function(t){return String(t).toLowerCase();});
     if(!ct.length)return [];
     return allClips.filter(function(cl){
       return tagsOf(cl).some(function(t){return ct.indexOf(String(t).toLowerCase())>=0;});
@@ -515,7 +532,20 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
         +'<a class="rc-t" href="clip.html?id='+encodeURIComponent(cl.id)+'">'+esc(cl.title||'클립')+'</a>'
         +(cl.creator?'<span class="rc-by">'+esc(cl.creator)+'</span>':'')+'</div>';
     }).join('');
-    return '<h3 class="cd-h" style="margin-top:26px">관련 클립 <span class="rc-count">'+rel.length+'</span></h3><div class="rc-grid">'+cards+'</div>';
+    /* '보러가기' = 클립 목록의 태그 필터(?t=)로 이동 — 여기 보이는 것과 같은 집합이 열린다.
+       넘길 키워드는 '실제로 클립을 묶고 있는 것'을 고른다. 기록의 첫 키워드를 무조건 넘기면
+       태그와 제목이 다른 기록에서 아무것도 안 걸리는 링크가 된다. */
+    var kw=keywordsOf(cur).map(function(k){return String(k).toLowerCase();}),t0='';
+    rel.some(function(cl){
+      return tagsOf(cl).some(function(t){
+        if(kw.indexOf(String(t).toLowerCase())>=0){t0=t;return true;}
+        return false;
+      });
+    });
+    var more=t0?'<a class="more-link" style="margin-left:auto;font-size:14px" href="clips.html?t='
+      +encodeURIComponent(t0)+'">관련 클립 보러가기 →</a>':'';
+    return '<h3 class="cd-h" style="margin-top:26px;display:flex;align-items:center;gap:10px">관련 클립 '
+      +'<span class="rc-count">'+rel.length+'</span>'+more+'</h3><div class="rc-grid">'+cards+'</div>';
   }
   function load(){
     if(!id){el.innerHTML='<div class="stub"><p>잘못된 접근입니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return Promise.resolve();}

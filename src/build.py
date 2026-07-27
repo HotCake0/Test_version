@@ -5,7 +5,7 @@
 # 공유 자산: assets/site.css · assets/site.js (메인 홈과 동일 디자인 시스템)
 # 페이지는 pages/ 안에 위치 → 자원 경로는 ../assets, ../img, ../index.html
 # =========================================================
-import json, os, html
+import json, os, html, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONTENT = os.path.join(HERE, "content")
@@ -55,7 +55,7 @@ def page_description(slug):
     gp = PAGE_BY_SLUG.get(slug)
     if gp:
         return f"고래상사 {gp[1]['label']} — 크루 16인의 방송·클립·일정·아카이브를 한 곳에서."
-    return "고래상사 크루 공식 사이트 — 방송·클립·일정·아카이브를 한 곳에서."
+    return "고래상사 크루 사이트 — 방송·클립·일정·아카이브를 한 곳에서."
 
 
 def head(title, page_css="", slug=None):
@@ -156,7 +156,7 @@ def footer():
       <a class="btn sm ghost" href="../index.html">메인으로</a>
     </div>
   </div>
-  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 역할극 버추얼 크루 · 16인.</div>
+  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 버추얼 크루 · 16인.</div>
 </footer>
 <div class="scroll-topwrp" id="scrollTopWrp">
   <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="맨 위로 이동">
@@ -221,6 +221,7 @@ def page_head_block(en, eyebrow, sub):
 
 def tail(scripts=""):
     return f"""{login_modal()}
+<script src="../assets/embed.js"></script>
 <script src="../assets/site.js"></script>
 {scripts}
 </body></html>"""
@@ -259,6 +260,14 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .chip:hover{border-color:var(--brand);color:var(--ink)}
 .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
 .pg-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.pg-search{font:inherit;font-size:13px;padding:8px 16px;border-radius:999px;min-height:36px;flex:0 1 240px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
+.pg-search::placeholder{color:var(--ink-2)}
+.pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+.pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.pg-select.on{border-color:var(--brand);color:var(--ink)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -483,7 +492,7 @@ def build_crew():
         page_head_block("CREW", "고래상사의 사람들", "크루 소개")
         + '<section class="crew-hero img-ani bottom-top">'
           '<div><h2>버추얼 크루 <em>고래상사</em>는<br>16인의 개성으로 굴러갑니다</h2>'
-          '<p>사장부터 인턴까지, 회사 역할극이라는 하나의 세계관 안에서 각자의 자리를 맡아 매일 방송을 이어갑니다. '
+          '<p>사장부터 인턴까지, 회사라는 하나의 세계관 안에서 각자의 자리를 맡아 매일 방송을 이어갑니다. '
           '비서·게임·컨텐츠… 부서는 달라도 \'웃음\'이라는 목표는 같습니다.</p>'
           '<div class="crew-metrics">'
           '<div class="crew-metric"><div class="n">16</div><div class="u">크루 인원</div></div>'
@@ -755,14 +764,76 @@ def build_clips():
         page_head_block("CLIPS", "베스트 클립", "베스트 클립")
         + '<div class="n-actions img-ani bottom-top" id="cActions"></div>'
         + '<div id="cHero" class="img-ani bottom-top"></div>'
-        + '<div class="pg-tools img-ani bottom-top" id="cChips"></div>'
+        # 검색창은 #cChips 밖 — renderChips()가 칩 컨테이너를 innerHTML로 갈아끼우므로
+        # 안에 두면 칩 클릭마다 입력값·포커스가 날아간다. display:contents로 한 줄 유지.
+        + '<div class="pg-tools img-ani bottom-top">'
+          '<input type="search" id="cQ" class="pg-search" placeholder="클립 검색"'
+          ' aria-label="클립 검색 (제목·제작자·태그)" autocomplete="off">'
+          # 제작자는 등록분 전부 '고래상사'라 필터 가치가 없다. 값이 실제로 갈리는 축은 태그(대회).
+          '<select id="cTag" class="pg-select" aria-label="대회·태그"><option value="">태그 전체</option></select>'
+          '<span id="cChips" style="display:contents"></span></div>'
         + '<div class="cgrid img-ani bottom-top" id="cGrid">' + '<div class="skel skel-card"></div>'*8 + '</div>'
         + clip_form_modal())
 
     js = "<script>(function(){" + _CLIP_JS_SHARED + """
   var hero=document.getElementById('cHero'), grid=document.getElementById('cGrid'),
-      chipsWrap=document.getElementById('cChips'), actionsEl=document.getElementById('cActions');
-  var ALL=[], activeFilter=new URLSearchParams(location.search).get('f')||'all';  // §2.6-3: ?f= 복원
+      chipsWrap=document.getElementById('cChips'), actionsEl=document.getElementById('cActions'),
+      qEl=document.getElementById('cQ'), tagEl=document.getElementById('cTag');
+  var Q0=new URLSearchParams(location.search);
+  var ALL=[], activeFilter=Q0.get('f')||'all';  // §2.6-3: ?f= 복원
+  var query=(Q0.get('q')||'').trim();           // ?q= 복원 — ?f=와 같은 방식(뒤로가기·공유 유지)
+  var fTag=Q0.get('t')||'';
+  qEl.value=query;
+
+  /* 태그 선택지는 등록된 클립에 실제로 붙은 것만 (대회 제목이 태그로 들어온다) */
+  function fillTags(){
+    var seen={},list=[];
+    ALL.forEach(function(c){(c.tags||[]).forEach(function(t){if(t&&!seen[t]){seen[t]=1;list.push(t);}});});
+    list.sort();
+    var head=tagEl.options[0];
+    tagEl.textContent='';tagEl.appendChild(head);
+    list.forEach(function(t){
+      var o=document.createElement('option');o.value=t;o.textContent=t;
+      if(t===fTag)o.selected=true;
+      tagEl.appendChild(o);
+    });
+    if(list.indexOf(fTag)<0){fTag='';tagEl.value='';}
+    tagEl.classList.toggle('on',!!fTag);
+  }
+  tagEl.addEventListener('change',function(){
+    fTag=tagEl.value;tagEl.classList.toggle('on',!!fTag);syncUrl();renderGrid();
+  });
+
+  function syncUrl(){
+    if(!history.replaceState)return;
+    var p=new URLSearchParams();
+    if(activeFilter!=='all')p.set('f',activeFilter);
+    if(query)p.set('q',query);
+    if(fTag)p.set('t',fTag);
+    var s=p.toString();
+    history.replaceState(null,'',s?'?'+s:location.pathname);
+  }
+  /* 검색 대상 필드 — 여기만 고치면 검색 범위가 바뀐다 */
+  function hay(c){
+    return [c.title,c.creator,c.category,c.desc,(c.tags||[]).join(' ')]
+      .join(' ').toLowerCase();
+  }
+  function matches(c){
+    if(!query)return true;
+    var h=hay(c);
+    // 공백 구분 = AND (예: "대회 편집" → 둘 다 든 클립)
+    return query.toLowerCase().split(/\\s+/).every(function(t){return h.indexOf(t)>=0;});
+  }
+  /* 입력마다 렌더하면 카드 iframe 포스터가 전부 재로드된다 → 짧은 디바운스 */
+  var qTimer;
+  qEl.addEventListener('input',function(){
+    clearTimeout(qTimer);
+    qTimer=setTimeout(function(){
+      query=qEl.value.trim();
+      syncUrl();
+      renderGrid();
+    },250);
+  });
 
   function renderActions(){
     var html='';
@@ -828,7 +899,7 @@ def build_clips():
     var feat=ALL.filter(function(c){return c.featured;})[0]||ALL[0];
     var hemb=window.WhaleEmbed?window.WhaleEmbed(feat.url):null;
     var heroBg=hemb
-      ?'<iframe src="'+esc(hemb)+'" title="'+esc(feat.title||'클립')+'" loading="lazy" tabindex="-1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none"></iframe>'
+      ?'<iframe src="'+esc(hemb)+'" title="'+esc(feat.title||'클립')+'" loading="lazy" tabindex="-1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;background:#0f1730"></iframe>'
       :bgOf(feat)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>';
     hero.innerHTML='<section class="clips-hero">'
       +'<a class="orig-feat" href="clip.html?id='+encodeURIComponent(feat.id)+'" aria-label="'+esc(feat.title)+' 시청">'
@@ -840,7 +911,7 @@ def build_clips():
       +'<div class="ch-meta"><span>제작: '+esc(feat.creator)+'</span>'
       +(feat.date?'<span>'+esc(feat.date)+'</span>':'')
       +(feat.duration?'<span class="ch-dur">'+esc(feat.duration)+'</span>':'')
-      +'<span>'+fmtViews(feat.views)+' 조회</span></div>'
+      +'<span>사이트 조회 '+fmtViews(feat.views)+'</span></div>'
       +(feat.desc?'<p class="ch-desc">'+esc(feat.desc)+'</p>':'')
       +'<a class="btn primary" href="clip.html?id='+encodeURIComponent(feat.id)+'"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>클립 시청</a>'
       +'</div></section>';
@@ -854,8 +925,7 @@ def build_clips():
     chipsWrap.innerHTML=html;
     [].slice.call(chipsWrap.querySelectorAll('.chip')).forEach(function(c){
       c.addEventListener('click',function(){activeFilter=c.getAttribute('data-f');
-        if(history.replaceState)history.replaceState(null,'',activeFilter==='all'?location.pathname:'?f='+encodeURIComponent(activeFilter));
-        renderChips();renderGrid();});
+        syncUrl();renderChips();renderGrid();});
     });
   }
   function cardActionsHtml(c){
@@ -870,7 +940,7 @@ def build_clips():
   function card(c){
     var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // 포스터만 표시(재생 X). pointer-events:none로 클릭은 카드가 받아 상세로 이동(façade)
     var media=emb
-      ?'<iframe src="'+esc(emb)+'" title="'+esc(c.title||'클립')+'" loading="lazy" tabindex="-1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none"></iframe>'
+      ?'<iframe src="'+esc(emb)+'" title="'+esc(c.title||'클립')+'" loading="lazy" tabindex="-1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;background:#0f1730"></iframe>'
       :bgOf(c)+'<div class="cplay" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>';
     return '<article class="ccard img-ani bottom-top" data-id="'+esc(c.id)+'" data-cat="'+esc(c.category||'')+'" role="button" tabindex="0" aria-label="'+esc(c.title)+' 클립 시청">'
       +(c.featured?'<span class="ccard-feat">★ 대표</span>':'')
@@ -878,18 +948,28 @@ def build_clips():
       +'<div class="ccard-info"><div class="ccard-title">'+esc(c.title)+'</div>'
       +'<div class="ccard-meta"><span>'+esc(c.creator)+'</span>'
       +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
-      +'<span>'+fmtViews(c.views)+' 조회</span></div></div>'
+      +'<span>사이트 조회 '+fmtViews(c.views)+'</span></div></div>'
       +cardActionsHtml(c)+'</article>';
   }
   function renderGrid(){
-    var filtered=activeFilter==='all'?ALL:ALL.filter(function(c){return c.category===activeFilter;});
+    /* 태그는 정확일치(대회 단위), 검색어는 여러 필드 부분일치 — 성격이 달라 matches()와 분리 */
+    var filtered=ALL.filter(function(c){
+      return (activeFilter==='all'||c.category===activeFilter)
+        &&(!fTag||(c.tags||[]).indexOf(fTag)>=0)
+        &&matches(c);
+    });
     var count=document.getElementById('cCount');
-    if(count)count.textContent=(activeFilter==='all'?'전체':activeFilter)+' '+filtered.length+'개';
-    grid.innerHTML=filtered.length?filtered.map(card).join(''):(ALL.length?'<div class="nlist-msg" style="grid-column:1/-1">해당 분류의 클립이 없습니다.</div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg><b>아직 등록된 클립이 없습니다</b><span>로그인하면 첫 클립을 직접 등록할 수 있습니다.</span></div>');
+    var label=query?'검색 결과':(fTag||(activeFilter==='all'?'전체':activeFilter));
+    if(count)count.textContent=label+' '+filtered.length+'개';
+    var none=(query||fTag)?'조건에 맞는 클립이 없습니다.':'해당 분류의 클립이 없습니다.';
+    grid.innerHTML=filtered.length?filtered.map(card).join(''):(ALL.length?'<div class="nlist-msg" style="grid-column:1/-1">'+none+'</div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg><b>아직 등록된 클립이 없습니다</b><span>로그인하면 첫 클립을 직접 등록할 수 있습니다.</span></div>');
   }
   function reload(){
+    /* 조회수는 clips가 아닌 /rework/clipviews 별도 노드 → 목록에 합류시킨 뒤 렌더(실패해도 0으로 진행) */
     return D.list('clips').then(function(items){
-      ALL=items;renderActions();renderHero();renderChips();renderGrid();
+      return window.WhaleViews?window.WhaleViews.load(items):items;
+    }).then(function(items){
+      ALL=items;renderActions();renderHero();renderChips();fillTags();renderGrid();
     }).catch(function(err){
       grid.innerHTML='<div class="nlist-msg" style="grid-column:1/-1">불러오기 실패: '+esc(err&&err.message||err)+'</div>';
     });
@@ -947,10 +1027,18 @@ def build_clip():
   var C=[], idx=0;
   function load(){
     return D.list('clips').then(function(items){
+      return window.WhaleViews?window.WhaleViews.load(items):items;
+    }).then(function(items){
       C=items;
       if(id){
         idx=C.findIndex(function(c){return c.id===id;});
-        if(idx<0)idx=0;
+        /* 없는 id면 1번 클립으로 폴백하지 않는다 — 엉뚱한 클립을 그 클립인 척 보여주고
+           조회수까지 올리게 된다(아카이브 상세와 동일하게 '찾을 수 없음' 처리). */
+        if(idx<0){
+          detail.innerHTML='<div class="nlist-msg">클립을 찾을 수 없습니다.'
+            +'<br><a class="btn sm" href="clips.html">전체 클립</a></div>';
+          return;
+        }
       } else if(legacyIdx!=null&&!isNaN(parseInt(legacyIdx,10))){
         idx=Math.min(Math.max(parseInt(legacyIdx,10),0),Math.max(C.length-1,0));
       } else idx=0;
@@ -961,6 +1049,9 @@ def build_clip():
   }
   function render(){
     var c=C[idx];
+    /* 조회수 +1 — 이전/다음으로 옮겨도 그 클립을 본 것이므로 여기서 센다.
+       같은 세션 재방문은 WhaleViews.bump 내부의 sessionStorage가 막는다. */
+    if(c&&window.WhaleViews)window.WhaleViews.bump(c.id);
     if(!c){
       detail.innerHTML='<div class="nlist-msg">등록된 클립이 없습니다.<br><a class="btn sm" href="clips.html">전체 클립</a></div>';
       return;
@@ -989,7 +1080,7 @@ def build_clip():
       +'<div class="cdetail-meta"><span>제작: '+esc(c.creator)+'</span>'
       +(c.date?'<span>'+esc(c.date)+'</span>':'')
       +(c.duration?'<span class="ccard-dur">'+esc(c.duration)+'</span>':'')
-      +'<span>'+fmtViews(c.views)+' 조회</span></div>'
+      +'<span>사이트 조회 '+fmtViews(c.views)+'</span></div>'
       +(c.desc?'<p class="cdetail-desc">'+esc(c.desc)+'</p>':'')
       +(c.url?'<div style="margin:0 0 20px"><a class="btn sm primary" href="'+esc(safeUrl(c.url))+'" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>원본 영상 보기</a></div>':'')
       +'<div class="cdetail-nav"><button class="btn sm" id="cPrev">← 이전 클립</button>'
@@ -1290,13 +1381,107 @@ def build_archive():
               '<button class="chip" data-f="크루대전">크루대전</button>'
               '<button class="chip" data-f="컨텐츠">컨텐츠</button>'
               '<span class="pg-count" id="aCount"></span></div>'
+            # 참여 멤버·게임 목록은 빌드 시점이 아니라 기록에서 뽑는다 —
+            # 졸업 멤버·외부 게스트가 기록에 남아 있어 members.json 16인과 일치하지 않는다.
+            + '<div class="pg-tools img-ani bottom-top">'
+              '<input type="search" id="aQ" class="pg-search" placeholder="기록 검색"'
+              ' aria-label="기록 검색 (제목·상대 크루·게임·참여 멤버)" autocomplete="off">'
+              '<select id="aMem" class="pg-select" aria-label="참여 멤버"><option value="">참여 멤버 전체</option></select>'
+              '<select id="aGame" class="pg-select" aria-label="게임"><option value="">게임 전체</option></select>'
+              '<select id="aWin" class="pg-select" aria-label="결과"><option value="">결과 전체</option>'
+              '<option value="win">우승</option><option value="other">우승 외</option></select>'
+              '<button type="button" class="chip" id="aReset" hidden>필터 초기화</button></div>'
             + '<div class="agrid img-ani bottom-top" id="aGrid">'
             + '<div class="skel skel-row" style="height:110px"></div>'*4 + '</div>'
             + archive_form_modal())
     js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
-  var qsF=new URLSearchParams(location.search).get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
+  var qs=new URLSearchParams(location.search), qsF=qs.get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
   var all=[], filt=(qsF==='크루대전'||qsF==='컨텐츠')?qsF:'all';
+  var qEl=document.getElementById('aQ'), memEl=document.getElementById('aMem'),
+      gameEl=document.getElementById('aGame'), winEl=document.getElementById('aWin'),
+      resetEl=document.getElementById('aReset');
+  var query=(qs.get('q')||'').trim(), fMem=qs.get('m')||'', fGame=qs.get('g')||'';
+  var fWin=(qs.get('w')==='win'||qs.get('w')==='other')?qs.get('w'):'';
+  qEl.value=query; winEl.value=fWin;
+
+  function syncUrl(){
+    if(!history.replaceState)return;
+    var p=new URLSearchParams();
+    if(filt!=='all')p.set('f',filt);
+    if(query)p.set('q',query);
+    if(fMem)p.set('m',fMem);
+    if(fGame)p.set('g',fGame);
+    if(fWin)p.set('w',fWin);
+    var s=p.toString();
+    history.replaceState(null,'',s?'?'+s:location.pathname);
+  }
+  function gameNames(c){
+    var g=c.games||{};
+    return Object.keys(g).map(function(k){return (g[k]||{}).name||'';}).filter(Boolean);
+  }
+  /* 직접입력 검색 대상 — 제목·날짜·참여 멤버·게임·상대 크루. 공백 구분 = AND */
+  function hay(c){
+    return [c.title,c.date,c.category,(c.members||[]).join(' '),gameNames(c).join(' '),
+            (c.opponents||[]).map(function(o){return (o&&o.name)||'';}).join(' ')]
+      .join(' ').toLowerCase();
+  }
+  function matches(c){
+    if(filt!=='all'&&(c.category||'크루대전')!==filt)return false;
+    if(fMem&&(c.members||[]).indexOf(fMem)<0)return false;
+    if(fGame&&gameNames(c).indexOf(fGame)<0)return false;
+    if(fWin==='win'&&c.rank!==1)return false;
+    if(fWin==='other'&&c.rank===1)return false;
+    if(query){
+      var h=hay(c);
+      if(!query.toLowerCase().split(/\s+/).every(function(t){return h.indexOf(t)>=0;}))return false;
+    }
+    return true;
+  }
+  function anyFilter(){return !!(query||fMem||fGame||fWin||filt!=='all');}
+  /* 선택지는 기록에 실제로 등장한 값만 — 없는 게임·멤버를 고르는 막다른 길을 만들지 않는다 */
+  function fillSelect(sel,list,cur){
+    var head=sel.options[0];
+    sel.textContent='';sel.appendChild(head);
+    list.forEach(function(v){
+      var o=document.createElement('option');o.value=v;o.textContent=v;
+      if(v===cur)o.selected=true;
+      sel.appendChild(o);
+    });
+    if(cur&&list.indexOf(cur)<0)sel.value='';  // URL에 없는 값이 와도 조용히 무시
+  }
+  function fillOptions(){
+    var mem={},gm={};
+    all.forEach(function(c){
+      (c.members||[]).forEach(function(m){if(m)mem[m]=1;});
+      gameNames(c).forEach(function(n){gm[n]=1;});
+    });
+    var ms=Object.keys(mem).sort(),gs=Object.keys(gm).sort();
+    fillSelect(memEl,ms,fMem);fillSelect(gameEl,gs,fGame);
+    if(ms.indexOf(fMem)<0)fMem='';
+    if(gs.indexOf(fGame)<0)fGame='';
+  }
+  function markActive(){
+    memEl.classList.toggle('on',!!fMem);
+    gameEl.classList.toggle('on',!!fGame);
+    winEl.classList.toggle('on',!!fWin);
+    resetEl.hidden=!anyFilter();
+  }
+  var qT;
+  qEl.addEventListener('input',function(){
+    clearTimeout(qT);
+    qT=setTimeout(function(){query=qEl.value.trim();syncUrl();render();},250);
+  });
+  memEl.addEventListener('change',function(){fMem=memEl.value;syncUrl();render();});
+  gameEl.addEventListener('change',function(){fGame=gameEl.value;syncUrl();render();});
+  winEl.addEventListener('change',function(){fWin=winEl.value;syncUrl();render();});
+  resetEl.addEventListener('click',function(){
+    query='';fMem='';fGame='';fWin='';filt='all';
+    qEl.value='';memEl.value='';gameEl.value='';winEl.value='';
+    [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(x){
+      x.classList.toggle('active',x.getAttribute('data-f')==='all');});
+    syncUrl();render();
+  });
   function renderActions(){
     var html='';
     if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
@@ -1331,16 +1516,15 @@ def build_archive():
       +rowActionsHtml(c)+'</div>';
   }
   function render(){
-    var arr=all.filter(function(c){
-      if(filt==='all')return true;
-      return (c.category||'크루대전')===filt;});
+    var arr=all.filter(matches);
+    markActive();
     count.textContent=arr.length+'건';
-    grid.innerHTML=arr.length?arr.map(card).join(''):(all.length?'<div class="stub" style="grid-column:1/-1"><p>해당 분류의 기록이 없습니다.</p></div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><b>아직 기록이 없습니다</b><span>크루대전·컨텐츠 기록이 등록되면 여기에 표시됩니다.</span></div>');
+    grid.innerHTML=arr.length?arr.map(card).join(''):(all.length?'<div class="stub" style="grid-column:1/-1"><p>'+(anyFilter()?'조건에 맞는 기록이 없습니다.':'해당 분류의 기록이 없습니다.')+'</p></div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><b>아직 기록이 없습니다</b><span>크루대전·컨텐츠 기록이 등록되면 여기에 표시됩니다.</span></div>');
   }
   function reload(){
     return D.list('contests').then(function(items){
       all=items.slice().sort(function(a,b){return ((a.date||'')<(b.date||'')?1:(a.date||'')>(b.date||'')?-1:0);});
-      renderActions();render();
+      renderActions();fillOptions();render();
     }).catch(function(err){
       grid.innerHTML='<div class="stub" style="grid-column:1/-1"><p>불러오기 실패: '+esc(err&&err.message||err)+'</p></div>';
     });
@@ -1348,8 +1532,7 @@ def build_archive():
   [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(c){c.addEventListener('click',function(){
     document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.remove('active')});
     c.classList.add('active');filt=c.getAttribute('data-f');
-    if(history.replaceState)history.replaceState(null,'',filt==='all'?location.pathname:'?f='+encodeURIComponent(filt));
-    render();});});
+    syncUrl();render();});});
   if(filt!=='all')document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-f')===filt);});  // §2.6-3: 진입 시 칩 동기화
   function removeRecord(item){
     if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;
@@ -1435,8 +1618,16 @@ def build_archive_detail():
   // (new URL 호스트 엄격검증+검증 조각 재조립). C-2 보안 재검증은 site.js의 WhaleEmbed 대상.
   var embedUrlOf=window.WhaleEmbed||function(){return null;};
   function tagsOf(x){return (x&&x.tags)||[];}
+  /* 이 기록을 클립과 묶는 키워드 — 태그 + 제목.
+     운영 기록에는 tags가 없고(15건 전부), 클립 tags에는 대회 제목이 그대로 들어 있어
+     제목을 키워드로 함께 쓰지 않으면 '관련 클립'이 영원히 0건이 된다. */
+  function keywordsOf(contest){
+    var ks=tagsOf(contest).slice();
+    if(contest&&contest.title)ks.push(contest.title);
+    return ks;
+  }
   function relatedOf(contest){
-    var ct=tagsOf(contest).map(function(t){return String(t).toLowerCase();});
+    var ct=keywordsOf(contest).map(function(t){return String(t).toLowerCase();});
     if(!ct.length)return [];
     return allClips.filter(function(cl){
       return tagsOf(cl).some(function(t){return ct.indexOf(String(t).toLowerCase())>=0;});
@@ -1456,7 +1647,20 @@ def build_archive_detail():
         +'<a class="rc-t" href="clip.html?id='+encodeURIComponent(cl.id)+'">'+esc(cl.title||'클립')+'</a>'
         +(cl.creator?'<span class="rc-by">'+esc(cl.creator)+'</span>':'')+'</div>';
     }).join('');
-    return '<h3 class="cd-h" style="margin-top:26px">관련 클립 <span class="rc-count">'+rel.length+'</span></h3><div class="rc-grid">'+cards+'</div>';
+    /* '보러가기' = 클립 목록의 태그 필터(?t=)로 이동 — 여기 보이는 것과 같은 집합이 열린다.
+       넘길 키워드는 '실제로 클립을 묶고 있는 것'을 고른다. 기록의 첫 키워드를 무조건 넘기면
+       태그와 제목이 다른 기록에서 아무것도 안 걸리는 링크가 된다. */
+    var kw=keywordsOf(cur).map(function(k){return String(k).toLowerCase();}),t0='';
+    rel.some(function(cl){
+      return tagsOf(cl).some(function(t){
+        if(kw.indexOf(String(t).toLowerCase())>=0){t0=t;return true;}
+        return false;
+      });
+    });
+    var more=t0?'<a class="more-link" style="margin-left:auto;font-size:14px" href="clips.html?t='
+      +encodeURIComponent(t0)+'">관련 클립 보러가기 →</a>':'';
+    return '<h3 class="cd-h" style="margin-top:26px;display:flex;align-items:center;gap:10px">관련 클립 '
+      +'<span class="rc-count">'+rel.length+'</span>'+more+'</h3><div class="rc-grid">'+cards+'</div>';
   }
   function load(){
     if(!id){el.innerHTML='<div class="stub"><p>잘못된 접근입니다.</p><a class="btn primary" href="archive.html">목록으로</a></div>';return Promise.resolve();}
@@ -2698,6 +2902,30 @@ def build_news():
     write("news", "최신 소식", body, NEWS_CSS, scripts=js)
 
 
+def sync_home_members():
+    """홈 index.html의 MEMBERS 배열을 members.json에서 재생성 — 멤버 페이지와 같은 단일 소스.
+    index.html은 빌더 산출물이 아니므로 마커 사이 블록만 교체한다."""
+    path = os.path.join(HERE, "..", "index.html")
+    with open(path, encoding="utf-8") as f:
+        src = f.read()
+    keys = ("name", "role", "dept", "color", "initials", "img", "bio", "stats")
+    data = [{k: m[k] for k in keys}
+            for _, m in sorted(enumerate(MEMBERS), key=lambda t: (t[1]["rank"], t[0]))]
+    # 인라인 <script> 안에 들어가는 JSON — 값에 "</script>"가 섞이면 스크립트가 조기 종료된다.
+    # json.dumps는 '<'를 이스케이프하지 않으므로 여기서 닫는 태그만 무력화한다.
+    rows = ",\n    ".join(json.dumps(d, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+                          for d in data)
+    block = ("  /* @members:start — src/content/members.json 자동 생성. 직접 수정 금지(build.py 재실행) */\n"
+             "  var MEMBERS = [\n    " + rows + "\n  ];\n"
+             "  /* @members:end */")
+    new, n = re.subn(r"  /\* @members:start.*?/\* @members:end \*/", lambda _: block, src, flags=re.S)
+    if n != 1:
+        raise SystemExit("❌ index.html에서 @members 마커를 찾지 못했습니다.")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(new)
+    print(f"✅ index.html MEMBERS {len(data)}인 동기화")
+
+
 def build_sitemap():
     """sitemap.xml — 진입점 페이지만(상세·관리자 제외). canonical과 동일한 www·무확장 URL."""
     urls = [f"{BASE_URL}/"]
@@ -2740,6 +2968,7 @@ def build():
     build_admin_clips()
     build_admin_notices()
     build_admin_members()
+    sync_home_members()
     build_sitemap()
     stub_count = 0
     for g in SITE["groups"]:

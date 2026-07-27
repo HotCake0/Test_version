@@ -8,7 +8,7 @@
     "w-0188b5": {"id":"w-0188b5","type":"image","parentId":"w-0188b4","childrenIds":[],"label":"고래상사 히어로 비주얼","layout":{"height":480}},
     "w-0188b6": {"id":"w-0188b6","type":"column","parentId":"w-0188b4","childrenIds":["w-0188b7","w-0188b8"],"layout":{"gap":8}},
     "w-0188b7": {"id":"w-0188b7","type":"text","parentId":"w-0188b6","childrenIds":[],"label":"고래상사에 오신 것을 환영합니다","size":"xl"},
-    "w-0188b8": {"id":"w-0188b8","type":"text","parentId":"w-0188b6","childrenIds":[],"label":"회사 역할극 버추얼 크루 고래상사의 방송, 클립, 멤버 정보를 한곳에서 확인하세요","size":"md"},
+    "w-0188b8": {"id":"w-0188b8","type":"text","parentId":"w-0188b6","childrenIds":[],"label":"회사 버추얼 크루 고래상사의 방송, 클립, 멤버 정보를 한곳에서 확인하세요","size":"md"},
     "w-0188b9": {"id":"w-0188b9","type":"row","parentId":"w-0188b4","childrenIds":["w-0188ba","w-0188bb"],"layout":{"gap":12}},
     "w-0188ba": {"id":"w-0188ba","type":"button","parentId":"w-0188b9","childrenIds":[],"label":"지금 멀티뷰 시청하기","variant":"primary","action":{"type":"navigate","targetPageNodeId":"n35"}},
     "w-0188bb": {"id":"w-0188bb","type":"button","parentId":"w-0188b9","childrenIds":[],"label":"최신 소식 확인하기","action":{"type":"navigate","targetPageNodeId":"n3"}},

@@ -12,7 +12,7 @@
     "w-018884": {"id":"w-018884","type":"box","parentId":"w-018880","childrenIds":["w-018885"]},
     "w-018885": {"id":"w-018885","type":"column","parentId":"w-018884","childrenIds":["w-018886","w-018887","w-018888"],"layout":{"gap":12}},
     "w-018886": {"id":"w-018886","type":"text","parentId":"w-018885","childrenIds":[],"label":"고래상사에 오신 것을 환영합니다","size":"lg"},
-    "w-018887": {"id":"w-018887","type":"text","parentId":"w-018885","childrenIds":[],"label":"고래상사는 회사 역할극을 기반으로 한 크리에이터 크루입니다. 각자의 직책과 캐릭터로 살아가는 이 세계관 속에서 진짜 같은 가짜 회사 생활을 함께 즐겨보세요."},
+    "w-018887": {"id":"w-018887","type":"text","parentId":"w-018885","childrenIds":[],"label":"고래상사는 회사 콘셉트를 기반으로 한 크리에이터 크루입니다. 각자의 직책과 캐릭터로 살아가는 이 세계관 속에서 진짜 같은 가짜 회사 생활을 함께 즐겨보세요."},
     "w-018888": {"id":"w-018888","type":"row","parentId":"w-018885","childrenIds":["w-018889","w-01888d","w-018891"],"layout":{"gap":16}},
     "w-018889": {"id":"w-018889","type":"box","parentId":"w-018888","childrenIds":["w-01888a","w-01888b","w-01888c"],"attributes":{"outlined":""}},
     "w-01888a": {"id":"w-01888a","type":"text","parentId":"w-018889","childrenIds":[],"label":"크루 미션","size":"md"},

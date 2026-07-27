@@ -43,6 +43,14 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .chip:hover{border-color:var(--brand);color:var(--ink)}
 .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
 .pg-count{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.pg-search{font:inherit;font-size:13px;padding:8px 16px;border-radius:999px;min-height:36px;flex:0 1 240px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
+.pg-search::placeholder{color:var(--ink-2)}
+.pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+.pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.pg-select.on{border-color:var(--brand);color:var(--ink)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -320,7 +328,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       <button class="btn-login" id="loginBtn" type="button">로그인</button>
       <button class="hamb" id="hambBtn" type="button" aria-label="메뉴 열기"
         aria-expanded="false" aria-controls="gnbOverlay"><span></span><span></span><span></span></button>
-    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a class="active" href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li><li><a href="stats.html"><span class="sn">3-2</span>통계 · 전적</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main id="main" class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">ARCHIVE</h1><p class="pg-sub">통합 아카이브</p></header><div class="n-actions img-ani bottom-top" id="aActions"></div><div class="pg-tools img-ani bottom-top"><button class="chip active" data-f="all">전체</button><button class="chip" data-f="크루대전">크루대전</button><button class="chip" data-f="컨텐츠">컨텐츠</button><span class="pg-count" id="aCount"></span></div><div class="agrid img-ani bottom-top" id="aGrid"><div class="skel skel-row" style="height:110px"></div><div class="skel skel-row" style="height:110px"></div><div class="skel skel-row" style="height:110px"></div><div class="skel skel-row" style="height:110px"></div></div><div class="n-modal-bg" id="acModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="acModalTitle">
+    </div></div></header><div class="gnb-overlay" id="gnbOverlay" aria-hidden="true"><nav aria-label="주요 메뉴"><ul class="gnb-menu"><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">01</span>메인 · 소식</button><ul class="gnb-sub"><li><a href="../index.html"><span class="sn">1-1</span>메인 홈</a></li><li><a href="news.html"><span class="sn">1-2</span>최신 소식</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">02</span>크루 · 멤버</button><ul class="gnb-sub"><li><a href="crew.html"><span class="sn">2-1</span>크루 소개</a></li><li><a href="members.html"><span class="sn">2-2</span>멤버 목록</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">03</span>아카이브</button><ul class="gnb-sub"><li><a class="active" href="archive.html"><span class="sn">3-1</span>통합 아카이브</a></li><li><a href="stats.html"><span class="sn">3-2</span>통계 · 전적</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">04</span>클립</button><ul class="gnb-sub"><li><a href="clips.html"><span class="sn">4-1</span>베스트 클립</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">05</span>방송 일정</button><ul class="gnb-sub"><li><a href="schedule.html"><span class="sn">5-1</span>일정 캘린더</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">06</span>멀티뷰</button><ul class="gnb-sub"><li><a href="multiview.html"><span class="sn">6-1</span>멀티뷰 시청</a></li></ul></li><li class="grp"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">07</span>공지</button><ul class="gnb-sub"><li><a href="notices.html"><span class="sn">7-1</span>공지사항</a></li></ul></li><li class="grp admin-only"><button class="grp-t" type="button" aria-expanded="false"><span class="mn">08</span>관리자</button><ul class="gnb-sub"><li><a href="admin.html"><span class="sn">8-1</span>관리자 홈</a></li><li><a href="admin-login.html"><span class="sn">8-2</span>로그인</a></li><li><a href="admin-clips.html"><span class="sn">8-3</span>클립 관리</a></li><li><a href="admin-notices.html"><span class="sn">8-4</span>공지/일정 관리</a></li><li><a href="admin-members.html"><span class="sn">8-5</span>멤버/크루 관리</a></li></ul></li></ul></nav><div class="gnb-btm"><a href="../index.html">메인 홈</a><a href="multiview.html">멀티뷰</a></div></div><main id="main" class="pg-wrap"><header class="pg-head img-ani bottom-top"><span class="pg-eyebrow">콘텐츠 아카이브</span><h1 class="pg-en">ARCHIVE</h1><p class="pg-sub">통합 아카이브</p></header><div class="n-actions img-ani bottom-top" id="aActions"></div><div class="pg-tools img-ani bottom-top"><button class="chip active" data-f="all">전체</button><button class="chip" data-f="크루대전">크루대전</button><button class="chip" data-f="컨텐츠">컨텐츠</button><span class="pg-count" id="aCount"></span></div><div class="pg-tools img-ani bottom-top"><input type="search" id="aQ" class="pg-search" placeholder="기록 검색" aria-label="기록 검색 (제목·상대 크루·게임·참여 멤버)" autocomplete="off"><select id="aMem" class="pg-select" aria-label="참여 멤버"><option value="">참여 멤버 전체</option></select><select id="aGame" class="pg-select" aria-label="게임"><option value="">게임 전체</option></select><select id="aWin" class="pg-select" aria-label="결과"><option value="">결과 전체</option><option value="win">우승</option><option value="other">우승 외</option></select><button type="button" class="chip" id="aReset" hidden>필터 초기화</button></div><div class="agrid img-ani bottom-top" id="aGrid"><div class="skel skel-row" style="height:110px"></div><div class="skel skel-row" style="height:110px"></div><div class="skel skel-row" style="height:110px"></div><div class="skel skel-row" style="height:110px"></div></div><div class="n-modal-bg" id="acModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="acModalTitle">
   <div class="n-modal">
     <button class="n-modal-close" id="acModalClose" type="button" aria-label="닫기">×</button>
     <h2 id="acModalTitle">기록 추가</h2>
@@ -354,7 +362,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       <a class="btn sm ghost" href="../index.html">메인으로</a>
     </div>
   </div>
-  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 역할극 버추얼 크루 · 16인.</div>
+  <div class="footer-copy">© <span id="footerYear"></span> 고래상사 (Whale-Corp). 회사 버추얼 크루 · 16인.</div>
 </footer>
 <div class="scroll-topwrp" id="scrollTopWrp">
   <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="맨 위로 이동">
@@ -377,6 +385,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     </details>
   </div>
 </div>
+<script src="../assets/embed.js"></script>
 <script src="../assets/site.js"></script>
 <script>(function(){
   var U=window.WhaleUI, D=window.WhaleData;
@@ -486,8 +495,92 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   });
 
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
-  var qsF=new URLSearchParams(location.search).get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
+  var qs=new URLSearchParams(location.search), qsF=qs.get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
   var all=[], filt=(qsF==='크루대전'||qsF==='컨텐츠')?qsF:'all';
+  var qEl=document.getElementById('aQ'), memEl=document.getElementById('aMem'),
+      gameEl=document.getElementById('aGame'), winEl=document.getElementById('aWin'),
+      resetEl=document.getElementById('aReset');
+  var query=(qs.get('q')||'').trim(), fMem=qs.get('m')||'', fGame=qs.get('g')||'';
+  var fWin=(qs.get('w')==='win'||qs.get('w')==='other')?qs.get('w'):'';
+  qEl.value=query; winEl.value=fWin;
+
+  function syncUrl(){
+    if(!history.replaceState)return;
+    var p=new URLSearchParams();
+    if(filt!=='all')p.set('f',filt);
+    if(query)p.set('q',query);
+    if(fMem)p.set('m',fMem);
+    if(fGame)p.set('g',fGame);
+    if(fWin)p.set('w',fWin);
+    var s=p.toString();
+    history.replaceState(null,'',s?'?'+s:location.pathname);
+  }
+  function gameNames(c){
+    var g=c.games||{};
+    return Object.keys(g).map(function(k){return (g[k]||{}).name||'';}).filter(Boolean);
+  }
+  /* 직접입력 검색 대상 — 제목·날짜·참여 멤버·게임·상대 크루. 공백 구분 = AND */
+  function hay(c){
+    return [c.title,c.date,c.category,(c.members||[]).join(' '),gameNames(c).join(' '),
+            (c.opponents||[]).map(function(o){return (o&&o.name)||'';}).join(' ')]
+      .join(' ').toLowerCase();
+  }
+  function matches(c){
+    if(filt!=='all'&&(c.category||'크루대전')!==filt)return false;
+    if(fMem&&(c.members||[]).indexOf(fMem)<0)return false;
+    if(fGame&&gameNames(c).indexOf(fGame)<0)return false;
+    if(fWin==='win'&&c.rank!==1)return false;
+    if(fWin==='other'&&c.rank===1)return false;
+    if(query){
+      var h=hay(c);
+      if(!query.toLowerCase().split(/\s+/).every(function(t){return h.indexOf(t)>=0;}))return false;
+    }
+    return true;
+  }
+  function anyFilter(){return !!(query||fMem||fGame||fWin||filt!=='all');}
+  /* 선택지는 기록에 실제로 등장한 값만 — 없는 게임·멤버를 고르는 막다른 길을 만들지 않는다 */
+  function fillSelect(sel,list,cur){
+    var head=sel.options[0];
+    sel.textContent='';sel.appendChild(head);
+    list.forEach(function(v){
+      var o=document.createElement('option');o.value=v;o.textContent=v;
+      if(v===cur)o.selected=true;
+      sel.appendChild(o);
+    });
+    if(cur&&list.indexOf(cur)<0)sel.value='';  // URL에 없는 값이 와도 조용히 무시
+  }
+  function fillOptions(){
+    var mem={},gm={};
+    all.forEach(function(c){
+      (c.members||[]).forEach(function(m){if(m)mem[m]=1;});
+      gameNames(c).forEach(function(n){gm[n]=1;});
+    });
+    var ms=Object.keys(mem).sort(),gs=Object.keys(gm).sort();
+    fillSelect(memEl,ms,fMem);fillSelect(gameEl,gs,fGame);
+    if(ms.indexOf(fMem)<0)fMem='';
+    if(gs.indexOf(fGame)<0)fGame='';
+  }
+  function markActive(){
+    memEl.classList.toggle('on',!!fMem);
+    gameEl.classList.toggle('on',!!fGame);
+    winEl.classList.toggle('on',!!fWin);
+    resetEl.hidden=!anyFilter();
+  }
+  var qT;
+  qEl.addEventListener('input',function(){
+    clearTimeout(qT);
+    qT=setTimeout(function(){query=qEl.value.trim();syncUrl();render();},250);
+  });
+  memEl.addEventListener('change',function(){fMem=memEl.value;syncUrl();render();});
+  gameEl.addEventListener('change',function(){fGame=gameEl.value;syncUrl();render();});
+  winEl.addEventListener('change',function(){fWin=winEl.value;syncUrl();render();});
+  resetEl.addEventListener('click',function(){
+    query='';fMem='';fGame='';fWin='';filt='all';
+    qEl.value='';memEl.value='';gameEl.value='';winEl.value='';
+    [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(x){
+      x.classList.toggle('active',x.getAttribute('data-f')==='all');});
+    syncUrl();render();
+  });
   function renderActions(){
     var html='';
     if(U.isAdmin())html+='<button type="button" class="btn sm primary" id="acWriteBtn">+ 기록 추가</button>';
@@ -522,16 +615,15 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
       +rowActionsHtml(c)+'</div>';
   }
   function render(){
-    var arr=all.filter(function(c){
-      if(filt==='all')return true;
-      return (c.category||'크루대전')===filt;});
+    var arr=all.filter(matches);
+    markActive();
     count.textContent=arr.length+'건';
-    grid.innerHTML=arr.length?arr.map(card).join(''):(all.length?'<div class="stub" style="grid-column:1/-1"><p>해당 분류의 기록이 없습니다.</p></div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><b>아직 기록이 없습니다</b><span>크루대전·컨텐츠 기록이 등록되면 여기에 표시됩니다.</span></div>');
+    grid.innerHTML=arr.length?arr.map(card).join(''):(all.length?'<div class="stub" style="grid-column:1/-1"><p>'+(anyFilter()?'조건에 맞는 기록이 없습니다.':'해당 분류의 기록이 없습니다.')+'</p></div>':'<div class="n-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><b>아직 기록이 없습니다</b><span>크루대전·컨텐츠 기록이 등록되면 여기에 표시됩니다.</span></div>');
   }
   function reload(){
     return D.list('contests').then(function(items){
       all=items.slice().sort(function(a,b){return ((a.date||'')<(b.date||'')?1:(a.date||'')>(b.date||'')?-1:0);});
-      renderActions();render();
+      renderActions();fillOptions();render();
     }).catch(function(err){
       grid.innerHTML='<div class="stub" style="grid-column:1/-1"><p>불러오기 실패: '+esc(err&&err.message||err)+'</p></div>';
     });
@@ -539,8 +631,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   [].forEach.call(document.querySelectorAll('.chip[data-f]'),function(c){c.addEventListener('click',function(){
     document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.remove('active')});
     c.classList.add('active');filt=c.getAttribute('data-f');
-    if(history.replaceState)history.replaceState(null,'',filt==='all'?location.pathname:'?f='+encodeURIComponent(filt));
-    render();});});
+    syncUrl();render();});});
   if(filt!=='all')document.querySelectorAll('.chip[data-f]').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-f')===filt);});  // §2.6-3: 진입 시 칩 동기화
   function removeRecord(item){
     if(!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;

@@ -410,36 +410,32 @@
   window.WhaleUI = { openMember: openMember, closeMember: closeMember, applyRole: applyRole,
                      getUser: currentUser, isAdmin: isAdmin, isLoggedIn: isLoggedIn, canEdit: canEdit };
   window.WhaleData = WhaleData;
-})();
 
-/* ── 공유 임베드 헬퍼 (§2.6-2, 아카이브 상세 인라인에서 승격) ──────────────
-   YouTube/SOOP VOD url → 임베드 플레이어 url, 그 외/검증 실패 → null.
-   ⚠️보안: 부분일치(indexOf)는 evil.com/sooplive.com 류 우회가 되므로 new URL로
-   호스트를 엄격 검증(정확일치 또는 .접미사)하고, 원본을 그대로 넘기지 않고
-   검증된 조각으로만 재조립한다. C-2 임베드 보안 매트릭스의 검증 대상. */
-window.WhaleEmbed = (function () {
-  function hostMatch(h, d) { return h === d || h.slice(-(d.length + 1)) === '.' + d; }
-  return function (u) {
-    var pu;
-    try { pu = new URL((u == null ? '' : String(u)).trim()); } catch (e) { return null; }
-    if (pu.protocol !== 'https:' && pu.protocol !== 'http:') return null;
-    var host = pu.hostname.toLowerCase();
-    // YouTube — 검증된 videoId(문자/숫자/-/_)로만 재조립
-    if (hostMatch(host, 'youtu.be')) {
-      var sid = pu.pathname.replace(/^\/+/, '').split('/')[0];
-      return /^[\w-]{6,}$/.test(sid) ? 'https://www.youtube.com/embed/' + sid : null;
+  /* 사이트 자체 조회수 — /rework/clipviews/{clipId} = 숫자 하나.
+     로그인 없이 쓰지만 규칙이 '1씩 증가'만 허용한다(임의값·감소·삭제 거부).
+     경합이 나면 서버가 그 쓰기를 거부할 뿐 덮어쓰기 유실은 없다 → 조용히 무시. */
+  window.WhaleViews = {
+    // 전체 카운터를 한 번에 읽어 목록에 합류. 실패해도 화면은 그대로(0으로 표시).
+    load: function (items) {
+      return jfetch(REWORK_BASE + '/clipviews.json?v=' + Date.now())
+        .then(function (v) { return v || {}; })
+        .catch(function () { return {}; })
+        .then(function (v) {
+          (items || []).forEach(function (c) { c.views = v[c.id] || 0; });
+          return items;
+        });
+    },
+    // 상세 진입 시 1회. 같은 세션의 새로고침은 sessionStorage로 막는다.
+    bump: function (id) {
+      if (!id) return;
+      var k = 'cv:' + id;
+      try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) {}
+      var u = REWORK_BASE + '/clipviews/' + encodeURIComponent(id) + '.json';
+      fetch(u).then(function (r) { return r.json(); }).then(function (n) {
+        return fetch(u, { method: 'PUT', body: String((Number(n) || 0) + 1) });
+      }).catch(function () {});
     }
-    if (hostMatch(host, 'youtube.com') || hostMatch(host, 'youtube-nocookie.com')) {
-      var vid = pu.searchParams.get('v');
-      if (!vid) { var me = pu.pathname.match(/^\/embed\/([\w-]{6,})/); if (me) vid = me[1]; }
-      return (vid && /^[\w-]{6,}$/.test(vid)) ? 'https://www.youtube.com/embed/' + vid : null;
-    }
-    // SOOP VOD — 숫자 player id로만 재조립(원본 패스스루 금지)
-    if (hostMatch(host, 'sooplive.com') || hostMatch(host, 'sooplive.co.kr')) {
-      var pm = pu.pathname.match(/\/player\/(\d+)/);
-      if (pm) return 'https://' + host + '/player/' + pm[1] + '/embed';
-      if (/\/embed(\/|$)/.test(pu.pathname)) return 'https://' + host + pu.pathname;
-    }
-    return null;
   };
 })();
+
+/* 공유 임베드 헬퍼(window.WhaleEmbed)는 assets/embed.js로 분리 — 홈(index.html)도 같은 한 벌을 쓴다. */
