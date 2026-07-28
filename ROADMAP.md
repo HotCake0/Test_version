@@ -823,7 +823,10 @@ RTDB 컬렉션 실측(2026-07-18 curl):
 | `/schedules`(운영, 이관취소로 미사용 예정) | 7.8KB | 73 | ~107B |
 | `/crews` | 1.3KB | — | — |
 | `/rework/notices` | 0.2KB | 1(테스트) | ~221B |
-| `/rework/clips`·`/rework/schedules` | 0 | 0 | 추정 클립 ~350B·일정 ~250B |
+| ~~`/rework/clips`·`/rework/schedules` 0건~~ → **v4.4 재실측(07-28)**: | | | |
+| `/rework/clips` | **4.2KB** | 13 | **~333B** (추정 350B와 거의 일치) |
+| `/rework/schedules` | 0.3KB | 1(테스트) | ~265B |
+| **`/rework/clipviews`** (v4.2 신설) | **0.1KB** | 5 | ~25B (`{키:정수}` 하나뿐) |
 
 페이지별 런타임 fetch(전수 grep — `D.list`는 **컬렉션 전량** 다운로드, `?v=Date.now()` 캐시버스터로 캐시 무효):
 
@@ -831,13 +834,19 @@ RTDB 컬렉션 실측(2026-07-18 curl):
 |---|---|---|---|
 | index·members·member | `/status` ×1 | 3.9KB | 3.9KB (고정) |
 | multiview·members | `/status` + **5분 폴링**(setInterval 300s) | 3.9KB/5분 | 동일 |
-| clips | clips ×1 | ~0 | ~80KB |
-| news | notices+clips+schedules ×3 | ~0 | **~210KB (최대 페이지)** |
-| schedule(-detail) | schedules ×1 | ~0 | ~100KB |
+| clips | clips + **clipviews** ×2 (+태그 입력 **포커스 시에만** contests — 관리자 한정) | 4.4KB | ~80KB (clipviews는 건당 ~25B라 무시 가능) |
+| clip(상세) | clips + **contests**(관련 기록, v4.3) + clipviews ×3 | 17.7KB | ~120KB |
+| news | notices+clips+schedules ×3 | 4.7KB | **~210KB (최대 페이지)** |
+| schedule(-detail) | schedules ×1 | 0.3KB | ~100KB |
+| **index(홈)** (v4.4 추가 — 홈도 런타임 fetch를 한다) | clips + clipviews + schedules ×3 | 4.7KB | ~185KB |
 | archive | contests ×1 | 13KB | ~35KB |
 | archive-detail | contests+clips ×2 | 13KB | ~115KB |
 | stats | contests+crews | 15KB | ~36KB |
 | notices/notice | notices ×1 | 0.2KB | ~25KB |
+
+⚠️**v4.4 재실측 요약**: 07-18 표는 clips/schedules가 비어 있던 시점이라 **홈·클립 경로가 통째로 빠져 있었다**.
+현재 최대 페이지는 news(4.7KB)·clip 상세(17.7KB)이며 **어느 축도 §8-2 결론(여유 20배+)을 바꾸지 않는다** — 판정 무변경.
+`clipviews`는 건당 ~25B라 성장해도 무시 가능(1,000클립이어도 ~25KB).
 
 \* 1년 성장 가정(활발 운영 시나리오): 클립 주5건=연260건(80KB) · 일정 주10건=연520건(104KB) · 공지 월4건(25KB) · 아카이브 월2건(+21KB).
 **연간 텍스트 총증가 ≈ 250KB** — RTDB 저장 1GB의 0.025%/년. 저장은 영원히 문제 아님(스팸 제외, §8-4).
