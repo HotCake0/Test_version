@@ -565,7 +565,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     }).join('');
     var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // §2.6-2: 인라인 재생(검증 통과 시)
     detail.innerHTML=
-      (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
+      (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
           :'<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>')
       +'<div class="cm-cat">'+esc(c.category||'')+'</div>'
       +'<h2 class="cdetail-title">'+esc(c.title)+'</h2>'

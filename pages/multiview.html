@@ -414,7 +414,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
         var w=document.createElement('div');w.className='video-wrapper';w.setAttribute('data-id',id);
         w.innerHTML='<button class="close-btn" aria-label="닫기">×</button>'
           +'<iframe src="https://play.sooplive.com/'+encodeURIComponent(id)+'/embed" '
-          +'allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen scrolling="no"></iframe>';
+          +'allow="autoplay; fullscreen; encrypted-media; picture-in-picture" scrolling="no"></iframe>';
         w.querySelector('.close-btn').addEventListener('click',function(){toggle(id);});
         stage.appendChild(w);
       });

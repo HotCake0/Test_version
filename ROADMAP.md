@@ -231,6 +231,20 @@
 
 **신규 백로그**: E-13(CSP 헤더 부재 — 보안헤더 4종에 없음) · 미문서화 자산 4건은 부록 E-1에 등재.
 
+### 0-11. 2026-07-29 D-5 헤드리스 런타임 재검증 (v4.4 후속)
+
+07-28에 코드 106줄을 삭제했으므로 **정적 검사만으로는 부족**하다고 보고 실제 브라우저로 전 페이지를 돌렸다.
+- **21페이지(홈+404+pages 19) 헤드리스 순회 → 우리 오리진발 콘솔 메시지 0**, HTTP **21/21 200**.
+  → 07-28 삭제분(멤버 모달 구동부·build.py 3건)이 런타임에 아무 것도 깨뜨리지 않았음을 실증. `pages/` diff 0 증거와 이중 확인.
+- 순회에서 잡힌 유일한 자체 메시지 = `clip.html`의 **"Allow attribute will take precedence over 'allowfullscreen'"**(에러 아닌 안내).
+  iframe에 `allow="…fullscreen…"`와 레거시 `allowfullscreen`이 중복이었음 → **4곳 전부 `allow` 한 벌로 일원화**(레거시 속성 제거).
+  ⚠️그중 `build_archive_detail`의 관련 클립 iframe은 `allow`에 fullscreen이 **빠진 채 레거시 속성에만 의존**하고 있어 함께 교정.
+  - **고친 이유**: 런북 §4-4 합격 기준이 "콘솔 에러 0"이라, 상시 뜨는 메시지가 있으면 D-Day에 진짜 문제와 구분하는 데 시간을 쓴다.
+    **이제 기준선이 진짜 0** → 8/3에 메시지가 하나라도 보이면 그건 실제 문제다.
+- 제3자(SOOP/YouTube) 임베드발 메시지는 필터 대상(`source: https://…`): `target-densitydpi` 미지원 안내 등 — 우리 코드와 무관.
+- 재현: 로컬 `python3 -m http.server` + Playwright Chromium `--headless=new --enable-logging=stderr --virtual-time-budget=5000 --dump-dom`,
+  stderr에서 `INFO:CONSOLE`을 긁어 `source: https://` 없는 것만 집계(부록 E-3 헤드리스 절차의 경량판 — playwright npm 불필요).
+
 ---
 
 ## 1. 즉시 뒷정리 — 보안 (cutover 무관, 지금 바로)

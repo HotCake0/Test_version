@@ -641,7 +641,7 @@ def build_member():
     var media = live
       ? '<div class="media-live"><div class="embed">'+
           '<span class="live-tag"><span class="d"></span>LIVE '+esc((st.viewers||0).toLocaleString())+'명</span>'+
-          '<iframe src="https://play.sooplive.com/'+sid+'/embed" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen scrolling="no" title="'+esc(m.name)+' 방송"></iframe>'+
+          '<iframe src="https://play.sooplive.com/'+sid+'/embed" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" scrolling="no" title="'+esc(m.name)+' 방송"></iframe>'+
         '</div>'+(st.title?'<div class="live-title">'+esc(st.title)+'</div>':'')+'</div>'
       : '<div class="portrait" style="background:'+esc(m.color)+'">'+img+'<div class="ava-ph">'+esc(m.initials)+'</div></div>';
     // SOOP 버튼: 방송중=방송으로 / 아니면=방송국으로
@@ -1210,7 +1210,7 @@ def build_clip():
     }).join('');
     var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // §2.6-2: 인라인 재생(검증 통과 시)
     detail.innerHTML=
-      (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
+      (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
           :'<div class="cdetail-player">'+bgOf(c)+'<div class="orig-play" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div></div>')
       +'<div class="cm-cat">'+esc(c.category||'')+'</div>'
       +'<h2 class="cdetail-title">'+esc(c.title)+'</h2>'
@@ -1763,7 +1763,7 @@ def build_archive_detail():
     var cards=rel.map(function(cl){
       var emb=embedUrlOf(cl.url);
       var media = emb
-        ? '<div class="rc-media"><iframe src="'+esc(emb)+'" loading="lazy" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" title="'+esc(cl.title||'클립')+'"></iframe></div>'
+        ? '<div class="rc-media"><iframe src="'+esc(emb)+'" loading="lazy" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" title="'+esc(cl.title||'클립')+'"></iframe></div>'
         : '<a class="rc-media rc-static" href="clip.html?id='+encodeURIComponent(cl.id)+'">'
             +(cl.img?'<img src="'+esc(safeUrl(cl.img))+'" alt="'+esc(cl.title||'')+'" loading="lazy" onerror="this.style.display=\'none\'">':'<span class="rc-play"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>')
           +'</a>';
@@ -2554,7 +2554,7 @@ def build_multiview():
         var w=document.createElement('div');w.className='video-wrapper';w.setAttribute('data-id',id);
         w.innerHTML='<button class="close-btn" aria-label="닫기">×</button>'
           +'<iframe src="https://play.sooplive.com/'+encodeURIComponent(id)+'/embed" '
-          +'allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen scrolling="no"></iframe>';
+          +'allow="autoplay; fullscreen; encrypted-media; picture-in-picture" scrolling="no"></iframe>';
         w.querySelector('.close-btn').addEventListener('click',function(){toggle(id);});
         stage.appendChild(w);
       });

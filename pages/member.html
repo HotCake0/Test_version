@@ -339,7 +339,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
     var media = live
       ? '<div class="media-live"><div class="embed">'+
           '<span class="live-tag"><span class="d"></span>LIVE '+esc((st.viewers||0).toLocaleString())+'명</span>'+
-          '<iframe src="https://play.sooplive.com/'+sid+'/embed" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen scrolling="no" title="'+esc(m.name)+' 방송"></iframe>'+
+          '<iframe src="https://play.sooplive.com/'+sid+'/embed" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" scrolling="no" title="'+esc(m.name)+' 방송"></iframe>'+
         '</div>'+(st.title?'<div class="live-title">'+esc(st.title)+'</div>':'')+'</div>'
       : '<div class="portrait" style="background:'+esc(m.color)+'">'+img+'<div class="ava-ph">'+esc(m.initials)+'</div></div>';
     // SOOP 버튼: 방송중=방송으로 / 아니면=방송국으로
