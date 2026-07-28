@@ -185,35 +185,6 @@ def login_modal():
 </div>"""
 
 
-def member_modal():
-    return """<div class="member-modal-bg" id="memberModalBg" hidden role="dialog" aria-modal="true" aria-labelledby="memberModalName">
-  <div class="member-modal">
-    <button class="modal-close" id="memberModalClose" type="button" aria-label="닫기">×</button>
-    <div class="modal-ava" id="memberModalAva"></div>
-    <div class="modal-body">
-      <div class="modal-dept" id="memberModalDept"></div>
-      <div class="modal-name" id="memberModalName"></div>
-      <div class="modal-role" id="memberModalRole"></div>
-      <div class="modal-bio"  id="memberModalBio"></div>
-      <div class="mstats-head"><span class="mstats-title">인사기록카드</span><span class="mstats-stamp">대외비</span></div>
-      <div class="modal-stats">
-        <div class="stat" data-k="birth"><div class="stat-u">생일</div>
-          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
-        <div class="stat" data-k="debut"><div class="stat-u">데뷔일</div>
-          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
-        <div class="stat" data-k="joined"><div class="stat-u">입사일</div>
-          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
-      </div>
-      <p class="mstats-note">* 출처: 인사부 문서고 — 열람 시 비밀 유지 서약이 적용됩니다.</p>
-      <div class="modal-nav-row">
-        <button class="btn sm" id="memberModalPrev" type="button">← 이전</button>
-        <button class="btn sm" id="memberModalNext" type="button">다음 →</button>
-      </div>
-    </div>
-  </div>
-</div>"""
-
-
 def page_head_block(en, eyebrow, sub):
     """그룹 EN 윤곽선 헤더 (디자인 시스템 섹션 헤더 패턴)."""
     return ('<header class="pg-head img-ani bottom-top">'
@@ -230,12 +201,11 @@ def tail(scripts=""):
 </body></html>"""
 
 
-def write(slug, title, body, page_css="", scripts="", need_member_modal=False):
-    mm = member_modal() if need_member_modal else ""
+def write(slug, title, body, page_css="", scripts=""):
     doc = (head(title, page_css, slug)
            + header_and_drawer(slug)
            + '<main id="main" class="pg-wrap">' + body + '</main>'
-           + footer() + mm + tail(scripts))
+           + footer() + tail(scripts))
     with open(os.path.join(OUT, f"{slug}.html"), "w", encoding="utf-8") as f:
         f.write(doc)
 
@@ -1375,20 +1345,6 @@ ARCHIVE_CSS = PAGE_CSS + """
 .rc-t:hover{color:var(--brand)}
 .rc-by{font-size:11.5px;color:var(--ink-2);padding:0 12px 12px}
 """
-
-
-# ---------- 아카이브 데이터 JSON 주입 ----------
-
-def archive_json_script():
-    """pages/ 기준 WHALE_ARCHIVE 주입 (아카이브 상세 페이지용)."""
-    data = []
-    for a in ARCHIVE:
-        d = dict(a)
-        if d.get("img"):
-            d["img"] = "../" + d["img"]
-        data.append(d)
-    return ('<script>window.WHALE_ARCHIVE=' +
-            json.dumps(data, ensure_ascii=False) + ';</script>')
 
 
 # ---------- 아카이브: 통합 목록 + 상세 (Firebase 실시간 CRUD, 클립/일정과 동일 패턴 + isAdmin 게이팅) ----------
@@ -3138,14 +3094,9 @@ def build():
     build_admin_members()
     sync_home_members()
     build_sitemap()
-    stub_count = 0
-    for g in SITE["groups"]:
-        for p in g["pages"]:
-            if p["slug"] in done or p.get("home"):
-                continue
-            build_stub(p["slug"], g)
-            stub_count += 1
-    print(f"✅ 실구현 {len(done)}페이지 + 스텁 {stub_count}페이지 → {OUT}")
+    # 미구현 페이지 스텁 생성 루프는 삭제(2026-07-28, E-6b): build_stub 함수가 정의된 적 없어
+    # SITE groups에 새 slug를 추가하는 순간 NameError로 터지는 휴면 지뢰였다. 전 페이지 실구현 상태.
+    print(f"✅ 실구현 {len(done)}페이지 → {OUT}")
 
 
 if __name__ == "__main__":

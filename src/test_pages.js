@@ -254,8 +254,9 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.error('  ✗ ' + msg); 
   const cut = s => grab(s, /  var DAY = 86400000;[\s\S]*?\n  function setStat\(/, '날짜 헬퍼')[0];
   ok(cut(read('index.html')) === cut(src), '홈 인라인 사본과 site.js 사본이 동일');
   // JS가 부르는 칸 이름과 마크업의 data-k가 어긋나면 카드가 조용히 빈칸이 된다
-  const keys = [...src.matchAll(/setStat\('(\w+)'/g)].map(m => m[1]);
-  ok(keys.join() === 'birth,debut,joined', 'site.js가 채우는 칸 3개');
+  // 모달을 실제로 그리는 건 홈 인라인 사본이다(site.js 구동부는 2026-07-28 사문으로 삭제)
+  const keys = [...read('index.html').matchAll(/setStat\('(\w+)'/g)].map(m => m[1]);
+  ok(keys.join() === 'birth,debut,joined', '홈 모달이 채우는 칸 3개');
   // 인사기록카드 모달은 홈에만 있다(하위 페이지는 member.html 상세로 이동)
   const home = read('index.html');
   ok(keys.every(k => home.includes(`data-k="${k}"`)), '홈 인사기록카드 칸 3개가 마크업에 존재');

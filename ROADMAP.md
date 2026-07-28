@@ -692,7 +692,19 @@
   - [P3] pages CRUD 목록 `불러오기 실패: err.message` 노출 → stats처럼 고정 안내문 순화(§2.6-4 잔여).
   - [P3] 빈 상태 카피 통일("아직 등록된"/"등록된") / stats 승패 팔레트 정합화 검토(dataviz 상태색 규칙과 상충 주의).
   - (기존 §5-3 중복 지적 재확인) 헬프/온보딩 H10=1점·aria-live·검색/정렬.
-- **E-6b. 죽은 코드 정리(07-19 ponytail-audit, 전부 런타임 영향 0 — 프리즈라 cutover 후 F-5로 이월)** — grep 검증 완료:
+- ~~**E-6b. 죽은 코드 정리**~~ ✅**2026-07-28 완료(v4.4, 사용자 지시로 앞당김)** — 순삭 **-106줄/+17줄**.
+  - ⚠️**감사 기록대로 지웠으면 사고였다**: 07-19 감사는 "site.js 멤버 모달 블록 ~60줄"이라 했지만, v4.3에서 그 블록
+    **한가운데에 `window.WhaleDate`(= `pages/member.html`이 실제로 쓰는 날짜 계산)가 들어와 있었다.**
+    → 소비처 grep 후 **구동부만**(fillModal/openMember/closeMember/escH/data-idx 배선/ESC 분기/WhaleUI 노출 2개) 제거하고
+    날짜 계산 + `setStat`은 존치(홈 인라인 사본과 한 벌). **교훈: 죽은 코드 목록도 코드보다 먼저 늙는다 — 지우기 직전 재-grep 필수.**
+  - ⚠️**테스트가 죽은 코드에 의존하고 있었다**: `test_pages.js`의 "칸 3개" 검사가 `fillModal` 안의 `setStat('birth'…)`를
+    세고 있었음 → 실제로 렌더하는 **홈 인라인 사본**으로 재조준.
+  - ⚠️**`var DAY …` ~ `function setStat(` 구간은 홈 사본과 문자 단위 대조 대상** — 이 구간에 설명 주석을 한쪽에만 넣었다가
+    자체검사가 즉시 실패했다(테스트가 제 역할을 한 실사례). 주석은 구간 밖에 둘 것.
+  - `build.py`: `member_modal()`+`write(need_member_modal=)`·`archive_json_script()`+`WHALE_ARCHIVE`·`build_stub` 휴면 루프 제거.
+    **삭제 후 `pages/` 산출물 diff가 0** = 이 코드들이 실제로 죽어 있었다는 증거.
+  - (이하 원 감사 기록 — 이력 보존)
+- **E-6b(원문). 죽은 코드 정리(07-19 ponytail-audit, 전부 런타임 영향 0 — 프리즈라 cutover 후 F-5로 이월)** — grep 검증 완료:
   - `assets/site.js:284~343` 멤버 프로필 모달(`fillModal/openMember/closeMember/countUp/escH` ~60줄) — site.js 로드 페이지 중 `#memberModalBg` 마크업 가진 곳 0, index.html은 site.js 미로드(인라인 재구현)라 완전 사문. `if(memberModalBg&&MEMBERS.length)` 가드라 제거해도 무동작 변화.
   - `src/build.py:188 member_modal()` + `write()`의 `need_member_modal` 파라미터 — 항상 False, True 호출 0(멤버카드 클릭이 `member.html?i=idx` 이동으로 바뀐 뒤 남은 잔재). 위 모달과 세트로 제거.
   - `src/build.py:1382`(v4.4 재측정, 종전 1115) `archive_json_script()` + `WHALE_ARCHIVE` — 호출자 0(아카이브는 `WhaleData.list('contests')` 런타임 렌더). 사문.

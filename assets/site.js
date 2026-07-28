@@ -303,14 +303,14 @@
     window.scrollTo({ top: 0, behavior: PRM ? 'auto' : 'smooth' });
   });
 
-  /* ---- 멤버 프로필 모달 (재사용) ----
-     페이지가 window.WHALE_MEMBERS 배열을 정의하고, 카드에 data-idx를 붙이면
-     자동으로 클릭/Enter 시 모달이 열린다. 스탯 카운트업 + 이전/다음 순환. */
-  var memberModalBg    = document.getElementById('memberModalBg');
-  var memberModalClose = document.getElementById('memberModalClose');
-  var memberModalAva   = document.getElementById('memberModalAva');
-  var MEMBERS = window.WHALE_MEMBERS || [];
-  var curIdx = 0;
+  /* ---- 인사기록카드 날짜 계산 (공유) ----
+     모달 자체는 홈(index.html)에만 있고 홈은 site.js를 로드하지 않으므로 여기엔 계산만 둔다.
+     쓰는 곳: pages/member.html(window.WhaleDate) + 홈의 인라인 사본(아래 setStat까지 한 벌로 동일).
+     ⚠️2026-07-28 정리: 여기 있던 모달 구동부(fillModal/openMember/closeMember/escH + data-idx 배선)는
+        site.js 로드 페이지 중 #memberModalBg 마크업을 가진 곳이 0이라 사문이었음 → 삭제(E-6b).
+        아래 setStat은 여기선 호출자가 없지만 홈 사본과 한 벌이라 남긴다.
+     ⚠️`var DAY …` ~ `function setStat(` 구간은 test_pages.js가 홈 사본과 **문자 단위로 대조**한다 —
+        이 구간 안에는 주석 한 줄도 한쪽에만 넣지 말 것(실제로 이 정리 중에 그렇게 깨뜨렸다). */
 
   /* 인사기록카드 날짜 — 생일은 다음 생일까지 D-, 데뷔·입사는 지난 날수 D+ 와 연·월·일 경과.
      날짜만 다루므로 UTC 자정 기준으로 뺀다(로컬 시각·서머타임 때문에 하루 밀리는 것 방지).
@@ -344,46 +344,6 @@
   }
   /* 멤버 상세(member.html)도 같은 계산을 쓴다 — 홈 모달과 상세가 서로 다른 날짜를 말하면 안 된다 */
   window.WhaleDate = { birth: birthInfo, past: pastInfo };
-  function escH(x) {
-    var d = document.createElement('div');
-    d.textContent = x == null ? '' : x;
-    return d.innerHTML.replace(/"/g, '&quot;');
-  }
-  function fillModal(idx) {
-    var m = MEMBERS[idx]; if (!m) return;
-    memberModalAva.style.background = m.color || '';
-    memberModalAva.innerHTML = (m.img ? '<img src="' + escH(m.img) + '" alt="' + escH(m.name) + '" onerror="this.style.display=\'none\'">' : '') + escH(m.initials || '');
-    var set = function (id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
-    set('memberModalDept', m.dept || '');
-    var deptEl = document.getElementById('memberModalDept');
-    /* 부서 그라데이션 위 어두운 스크림 — 밝은 색 끝단에서도 흰 글자 대비 확보 */
-    if (deptEl) deptEl.style.background = m.color
-      ? 'linear-gradient(rgba(5,7,18,.38),rgba(5,7,18,.38)),' + m.color : '';
-    set('memberModalName', m.name || '');
-    set('memberModalRole', m.role || '');
-    set('memberModalBio',  m.bio || '');
-    setStat('birth',  birthInfo(m.birth));
-    setStat('debut',  pastInfo(m.debut));
-    setStat('joined', pastInfo(m.joined));
-  }
-  function openMember(idx) { if (!memberModalBg) return; curIdx = idx; fillModal(idx); memberModalBg.hidden = false; }
-  function closeMember()   { if (memberModalBg) memberModalBg.hidden = true; }
-
-  if (memberModalBg && MEMBERS.length) {
-    $$('[data-idx]').forEach(function (card) {
-      var idx = parseInt(card.getAttribute('data-idx'), 10);
-      if (isNaN(idx)) return;
-      card.addEventListener('click', function () { openMember(idx); });
-      card.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMember(idx); }
-      });
-    });
-    if (memberModalClose) memberModalClose.addEventListener('click', closeMember);
-    memberModalBg.addEventListener('click', function (e) { if (e.target === memberModalBg) closeMember(); });
-    var mp = document.getElementById('memberModalPrev'), mn = document.getElementById('memberModalNext');
-    if (mp) mp.addEventListener('click', function () { curIdx = (curIdx - 1 + MEMBERS.length) % MEMBERS.length; fillModal(curIdx); });
-    if (mn) mn.addEventListener('click', function () { curIdx = (curIdx + 1) % MEMBERS.length; fillModal(curIdx); });
-  }
 
   /* ---- 이미지 저장 방지 (운영본 image-protect.js 이식) ----
      우클릭 저장·드래그 저장만 차단 — 완전 차단은 불가(개발자도구로 우회 가능) */
@@ -428,11 +388,10 @@
     if (e.key !== 'Escape') return;
     if (menuOpen) closeGnb();
     if (loginModalBg && !loginModalBg.hidden) closeLogin();
-    if (memberModalBg && !memberModalBg.hidden) closeMember();
   });
 
   /* 외부에서 쓸 수 있게 노출 */
-  window.WhaleUI = { openMember: openMember, closeMember: closeMember, applyRole: applyRole,
+  window.WhaleUI = { applyRole: applyRole,
                      getUser: currentUser, isAdmin: isAdmin, isLoggedIn: isLoggedIn, canEdit: canEdit };
   window.WhaleData = WhaleData;
 
