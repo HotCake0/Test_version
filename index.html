@@ -335,9 +335,12 @@
       <div class="modal-bio"  id="memberModalBio"></div>
       <div class="mstats-head"><span class="mstats-title">인사기록카드</span><span class="mstats-stamp">대외비</span></div>
       <div class="modal-stats">
-        <div class="stat"><div class="stat-n" id="mstat0">0</div><div class="stat-u" id="mstat0u">—</div></div>
-        <div class="stat"><div class="stat-n" id="mstat1">0</div><div class="stat-u" id="mstat1u">—</div></div>
-        <div class="stat"><div class="stat-n" id="mstat2">0</div><div class="stat-u" id="mstat2u">—</div></div>
+        <div class="stat" data-k="birth"><div class="stat-u">생일</div>
+          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
+        <div class="stat" data-k="debut"><div class="stat-u">데뷔일</div>
+          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
+        <div class="stat" data-k="joined"><div class="stat-u">입사일</div>
+          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
       </div>
       <p class="mstats-note">* 출처: 인사부 문서고 — 열람 시 비밀 유지 서약이 적용됩니다.</p>
       <div class="modal-nav-row">
@@ -398,22 +401,22 @@
      ------------------------------------------------------- */
   /* @members:start — src/content/members.json 자동 생성. 직접 수정 금지(build.py 재실행) */
   var MEMBERS = [
-    {"name":"울산큰고래","role":"사장","dept":"임원","color":"linear-gradient(135deg,#0d1a4a,#2f63ff)","initials":"고","img":"img/울산큰고래.png","bio":"고래상사를 세운 수장. 든든한 리더십과 특유의 허당미로 16인 크루를 이끄는 대표입니다. 직원들의 고충을 누구보다 잘 압니다.","stats":[{"n":4200,"u":"누적 방송시간(h)"},{"n":320,"u":"클립 수"},{"n":128000,"u":"누적 시청자"}]},
-    {"name":"견자희","role":"부사장","dept":"임원","color":"linear-gradient(135deg,#0a1e20,#0fb5b0)","initials":"부","img":"img/견자희.png","bio":"냉철한 판단력과 탁월한 업무 능력으로 회사를 실질 운영하는 오른팔. 사장님의 폭주를 막는 든든한 억제기입니다.","stats":[{"n":3800,"u":"누적 방송시간(h)"},{"n":285,"u":"클립 수"},{"n":98000,"u":"누적 시청자"}]},
-    {"name":"멜로딩딩","role":"비서부 부장","dept":"비서부","color":"linear-gradient(135deg,#0a1025,#3b82f6)","initials":"멜","img":"img/멜로딩딩.png","bio":"비서부를 이끄는 부장. 꼼꼼한 일정·의전 관리로 대표진을 지근거리에서 보좌하는 회사의 핵심입니다.","stats":[{"n":4100,"u":"누적 방송시간(h)"},{"n":350,"u":"클립 수"},{"n":140000,"u":"누적 시청자"}]},
-    {"name":"김마렌","role":"게임부 부장","dept":"게임부","color":"linear-gradient(135deg,#2a0a0a,#ff4d4d)","initials":"게","img":"img/김마렌.png","bio":"게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끄는 부장입니다.","stats":[{"n":5100,"u":"누적 방송시간(h)"},{"n":410,"u":"클립 수"},{"n":210000,"u":"누적 시청자"}]},
-    {"name":"감자가비","role":"컨텐츠부 부장","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a1800,#ffcb45)","initials":"컨","img":"img/감자가비.png","bio":"컨텐츠부를 총괄하는 아이디어의 원천. 투박해 보이지만 속은 꽉 찬, 콘텐츠 기획의 핵심 인재입니다.","stats":[{"n":4600,"u":"누적 방송시간(h)"},{"n":380,"u":"클립 수"},{"n":175000,"u":"누적 시청자"}]},
-    {"name":"이지수","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#150a30,#8b5cf6)","initials":"이","img":"img/이지수.png","bio":"게임부의 분위기 메이커. 승부욕과 순발력으로 팀에 활력을 불어넣는 사원입니다.","stats":[{"n":3200,"u":"누적 방송시간(h)"},{"n":220,"u":"클립 수"},{"n":85000,"u":"누적 시청자"}]},
-    {"name":"쏭이","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#0a0a22,#6366f1)","initials":"쏭","img":"img/쏭이.png","bio":"무한한 가능성을 지닌 게임부의 기대주. 빠르게 성장하며 팀의 활력을 더하는 사원입니다.","stats":[{"n":800,"u":"누적 방송시간(h)"},{"n":65,"u":"클립 수"},{"n":28000,"u":"누적 시청자"}]},
-    {"name":"조아라","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#0a1a10,#10b981)","initials":"조","img":"img/조아라.png","bio":"게임부의 든든한 허리. 부장을 보좌하며 팀을 열정적으로 받치는 사원입니다.","stats":[{"n":3600,"u":"누적 방송시간(h)"},{"n":280,"u":"클립 수"},{"n":115000,"u":"누적 시청자"}]},
-    {"name":"빡쏘","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#1a0a18,#ec4899)","initials":"빡","img":"img/빡쏘.png","bio":"작지만 강하다! 패기 넘치는 플레이로 빠르게 존재감을 키워가는 게임부 사원입니다.","stats":[{"n":2200,"u":"누적 방송시간(h)"},{"n":160,"u":"클립 수"},{"n":58000,"u":"누적 시청자"}]},
-    {"name":"희희덕","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#0a1a0a,#22c55e)","initials":"희","img":"img/희희덕.png","bio":"탄탄한 게임 실력과 성실함으로 팀에 기여하는 게임부 사원입니다.","stats":[{"n":1900,"u":"누적 방송시간(h)"},{"n":140,"u":"클립 수"},{"n":52000,"u":"누적 시청자"}]},
-    {"name":"밀크티냠","role":"컨텐츠부 사원","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a1200,#f59e0b)","initials":"밀","img":"img/밀크티냠.png","bio":"톡톡 튀는 아이디어와 꼼꼼함으로 콘텐츠 기획을 받치는 컨텐츠부 사원입니다.","stats":[{"n":2800,"u":"누적 방송시간(h)"},{"n":195,"u":"클립 수"},{"n":72000,"u":"누적 시청자"}]},
-    {"name":"삐요코","role":"컨텐츠부 사원","dept":"컨텐츠부","color":"linear-gradient(135deg,#0a1a1a,#14b8a6)","initials":"삐","img":"img/삐요코.png","bio":"꼼꼼한 편집과 센스 있는 기획으로 콘텐츠를 완성하는 컨텐츠부 사원입니다.","stats":[{"n":3000,"u":"누적 방송시간(h)"},{"n":240,"u":"클립 수"},{"n":95000,"u":"누적 시청자"}]},
-    {"name":"채하나","role":"컨텐츠부 사원","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a0a00,#f97316)","initials":"채","img":"img/채하나.png","bio":"친근하고 활발한 에너지로 콘텐츠에 생기를 더하는 컨텐츠부 사원입니다.","stats":[{"n":2600,"u":"누적 방송시간(h)"},{"n":185,"u":"클립 수"},{"n":76000,"u":"누적 시청자"}]},
-    {"name":"묵아","role":"게임부 인턴","dept":"게임부","color":"linear-gradient(135deg,#0a1820,#06b6d4)","initials":"묵","img":"img/묵아.png","bio":"게임부에 새로 합류한 패기의 인턴. 근성으로 실력을 쌓아가는 중입니다.","stats":[{"n":1600,"u":"누적 방송시간(h)"},{"n":110,"u":"클립 수"},{"n":44000,"u":"누적 시청자"}]},
-    {"name":"프하","role":"게임부 인턴","dept":"게임부","color":"linear-gradient(135deg,#160a22,#a855f7)","initials":"프","img":"img/프하.png","bio":"장비 세팅부터 실전까지 하나씩 배워가는 게임부 인턴입니다.","stats":[{"n":2100,"u":"누적 방송시간(h)"},{"n":155,"u":"클립 수"},{"n":63000,"u":"누적 시청자"}]},
-    {"name":"셀키","role":"컨텐츠부 인턴","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a0808,#ef4444)","initials":"셀","img":"img/셀키.png","bio":"이제 막 합류한 컨텐츠부의 새내기 인턴. 밝은 인사로 팀에 스며드는 중입니다.","stats":[{"n":3400,"u":"누적 방송시간(h)"},{"n":260,"u":"클립 수"},{"n":89000,"u":"누적 시청자"}]}
+    {"name":"울산큰고래","role":"사장","dept":"임원","color":"linear-gradient(135deg,#0d1a4a,#2f63ff)","initials":"고","img":"img/울산큰고래.png","bio":"고래상사를 세운 수장. 든든한 리더십과 특유의 허당미로 16인 크루를 이끄는 대표입니다. 직원들의 고충을 누구보다 잘 압니다.","birth":"05-03","debut":"2009-12-12","joined":"2025-09-07"},
+    {"name":"견자희","role":"부사장","dept":"임원","color":"linear-gradient(135deg,#0a1e20,#0fb5b0)","initials":"부","img":"img/견자희.png","bio":"냉철한 판단력과 탁월한 업무 능력으로 회사를 실질 운영하는 오른팔. 사장님의 폭주를 막는 든든한 억제기입니다.","birth":"04-28","debut":"2012-05-11","joined":"2025-09-10"},
+    {"name":"멜로딩딩","role":"비서부 부장","dept":"비서부","color":"linear-gradient(135deg,#0a1025,#3b82f6)","initials":"멜","img":"img/멜로딩딩.png","bio":"비서부를 이끄는 부장. 꼼꼼한 일정·의전 관리로 대표진을 지근거리에서 보좌하는 회사의 핵심입니다.","birth":"09-03","debut":"2021-02-21","joined":"2025-09-07"},
+    {"name":"김마렌","role":"게임부 부장","dept":"게임부","color":"linear-gradient(135deg,#2a0a0a,#ff4d4d)","initials":"게","img":"img/김마렌.png","bio":"게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끄는 부장입니다.","birth":"06-03","debut":"2021-01-01","joined":"2025-09-12"},
+    {"name":"감자가비","role":"컨텐츠부 부장","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a1800,#ffcb45)","initials":"컨","img":"img/감자가비.png","bio":"컨텐츠부를 총괄하는 아이디어의 원천. 투박해 보이지만 속은 꽉 찬, 콘텐츠 기획의 핵심 인재입니다.","birth":"08-18","debut":"2017-10-01","joined":"2025-09-12"},
+    {"name":"이지수","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#150a30,#8b5cf6)","initials":"이","img":"img/이지수.png","bio":"게임부의 분위기 메이커. 승부욕과 순발력으로 팀에 활력을 불어넣는 사원입니다.","birth":"04-08","debut":"2017-12-28","joined":"2025-09-12"},
+    {"name":"쏭이","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#0a0a22,#6366f1)","initials":"쏭","img":"img/쏭이.png","bio":"무한한 가능성을 지닌 게임부의 기대주. 빠르게 성장하며 팀의 활력을 더하는 사원입니다.","birth":"06-28","debut":"2017-12-30","joined":"2025-09-12"},
+    {"name":"조아라","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#0a1a10,#10b981)","initials":"조","img":"img/조아라.png","bio":"게임부의 든든한 허리. 부장을 보좌하며 팀을 열정적으로 받치는 사원입니다.","birth":"02-24","debut":"2024-02-24","joined":"2025-09-12"},
+    {"name":"빡쏘","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#1a0a18,#ec4899)","initials":"빡","img":"img/빡쏘.png","bio":"작지만 강하다! 패기 넘치는 플레이로 빠르게 존재감을 키워가는 게임부 사원입니다.","birth":"10-01","debut":"2024-11-18","joined":"2025-09-07"},
+    {"name":"희희덕","role":"게임부 사원","dept":"게임부","color":"linear-gradient(135deg,#0a1a0a,#22c55e)","initials":"희","img":"img/희희덕.png","bio":"탄탄한 게임 실력과 성실함으로 팀에 기여하는 게임부 사원입니다.","birth":"05-02","debut":"2024-02-22","joined":"2026-04-05"},
+    {"name":"밀크티냠","role":"컨텐츠부 사원","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a1200,#f59e0b)","initials":"밀","img":"img/밀크티냠.png","bio":"톡톡 튀는 아이디어와 꼼꼼함으로 콘텐츠 기획을 받치는 컨텐츠부 사원입니다.","birth":"08-10","debut":"2019-10-11","joined":"2025-09-12"},
+    {"name":"삐요코","role":"컨텐츠부 사원","dept":"컨텐츠부","color":"linear-gradient(135deg,#0a1a1a,#14b8a6)","initials":"삐","img":"img/삐요코.png","bio":"꼼꼼한 편집과 센스 있는 기획으로 콘텐츠를 완성하는 컨텐츠부 사원입니다.","birth":"06-01","debut":"2025-02-14","joined":"2025-09-08"},
+    {"name":"채하나","role":"컨텐츠부 사원","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a0a00,#f97316)","initials":"채","img":"img/채하나.png","bio":"친근하고 활발한 에너지로 콘텐츠에 생기를 더하는 컨텐츠부 사원입니다.","birth":"01-08","debut":"2025-12-04","joined":"2026-04-05"},
+    {"name":"묵아","role":"게임부 인턴","dept":"게임부","color":"linear-gradient(135deg,#0a1820,#06b6d4)","initials":"묵","img":"img/묵아.png","bio":"게임부에 새로 합류한 패기의 인턴. 근성으로 실력을 쌓아가는 중입니다.","birth":"03-20","debut":"2020-05-16","joined":"2026-06-04"},
+    {"name":"프하","role":"게임부 인턴","dept":"게임부","color":"linear-gradient(135deg,#160a22,#a855f7)","initials":"프","img":"img/프하.png","bio":"장비 세팅부터 실전까지 하나씩 배워가는 게임부 인턴입니다.","birth":"12-16","debut":"2025-02-01","joined":"2026-06-04"},
+    {"name":"셀키","role":"컨텐츠부 인턴","dept":"컨텐츠부","color":"linear-gradient(135deg,#1a0808,#ef4444)","initials":"셀","img":"img/셀키.png","bio":"이제 막 합류한 컨텐츠부의 새내기 인턴. 밝은 인사로 팀에 스며드는 중입니다.","birth":"02-22","debut":"2024-02-04","joined":"2026-06-07"}
   ];
   /* @members:end */
 
@@ -785,15 +788,34 @@
   var memberModalAva   = document.getElementById('memberModalAva');
   var currentIdx = 0;
 
-  function countUp(el, target) {
-    if (PRM) { el.textContent = target.toLocaleString(); return; }
-    var st = null, dur = 1200;
-    (function step(ts) {
-      if (!st) st = ts;
-      var p = Math.min((ts - st) / dur, 1);
-      el.textContent = Math.floor((1 - Math.pow(1 - p, 3)) * target).toLocaleString();
-      if (p < 1) requestAnimationFrame(step);
-    })(performance.now());
+  /* 인사기록카드 날짜 — assets/site.js와 같은 한 벌(홈은 site.js 미로드라 인라인).
+     고치면 양쪽 다 고쳐야 한다: src/test_pages.js가 두 사본이 같은지 대조한다. */
+  var DAY = 86400000;
+  function todayUTC() { var d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function birthInfo(s) {
+    var p = /^(\d{2})-(\d{2})$/.exec(String(s || '')); if (!p) return null;
+    var mo = +p[1], da = +p[2], t = todayUTC(), y = new Date(t).getUTCFullYear();
+    var next = Date.UTC(y, mo - 1, da);
+    if (next < t) next = Date.UTC(y + 1, mo - 1, da);
+    var n = Math.round((next - t) / DAY);
+    return { v: mo + '월 ' + da + '일', d: n === 0 ? 'D-DAY' : 'D-' + n, e: '' };
+  }
+  function pastInfo(s) {
+    var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '')); if (!p) return null;
+    var t = todayUTC(), from = Date.UTC(+p[1], +p[2] - 1, +p[3]);
+    var n = Math.round((t - from) / DAY), now = new Date(t);
+    // 연·월·일 경과는 달력 기준 — 달마다 길이가 달라 날수 나눗셈으로는 맞출 수 없다
+    var y = now.getUTCFullYear() - +p[1], mo = now.getUTCMonth() + 1 - +p[2], d = now.getUTCDate() - +p[3];
+    if (d < 0) { mo--; d += new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).getUTCDate(); }
+    if (mo < 0) { y--; mo += 12; }
+    return { v: p[1] + '-' + p[2] + '-' + p[3], d: (n >= 0 ? 'D+' : 'D') + n,
+             e: y > 0 || mo > 0 || d > 0 ? y + '년 ' + mo + '개월 ' + d + '일' : '' };
+  }
+  function setStat(k, info) {
+    var el = document.querySelector('.modal-stats .stat[data-k="' + k + '"]'); if (!el) return;
+    el.querySelector('.stat-v').textContent = info ? info.v : '—';
+    el.querySelector('.stat-d').textContent = info ? info.d : '';
+    el.querySelector('.stat-e').textContent = info ? info.e : '';
   }
 
   function fillModal(idx) {
@@ -808,12 +830,9 @@
     document.getElementById('memberModalName').textContent = m.name;
     document.getElementById('memberModalRole').textContent = m.role;
     document.getElementById('memberModalBio').textContent  = m.bio;
-    m.stats.forEach(function (s, i) {
-      var en = document.getElementById('mstat' + i);
-      var eu = document.getElementById('mstat' + i + 'u');
-      if (en) countUp(en, s.n);
-      if (eu) eu.textContent = s.u;
-    });
+    setStat('birth',  birthInfo(m.birth));
+    setStat('debut',  pastInfo(m.debut));
+    setStat('joined', pastInfo(m.joined));
   }
 
   function openMemberModal(idx) { currentIdx = idx; fillModal(idx); memberModalBg.hidden = false; }

@@ -197,9 +197,12 @@ def member_modal():
       <div class="modal-bio"  id="memberModalBio"></div>
       <div class="mstats-head"><span class="mstats-title">인사기록카드</span><span class="mstats-stamp">대외비</span></div>
       <div class="modal-stats">
-        <div class="stat"><div class="stat-n" id="mstat0">0</div><div class="stat-u" id="mstat0u">—</div></div>
-        <div class="stat"><div class="stat-n" id="mstat1">0</div><div class="stat-u" id="mstat1u">—</div></div>
-        <div class="stat"><div class="stat-n" id="mstat2">0</div><div class="stat-u" id="mstat2u">—</div></div>
+        <div class="stat" data-k="birth"><div class="stat-u">생일</div>
+          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
+        <div class="stat" data-k="debut"><div class="stat-u">데뷔일</div>
+          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
+        <div class="stat" data-k="joined"><div class="stat-u">입사일</div>
+          <div class="stat-v"></div><div class="stat-d"></div><div class="stat-e"></div></div>
       </div>
       <p class="mstats-note">* 출처: 인사부 문서고 — 열람 시 비밀 유지 서약이 적용됩니다.</p>
       <div class="modal-nav-row">
@@ -264,10 +267,29 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
 .pg-search::placeholder{color:var(--ink-2)}
 .pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
-.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
-  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+/* select은 닫힌 상태만 CSS로 칠할 수 있고 펼친 목록은 OS/브라우저가 그린다.
+   color-scheme:dark = 그 목록까지 다크로 그리게 하는 유일한 표준 스위치(하양 윈도우 목록 방지).
+   option 색은 그 위 보강(리눅스·구형 엣지). 화살표는 chip과 톤을 맞춘 인라인 SVG. */
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 34px 8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);color:var(--ink-2);cursor:pointer;max-width:190px;color-scheme:dark;
+  appearance:none;-webkit-appearance:none;transition:.15s;
+  background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.6 6 6.4 11 1.6' fill='none' stroke='%239aa6bd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 13px center/10px 7px}
+.pg-select:hover{border-color:var(--brand);color:var(--ink)}
 .pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
-.pg-select.on{border-color:var(--brand);color:var(--ink)}
+.pg-select.on{border-color:var(--brand);color:var(--ink);background-color:var(--brand-soft)}
+.pg-select option{background:#101625;color:var(--ink);font-weight:600}
+.pg-select option:checked{background:var(--brand);color:#fff}
+/* 클립 상세 → 아카이브 기록 역방향 링크 */
+.ct-links{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.ct-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:700;
+  transition:border-color .2s var(--ease),background .2s var(--ease),transform .2s var(--ease)}
+.ct-link:hover{border-color:var(--brand);background:var(--surface-2);transform:translateX(3px)}
+.ct-link-k{flex-shrink:0;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--accent);
+  border:1px solid rgba(15,181,176,.35);border-radius:999px;padding:2px 8px}
+.ct-link-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-link-d{flex-shrink:0;font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.ct-link .oi-ar{flex-shrink:0;color:var(--ink-2)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -341,9 +363,12 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .mdetail .role{font-size:15px;color:var(--ink-2);margin-bottom:20px}
 .mdetail .bio{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.75;margin-bottom:26px;word-break:keep-all}
 .mdetail .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
-.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
-.mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
-.mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
+.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 8px 12px;text-align:center}
+/* 라벨 → 날짜 → D-day → 경과 (홈 인사기록카드와 같은 배치) */
+.mdetail .stat .u{font-size:11px;font-weight:700;color:var(--ink-2)}
+.mdetail .stat .n{font-size:clamp(14px,1.7vw,18px);font-weight:900;letter-spacing:-.02em;margin-top:5px;white-space:nowrap}
+.mdetail .stat .dd{font-size:12.5px;font-weight:800;color:var(--brand);margin-top:3px}
+.mdetail .stat .el{font-size:11px;color:var(--ink-2);margin-top:1px;word-break:keep-all}
 .mdetail .navrow{display:flex;gap:10px;flex-wrap:wrap}
 .mdetail .soop-row{margin:0 0 14px}
 .mdetail .soop-row .btn{width:100%;justify-content:center;font-weight:800}
@@ -433,6 +458,30 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .n-modal .field select:focus,.n-modal .field textarea:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.07)}
 .n-modal .field textarea{resize:vertical;min-height:130px;line-height:1.6;font-family:inherit}
 .n-modal .field select option{background:#0e1524;color:var(--ink)}
+/* 태그 콤보박스 — 선택된 태그는 칩, 후보는 아래 목록. select 팝업과 달리 전부 우리 CSS로 그린다 */
+.tf-lab{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;
+  padding:7px 10px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04);
+  transition:border-color .15s,background .15s}
+.tagbox:focus-within{border-color:var(--brand);background:rgba(255,255,255,.07)}
+.tagbox #clTagChips{display:contents}
+.tagbox input{flex:1 1 130px;min-width:110px;font:inherit;font-size:15px;padding:4px 2px;
+  border:none;background:none;color:var(--ink)}
+.tagbox input:focus{outline:none}
+.tagbox input::placeholder{color:#7d89a0}
+.tg{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;
+  padding:4px 5px 4px 10px;border-radius:999px;color:var(--ink);
+  background:var(--brand-soft);border:1px solid rgba(47,99,255,.45)}
+.tg button{border:none;background:none;color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer;padding:0 3px}
+.tg button:hover{color:var(--hot)}
+.tagsug{margin-top:6px;max-height:200px;overflow-y:auto;border:1px solid var(--line-2);border-radius:10px;
+  background:#0e1524;box-shadow:0 16px 40px rgba(0,0,0,.55)}
+.tagsug[hidden]{display:none}
+.tagsug button{display:flex;align-items:center;width:100%;text-align:left;border:none;background:none;
+  color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;padding:9px 12px;cursor:pointer}
+.tagsug button:hover,.tagsug button:focus-visible{background:var(--brand-soft);outline:none}
+.tagsug .sg-k{margin-left:auto;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--accent)}
+.tagsug .sg-new{color:var(--ink-2);border-top:1px solid var(--line)}
 .n-pin-field{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);cursor:pointer;margin-bottom:14px}
 .n-pin-field input{width:16px;height:16px;accent-color:var(--brand)}
 .n-modal .btn{width:100%;justify-content:center;padding:12px;margin-top:6px}
@@ -463,14 +512,16 @@ def member_card(m, idx, tag="mcard"):
 
 def members_json_script():
     """site.js가 모달에 쓸 WHALE_MEMBERS 주입 (홈과 동일 포맷)."""
-    data = [{k: m.get(k) for k in ("name", "role", "dept", "color", "initials", "img", "bio", "stats", "soop")}
+    data = [{k: m.get(k) for k in ("name", "role", "dept", "color", "initials", "img", "bio",
+                                   "birth", "debut", "joined", "soop")}
             for m in MEMBERS]
     # img 경로를 pages/ 기준으로 (../ 접두)
     for d in data:
         if d.get("img"):
             d["img"] = "../" + d["img"]
+    # 인라인 <script> 안 JSON — 값에 "</script>"가 섞이면 스크립트가 조기 종료된다(홈 동기화와 같은 처리)
     return ('<script>window.WHALE_MEMBERS=' +
-            json.dumps(data, ensure_ascii=False) + ';</script>')
+            json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + ';</script>')
 
 
 
@@ -605,18 +656,13 @@ def build_member():
   var M=window.WHALE_MEMBERS||[];
   var i=parseInt(new URLSearchParams(location.search).get('i')||'0',10);
   if(isNaN(i)||i<0||i>=M.length)i=0;
-  var PRM=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var SURL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
   var STATUS={};  // soop id -> {is_live, viewers, title, live_url}
-  function countUp(el,t){if(PRM){el.textContent=t.toLocaleString();return;}
-    var s=null;(function step(ts){if(!s)s=ts;var p=Math.min((ts-s)/1200,1);
-    el.textContent=Math.floor((1-Math.pow(1-p,3))*t).toLocaleString();
-    if(p<1)requestAnimationFrame(step);})(performance.now());}
   function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
   // st.live_url은 외부(status 피드) 값 → http/https만 허용, 아니면 신뢰 URL로 폴백(href javascript: 차단)
   function safeHttp(u,fb){try{var p=new URL(u,location.href);return (p.protocol==='http:'||p.protocol==='https:')?u:fb;}catch(e){return fb;}}
   // soop id는 자체 데이터(members.json)에서 오므로 신뢰됨. encodeURIComponent로만 방어.
-  function render(animate){
+  function render(){
     var m=M[i];if(!m)return;
     document.title=m.name+' · 고래상사';
     var st=STATUS[m.soop]||{}, live=!!st.is_live, sid=encodeURIComponent(m.soop||'');
@@ -633,8 +679,16 @@ def build_member():
                         : ('https://www.sooplive.co.kr/station/'+sid);
     var soopBtn = '<a class="btn sm '+(live?'primary':'')+'" href="'+esc(soopHref)+'" target="_blank" rel="noopener">'+
                   (live?'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>방송 보러가기':'SOOP 방송국 →')+'</a>';
-    var stats=(m.stats||[]).map(function(s,k){
-      return '<div class="stat"><div class="n" id="ds'+k+'">0</div><div class="u">'+esc(s.u)+'</div></div>';}).join('');
+    /* 인사기록 3칸 = 홈 모달과 같은 계산(site.js WhaleDate) — 같은 사람이 페이지마다
+       다른 D-day를 말하지 않게 한 벌만 쓴다. site.js가 없으면 조용히 '—'로 둔다. */
+    var DT=window.WhaleDate||{};
+    var stats=[['생일',DT.birth&&DT.birth(m.birth)],['데뷔일',DT.past&&DT.past(m.debut)],
+               ['입사일',DT.past&&DT.past(m.joined)]].map(function(p){
+      var v=p[1];
+      return '<div class="stat"><div class="u">'+esc(p[0])+'</div>'
+        +'<div class="n">'+esc(v?v.v:'—')+'</div>'
+        +'<div class="dd">'+esc(v?v.d:'')+'</div>'
+        +'<div class="el">'+esc(v?v.e:'')+'</div></div>';}).join('');
     var el=document.getElementById('mDetail');
     el.innerHTML= media +
       '<div><div class="dept-label">'+esc(m.dept)+'</div>'+
@@ -645,15 +699,13 @@ def build_member():
         '<div class="navrow"><button class="btn sm" id="dPrev">← 이전 멤버</button>'+
         '<button class="btn sm" id="dNext">다음 멤버 →</button>'+
         '<a class="btn sm" href="members.html">전체 목록</a></div></div>';
-    (m.stats||[]).forEach(function(s,k){var e=document.getElementById('ds'+k);if(!e)return;
-      animate?countUp(e,s.n):(e.textContent=s.n.toLocaleString());});
     document.getElementById('dPrev').onclick=function(){i=(i-1+M.length)%M.length;render(true);};
     document.getElementById('dNext').onclick=function(){i=(i+1)%M.length;render(true);};
   }
-  render(true);  // 즉시 페인트(초상). 상태 도착 후 방송중이면 임베드로 갱신
+  render();  // 즉시 페인트(초상). 상태 도착 후 방송중이면 임베드로 갱신
   fetch(SURL+'?v='+Date.now()).then(function(r){return r.json();}).then(function(d){
     if(d&&d.members)Object.keys(d.members).forEach(function(k){var m=d.members[k];STATUS[m.id]=m;});
-  }).catch(function(){}).then(function(){render(false);});
+  }).catch(function(){}).then(render);
 })();</script>"""
     write("member", "멤버 상세", body, PAGE_CSS,
           scripts=members_json_script() + render)
@@ -662,6 +714,26 @@ def build_member():
 # ---------- 아키타입: 클립 (Firebase 실시간 CRUD, 공지 구현 패턴 그대로 적용) ----------
 
 CLIP_CATEGORIES = ["예능", "합방", "토크", "게임", "대회", "일상"]
+
+
+# 클립 ↔ 아카이브 기록을 잇는 유일한 판정. 기록 상세('관련 클립')와 클립 상세('관련 기록')가
+# 이 하나를 공유한다 — 한쪽만 고치면 A→B는 보이는데 B→A는 안 보이는 비대칭이 생긴다.
+_LINK_JS_SHARED = r"""
+  function tagsOf(x){return (x&&x.tags)||[];}
+  /* 기록을 클립과 묶는 키워드 — 태그 + 제목.
+     운영 기록에는 tags가 없고(15건 전부), 클립 tags에는 대회 제목이 그대로 들어 있어
+     제목을 키워드로 함께 쓰지 않으면 연결이 영원히 0건이 된다. */
+  function keywordsOf(contest){
+    var ks=tagsOf(contest).slice();
+    if(contest&&contest.title)ks.push(contest.title);
+    return ks;
+  }
+  function linksTo(contest,clip){
+    var ks=keywordsOf(contest).map(function(t){return String(t).toLowerCase();});
+    if(!ks.length)return false;
+    return tagsOf(clip).some(function(t){return ks.indexOf(String(t).toLowerCase())>=0;});
+  }
+"""
 
 
 def clip_form_modal():
@@ -679,7 +751,15 @@ def clip_form_modal():
       <label class="field"><span>설명 (선택)</span><textarea name="desc" rows="4"></textarea></label>
       <label class="field"><span>영상 URL (선택)</span><input type="url" name="url" placeholder="https://..."></label>
       <label class="field"><span>이미지 URL (선택, 비우면 영상 링크로 미리보기 · 둘 다 없으면 그라데이션)</span><input type="url" name="img" placeholder="https://..."></label>
-      <label class="field"><span>태그 (쉼표로 구분 · 같은 태그의 아카이브 상세에 이 클립이 표시됨)</span><input type="text" name="tags" placeholder="예: 크루대전, 여름특집"></label>
+      <div class="field">
+        <label class="tf-lab" for="clTagQ">태그 — 아카이브 기록과 이어주는 키 (검색해서 선택 · 없으면 Enter로 새로 추가)</label>
+        <div class="tagbox" id="clTagBox"><span id="clTagChips"></span><input type="text" id="clTagQ"
+          placeholder="대회·기록 이름 검색" autocomplete="off" role="combobox" aria-expanded="false"
+          aria-controls="clTagList" aria-autocomplete="list"></div>
+        <div class="tagsug" id="clTagList" role="listbox" aria-label="태그 후보" hidden></div>
+        <!-- 후보 버튼은 role="option"으로 만든다(clRenderSug) — listbox 안에서 유효한 역할 -->
+        <input type="hidden" name="tags">
+      </div>
       <label class="n-pin-field" id="clFeatField" style="display:none">
         <input type="checkbox" name="featured"><span>대표 클립으로 지정 (관리자만, 기존 대표는 자동 해제)</span></label>
       <p class="n-modal-msg" id="clModalMsg" role="status" aria-live="polite"></p>
@@ -706,6 +786,77 @@ _CLIP_JS_SHARED = """
       clForm=document.getElementById('clForm'), clFeatField=document.getElementById('clFeatField'),
       clModalMsg=document.getElementById('clModalMsg');
   var clMode='create', clItem=null, clOnSaved=function(){};
+
+  /* 태그 = 검색해서 고르는 콤보박스. 후보는 아카이브 기록 제목/태그 + 이미 쓰인 클립 태그 —
+     기록 제목이 곧 연결 키라(linksTo) 여기서 고르기만 하면 그 기록 상세의 '관련 클립'에 바로 뜬다.
+     저장 형식은 종전과 같은 쉼표 문자열(hidden input) → 제출·서버 규칙은 손대지 않는다. */
+  var clTagBox=document.getElementById('clTagBox'), clTagChips=document.getElementById('clTagChips'),
+      clTagQ=document.getElementById('clTagQ'), clTagList=document.getElementById('clTagList');
+  var clTags=[], clTagPool=null;
+  function clSyncTags(){
+    if(clForm)clForm.tags.value=clTags.join(', ');
+    clTagChips.innerHTML=clTags.map(function(t,i){
+      return '<span class="tg">'+esc(t)+'<button type="button" data-i="'+i+'" aria-label="'+esc(t)+' 제거">×</button></span>';
+    }).join('');
+  }
+  function clSetTags(list){clTags=(list||[]).slice();clSyncTags();}
+  function clAddTag(t){
+    t=(t||'').trim();
+    if(!t)return;
+    if(clTags.some(function(x){return x.toLowerCase()===t.toLowerCase();}))return;  /* 대소문자만 다른 중복 차단 */
+    clTags.push(t);clSyncTags();
+  }
+  function clLoadPool(){
+    if(clTagPool)return Promise.resolve(clTagPool);
+    return Promise.all([D.list('contests').catch(function(){return [];}),
+                        D.list('clips').catch(function(){return [];})]).then(function(res){
+      var seen={},pool=[];
+      function put(name,kind){
+        name=(name||'').trim();var k=name.toLowerCase();
+        if(!name||seen[k])return;seen[k]=1;pool.push({name:name,kind:kind});
+      }
+      (res[0]||[]).forEach(function(ct){put(ct.title,'기록');(ct.tags||[]).forEach(function(t){put(t,'기록');});});
+      (res[1]||[]).forEach(function(cl){(cl.tags||[]).forEach(function(t){put(t,'');});});
+      clTagPool=pool;return pool;
+    });
+  }
+  function clHasTag(n){return clTags.some(function(x){return x.toLowerCase()===n.toLowerCase();});}
+  function clRenderSug(){
+    var raw=clTagQ.value.trim(), q=raw.toLowerCase(), pool=clTagPool||[];
+    var html=pool.filter(function(p){
+      return (!q||p.name.toLowerCase().indexOf(q)>=0)&&!clHasTag(p.name);
+    }).slice(0,20).map(function(p){
+      return '<button type="button" role="option" data-t="'+esc(p.name)+'">'+esc(p.name)
+        +(p.kind?'<span class="sg-k">'+p.kind+'</span>':'')+'</button>';
+    }).join('');
+    /* 후보에 없는 이름도 막지 않는다 — 새 대회를 클립부터 올리는 경우가 있다 */
+    if(raw&&!clHasTag(raw)&&!pool.some(function(p){return p.name.toLowerCase()===q;}))
+      html+='<button type="button" role="option" class="sg-new" data-t="'+esc(raw)+'">+ 새 태그 &quot;'+esc(raw)+'&quot; 추가</button>';
+    clTagList.innerHTML=html;
+    clTagList.hidden=!html;
+    clTagQ.setAttribute('aria-expanded',html?'true':'false');
+  }
+  if(clTagBox){
+    clTagBox.addEventListener('click',function(e){
+      var b=e.target.closest&&e.target.closest('button[data-i]');
+      if(b){clTags.splice(parseInt(b.getAttribute('data-i'),10),1);clSyncTags();clRenderSug();return;}
+      clTagQ.focus();
+    });
+    clTagQ.addEventListener('focus',function(){clLoadPool().then(clRenderSug);});
+    clTagQ.addEventListener('input',function(){clLoadPool().then(clRenderSug);});
+    clTagQ.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();clAddTag(clTagQ.value);clTagQ.value='';clRenderSug();}
+      else if(e.key==='Backspace'&&!clTagQ.value&&clTags.length){clTags.pop();clSyncTags();clRenderSug();}
+      /* 목록이 열려 있으면 Esc는 목록만 닫는다 — 모달까지 닫혀 입력이 날아가지 않도록 */
+      else if(e.key==='Escape'&&!clTagList.hidden){e.stopPropagation();clTagList.hidden=true;}
+    });
+    clTagList.addEventListener('click',function(e){
+      var b=e.target.closest&&e.target.closest('button[data-t]');
+      if(!b)return;
+      clAddTag(b.getAttribute('data-t'));clTagQ.value='';clRenderSug();clTagQ.focus();
+    });
+  }
+
   function clOpenForm(mode,item,cb){
     clMode=mode;clItem=item;clOnSaved=cb||function(){};
     clModalMsg.textContent='';clForm.reset();
@@ -715,9 +866,13 @@ _CLIP_JS_SHARED = """
       clForm.category.value=item.category||'예능';clForm.title.value=item.title||'';
       clForm.creator.value=item.creator||'';clForm.desc.value=item.desc||'';
       clForm.url.value=item.url||'';clForm.img.value=item.img||'';
-      clForm.tags.value=(item.tags||[]).join(', ');
+      clSetTags(item.tags||[]);
       if(clForm.featured)clForm.featured.checked=!!item.featured;
-    } else if(clForm.featured){clForm.featured.checked=false;}
+    } else {
+      clSetTags([]);
+      if(clForm.featured)clForm.featured.checked=false;
+    }
+    if(clTagQ){clTagQ.value='';clTagList.hidden=true;}
     clModalBg.hidden=false;
   }
   function clCloseForm(){clModalBg.hidden=true;}
@@ -1021,13 +1176,19 @@ def build_clip():
         + '<div class="cdetail img-ani bottom-top" id="cDetail"><div class="skel" style="aspect-ratio:16/9;margin-bottom:14px"></div><div class="skel skel-line" style="width:60%"></div></div>'
         + clip_form_modal())
 
-    js = "<script>(function(){" + _CLIP_JS_SHARED + """
+    js = "<script>(function(){" + _CLIP_JS_SHARED + _LINK_JS_SHARED + """
   var detail=document.getElementById('cDetail');
   var qs=new URLSearchParams(location.search), id=qs.get('id'), legacyIdx=qs.get('i');
-  var C=[], idx=0;
+  var C=[], idx=0, allContests=[];
+  /* 이 클립이 걸려 있는 아카이브 기록 — 기록 상세의 '관련 클립'과 정확히 같은 판정(linksTo)이라
+     양방향이 항상 짝을 이룬다. 기록 목록을 못 받아도(권한·네트워크) 클립 재생은 그대로 뜬다. */
+  function contestsOf(clip){
+    return allContests.filter(function(ct){return linksTo(ct,clip);});
+  }
   function load(){
-    return D.list('clips').then(function(items){
-      return window.WhaleViews?window.WhaleViews.load(items):items;
+    return Promise.all([D.list('clips'),D.list('contests').catch(function(){return [];})]).then(function(res){
+      allContests=res[1]||[];
+      return window.WhaleViews?window.WhaleViews.load(res[0]):res[0];
     }).then(function(items){
       C=items;
       if(id){
@@ -1071,6 +1232,12 @@ def build_clip():
       manage+='<button class="btn sm" id="cDetEdit" type="button">✏️ 수정</button>';
       manage+='<button class="btn sm" id="cDetDel" type="button">🗑 삭제</button>';
     }
+    var ctHtml=contestsOf(c).map(function(ct){
+      return '<a class="ct-link" href="archive-detail.html?id='+encodeURIComponent(ct.id)+'">'
+        +'<span class="ct-link-k">'+esc(ct.category||'크루대전')+'</span>'
+        +'<span class="ct-link-t">'+esc(ct.title||'기록')+'</span>'
+        +(ct.date?'<span class="ct-link-d">'+esc(ct.date)+'</span>':'')+'<span class="oi-ar">→</span></a>';
+    }).join('');
     var emb=window.WhaleEmbed?window.WhaleEmbed(c.url):null;  // §2.6-2: 인라인 재생(검증 통과 시)
     detail.innerHTML=
       (emb?'<div class="cdetail-player"><iframe src="'+esc(emb)+'" title="'+esc(c.title)+'" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>'
@@ -1083,6 +1250,7 @@ def build_clip():
       +'<span>사이트 조회 '+fmtViews(c.views)+'</span></div>'
       +(c.desc?'<p class="cdetail-desc">'+esc(c.desc)+'</p>':'')
       +(c.url?'<div style="margin:0 0 20px"><a class="btn sm primary" href="'+esc(safeUrl(c.url))+'" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>원본 영상 보기</a></div>':'')
+      +(ctHtml?'<div class="crelated-head">관련 기록</div><div class="ct-links">'+ctHtml+'</div>':'')
       +'<div class="cdetail-nav"><button class="btn sm" id="cPrev">← 이전 클립</button>'
       +'<button class="btn sm" id="cNext">다음 클립 →</button>'
       +manage
@@ -1381,8 +1549,8 @@ def build_archive():
               '<button class="chip" data-f="크루대전">크루대전</button>'
               '<button class="chip" data-f="컨텐츠">컨텐츠</button>'
               '<span class="pg-count" id="aCount"></span></div>'
-            # 참여 멤버·게임 목록은 빌드 시점이 아니라 기록에서 뽑는다 —
-            # 졸업 멤버·외부 게스트가 기록에 남아 있어 members.json 16인과 일치하지 않는다.
+            # 선택지는 기록에서 뽑되(없는 값을 고르는 막다른 길 방지) 목록이 길어지지 않게 추린다:
+            # 멤버는 현재 members.json 16인만(졸업 멤버·외부 게스트는 '기타'), 게임은 3회 이상만(나머지 '기타').
             + '<div class="pg-tools img-ani bottom-top">'
               '<input type="search" id="aQ" class="pg-search" placeholder="기록 검색"'
               ' aria-label="기록 검색 (제목·상대 크루·게임·참여 멤버)" autocomplete="off">'
@@ -1394,7 +1562,12 @@ def build_archive():
             + '<div class="agrid img-ani bottom-top" id="aGrid">'
             + '<div class="skel skel-row" style="height:110px"></div>'*4 + '</div>'
             + archive_form_modal())
-    js = "<script>(function(){" + _ARCHIVE_JS_SHARED + r"""
+    roster = json.dumps(
+        [m["name"] for _, m in sorted(enumerate(MEMBERS), key=lambda t: (t[1]["rank"], t[0]))],
+        ensure_ascii=False).replace("</", "<\\/")  # 인라인 script 조기 종료 방지
+    js = ("<script>(function(){var ROSTER=" + roster + ";"
+          "var RSET={};ROSTER.forEach(function(n){RSET[n]=1;});var ETC='기타';"
+          "var GAME_MIN=3;var topGames={};" + _ARCHIVE_JS_SHARED + r"""
   var grid=document.getElementById('aGrid'), count=document.getElementById('aCount'), actionsEl=document.getElementById('aActions');
   var qs=new URLSearchParams(location.search), qsF=qs.get('f');  // §2.6-3: ?f= 복원(정적 칩 2종만 유효)
   var all=[], filt=(qsF==='크루대전'||qsF==='컨텐츠')?qsF:'all';
@@ -1428,8 +1601,10 @@ def build_archive():
   }
   function matches(c){
     if(filt!=='all'&&(c.category||'크루대전')!==filt)return false;
-    if(fMem&&(c.members||[]).indexOf(fMem)<0)return false;
-    if(fGame&&gameNames(c).indexOf(fGame)<0)return false;
+    if(fMem===ETC){if(!(c.members||[]).some(function(m){return m&&!RSET[m];}))return false;}
+    else if(fMem&&(c.members||[]).indexOf(fMem)<0)return false;
+    if(fGame===ETC){if(!gameNames(c).some(function(n){return !topGames[n];}))return false;}
+    else if(fGame&&gameNames(c).indexOf(fGame)<0)return false;
     if(fWin==='win'&&c.rank!==1)return false;
     if(fWin==='other'&&c.rank===1)return false;
     if(query){
@@ -1450,13 +1625,20 @@ def build_archive():
     });
     if(cur&&list.indexOf(cur)<0)sel.value='';  // URL에 없는 값이 와도 조용히 무시
   }
+  /* 멤버 = 현재 16인 중 기록에 등장한 사람만(정렬은 멤버 페이지와 같은 rank 순),
+     게임 = GAME_MIN회 이상 등장한 것만(많이 한 순). 나머지는 각각 '기타' 한 칸으로 접는다. */
   function fillOptions(){
-    var mem={},gm={};
+    var mem={},gm={},etcMem=false;
     all.forEach(function(c){
-      (c.members||[]).forEach(function(m){if(m)mem[m]=1;});
-      gameNames(c).forEach(function(n){gm[n]=1;});
+      (c.members||[]).forEach(function(m){if(!m)return;if(RSET[m])mem[m]=1;else etcMem=true;});
+      gameNames(c).forEach(function(n){gm[n]=(gm[n]||0)+1;});
     });
-    var ms=Object.keys(mem).sort(),gs=Object.keys(gm).sort();
+    var ms=ROSTER.filter(function(n){return mem[n];});
+    if(etcMem)ms.push(ETC);
+    var gs=Object.keys(gm).filter(function(n){return gm[n]>=GAME_MIN;})
+      .sort(function(a,b){return gm[b]-gm[a]||(a<b?-1:1);});
+    topGames={};gs.forEach(function(n){topGames[n]=1;});
+    if(Object.keys(gm).some(function(n){return gm[n]<GAME_MIN;}))gs.push(ETC);
     fillSelect(memEl,ms,fMem);fillSelect(gameEl,gs,fGame);
     if(ms.indexOf(fMem)<0)fMem='';
     if(gs.indexOf(fGame)<0)fGame='';
@@ -1599,7 +1781,7 @@ def build_archive():
   }
   document.addEventListener('whale:authchange',reload);  // 로그인/로그아웃 시 버튼 재렌더
   reload();
-})();</script>"""
+})();</script>""")
     write("archive", "크루대전 기록", body, ARCHIVE_CSS, scripts=js)
 
 
@@ -1616,22 +1798,8 @@ def build_archive_detail():
   // 영상 URL -> 임베드(미리보기) URL. 운영본 contest.js getEmbedUrl 규칙 이식.
   // 임베드 변환은 공유 헬퍼(assets/site.js `WhaleEmbed`)로 승격(§2.6-2) — 검증 로직 동일
   // (new URL 호스트 엄격검증+검증 조각 재조립). C-2 보안 재검증은 site.js의 WhaleEmbed 대상.
-  var embedUrlOf=window.WhaleEmbed||function(){return null;};
-  function tagsOf(x){return (x&&x.tags)||[];}
-  /* 이 기록을 클립과 묶는 키워드 — 태그 + 제목.
-     운영 기록에는 tags가 없고(15건 전부), 클립 tags에는 대회 제목이 그대로 들어 있어
-     제목을 키워드로 함께 쓰지 않으면 '관련 클립'이 영원히 0건이 된다. */
-  function keywordsOf(contest){
-    var ks=tagsOf(contest).slice();
-    if(contest&&contest.title)ks.push(contest.title);
-    return ks;
-  }
-  function relatedOf(contest){
-    var ct=keywordsOf(contest).map(function(t){return String(t).toLowerCase();});
-    if(!ct.length)return [];
-    return allClips.filter(function(cl){
-      return tagsOf(cl).some(function(t){return ct.indexOf(String(t).toLowerCase())>=0;});
-    });
+  var embedUrlOf=window.WhaleEmbed||function(){return null;};""" + _LINK_JS_SHARED + r"""  function relatedOf(contest){
+    return allClips.filter(function(cl){return linksTo(contest,cl);});
   }
   function renderRelated(){
     var rel=relatedOf(cur);
@@ -2908,7 +3076,7 @@ def sync_home_members():
     path = os.path.join(HERE, "..", "index.html")
     with open(path, encoding="utf-8") as f:
         src = f.read()
-    keys = ("name", "role", "dept", "color", "initials", "img", "bio", "stats")
+    keys = ("name", "role", "dept", "color", "initials", "img", "bio", "birth", "debut", "joined")
     data = [{k: m[k] for k in keys}
             for _, m in sorted(enumerate(MEMBERS), key=lambda t: (t[1]["rank"], t[0]))]
     # 인라인 <script> 안에 들어가는 JSON — 값에 "</script>"가 섞이면 스크립트가 조기 종료된다.

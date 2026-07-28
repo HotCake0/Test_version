@@ -48,10 +48,29 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
 .pg-search::placeholder{color:var(--ink-2)}
 .pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
-.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
-  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+/* select은 닫힌 상태만 CSS로 칠할 수 있고 펼친 목록은 OS/브라우저가 그린다.
+   color-scheme:dark = 그 목록까지 다크로 그리게 하는 유일한 표준 스위치(하양 윈도우 목록 방지).
+   option 색은 그 위 보강(리눅스·구형 엣지). 화살표는 chip과 톤을 맞춘 인라인 SVG. */
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 34px 8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);color:var(--ink-2);cursor:pointer;max-width:190px;color-scheme:dark;
+  appearance:none;-webkit-appearance:none;transition:.15s;
+  background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.6 6 6.4 11 1.6' fill='none' stroke='%239aa6bd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 13px center/10px 7px}
+.pg-select:hover{border-color:var(--brand);color:var(--ink)}
 .pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
-.pg-select.on{border-color:var(--brand);color:var(--ink)}
+.pg-select.on{border-color:var(--brand);color:var(--ink);background-color:var(--brand-soft)}
+.pg-select option{background:#101625;color:var(--ink);font-weight:600}
+.pg-select option:checked{background:var(--brand);color:#fff}
+/* 클립 상세 → 아카이브 기록 역방향 링크 */
+.ct-links{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.ct-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:700;
+  transition:border-color .2s var(--ease),background .2s var(--ease),transform .2s var(--ease)}
+.ct-link:hover{border-color:var(--brand);background:var(--surface-2);transform:translateX(3px)}
+.ct-link-k{flex-shrink:0;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--accent);
+  border:1px solid rgba(15,181,176,.35);border-radius:999px;padding:2px 8px}
+.ct-link-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-link-d{flex-shrink:0;font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.ct-link .oi-ar{flex-shrink:0;color:var(--ink-2)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -125,9 +144,12 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .mdetail .role{font-size:15px;color:var(--ink-2);margin-bottom:20px}
 .mdetail .bio{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.75;margin-bottom:26px;word-break:keep-all}
 .mdetail .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
-.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
-.mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
-.mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
+.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 8px 12px;text-align:center}
+/* 라벨 → 날짜 → D-day → 경과 (홈 인사기록카드와 같은 배치) */
+.mdetail .stat .u{font-size:11px;font-weight:700;color:var(--ink-2)}
+.mdetail .stat .n{font-size:clamp(14px,1.7vw,18px);font-weight:900;letter-spacing:-.02em;margin-top:5px;white-space:nowrap}
+.mdetail .stat .dd{font-size:12.5px;font-weight:800;color:var(--brand);margin-top:3px}
+.mdetail .stat .el{font-size:11px;color:var(--ink-2);margin-top:1px;word-break:keep-all}
 .mdetail .navrow{display:flex;gap:10px;flex-wrap:wrap}
 .mdetail .soop-row{margin:0 0 14px}
 .mdetail .soop-row .btn{width:100%;justify-content:center;font-weight:800}
@@ -217,6 +239,30 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .n-modal .field select:focus,.n-modal .field textarea:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.07)}
 .n-modal .field textarea{resize:vertical;min-height:130px;line-height:1.6;font-family:inherit}
 .n-modal .field select option{background:#0e1524;color:var(--ink)}
+/* 태그 콤보박스 — 선택된 태그는 칩, 후보는 아래 목록. select 팝업과 달리 전부 우리 CSS로 그린다 */
+.tf-lab{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;
+  padding:7px 10px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04);
+  transition:border-color .15s,background .15s}
+.tagbox:focus-within{border-color:var(--brand);background:rgba(255,255,255,.07)}
+.tagbox #clTagChips{display:contents}
+.tagbox input{flex:1 1 130px;min-width:110px;font:inherit;font-size:15px;padding:4px 2px;
+  border:none;background:none;color:var(--ink)}
+.tagbox input:focus{outline:none}
+.tagbox input::placeholder{color:#7d89a0}
+.tg{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;
+  padding:4px 5px 4px 10px;border-radius:999px;color:var(--ink);
+  background:var(--brand-soft);border:1px solid rgba(47,99,255,.45)}
+.tg button{border:none;background:none;color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer;padding:0 3px}
+.tg button:hover{color:var(--hot)}
+.tagsug{margin-top:6px;max-height:200px;overflow-y:auto;border:1px solid var(--line-2);border-radius:10px;
+  background:#0e1524;box-shadow:0 16px 40px rgba(0,0,0,.55)}
+.tagsug[hidden]{display:none}
+.tagsug button{display:flex;align-items:center;width:100%;text-align:left;border:none;background:none;
+  color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;padding:9px 12px;cursor:pointer}
+.tagsug button:hover,.tagsug button:focus-visible{background:var(--brand-soft);outline:none}
+.tagsug .sg-k{margin-left:auto;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--accent)}
+.tagsug .sg-new{color:var(--ink-2);border-top:1px solid var(--line)}
 .n-pin-field{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);cursor:pointer;margin-bottom:14px}
 .n-pin-field input{width:16px;height:16px;accent-color:var(--brand)}
 .n-modal .btn{width:100%;justify-content:center;padding:12px;margin-top:6px}
@@ -274,22 +320,17 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 </div>
 <script src="../assets/embed.js"></script>
 <script src="../assets/site.js"></script>
-<script>window.WHALE_MEMBERS=[{"name": "울산큰고래", "role": "사장", "dept": "임원", "color": "linear-gradient(135deg,#0d1a4a,#2f63ff)", "initials": "고", "img": "../img/울산큰고래.png", "bio": "고래상사를 세운 수장. 든든한 리더십과 특유의 허당미로 16인 크루를 이끄는 대표입니다. 직원들의 고충을 누구보다 잘 압니다.", "stats": [{"n": 4200, "u": "누적 방송시간(h)"}, {"n": 320, "u": "클립 수"}, {"n": 128000, "u": "누적 시청자"}], "soop": "bach023"}, {"name": "견자희", "role": "부사장", "dept": "임원", "color": "linear-gradient(135deg,#0a1e20,#0fb5b0)", "initials": "부", "img": "../img/견자희.png", "bio": "냉철한 판단력과 탁월한 업무 능력으로 회사를 실질 운영하는 오른팔. 사장님의 폭주를 막는 든든한 억제기입니다.", "stats": [{"n": 3800, "u": "누적 방송시간(h)"}, {"n": 285, "u": "클립 수"}, {"n": 98000, "u": "누적 시청자"}], "soop": "gyeonjahee"}, {"name": "멜로딩딩", "role": "비서부 부장", "dept": "비서부", "color": "linear-gradient(135deg,#0a1025,#3b82f6)", "initials": "멜", "img": "../img/멜로딩딩.png", "bio": "비서부를 이끄는 부장. 꼼꼼한 일정·의전 관리로 대표진을 지근거리에서 보좌하는 회사의 핵심입니다.", "stats": [{"n": 4100, "u": "누적 방송시간(h)"}, {"n": 350, "u": "클립 수"}, {"n": 140000, "u": "누적 시청자"}], "soop": "melodingding"}, {"name": "김마렌", "role": "게임부 부장", "dept": "게임부", "color": "linear-gradient(135deg,#2a0a0a,#ff4d4d)", "initials": "게", "img": "../img/김마렌.png", "bio": "게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끄는 부장입니다.", "stats": [{"n": 5100, "u": "누적 방송시간(h)"}, {"n": 410, "u": "클립 수"}, {"n": 210000, "u": "누적 시청자"}], "soop": "kimmaren77"}, {"name": "감자가비", "role": "컨텐츠부 부장", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a1800,#ffcb45)", "initials": "컨", "img": "../img/감자가비.png", "bio": "컨텐츠부를 총괄하는 아이디어의 원천. 투박해 보이지만 속은 꽉 찬, 콘텐츠 기획의 핵심 인재입니다.", "stats": [{"n": 4600, "u": "누적 방송시간(h)"}, {"n": 380, "u": "클립 수"}, {"n": 175000, "u": "누적 시청자"}], "soop": "doki0818"}, {"name": "이지수", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#150a30,#8b5cf6)", "initials": "이", "img": "../img/이지수.png", "bio": "게임부의 분위기 메이커. 승부욕과 순발력으로 팀에 활력을 불어넣는 사원입니다.", "stats": [{"n": 3200, "u": "누적 방송시간(h)"}, {"n": 220, "u": "클립 수"}, {"n": 85000, "u": "누적 시청자"}], "soop": "xpdpfv2"}, {"name": "쏭이", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#0a0a22,#6366f1)", "initials": "쏭", "img": "../img/쏭이.png", "bio": "무한한 가능성을 지닌 게임부의 기대주. 빠르게 성장하며 팀의 활력을 더하는 사원입니다.", "stats": [{"n": 800, "u": "누적 방송시간(h)"}, {"n": 65, "u": "클립 수"}, {"n": 28000, "u": "누적 시청자"}], "soop": "gatgdf"}, {"name": "조아라", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#0a1a10,#10b981)", "initials": "조", "img": "../img/조아라.png", "bio": "게임부의 든든한 허리. 부장을 보좌하며 팀을 열정적으로 받치는 사원입니다.", "stats": [{"n": 3600, "u": "누적 방송시간(h)"}, {"n": 280, "u": "클립 수"}, {"n": 115000, "u": "누적 시청자"}], "soop": "joaras2"}, {"name": "빡쏘", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#1a0a18,#ec4899)", "initials": "빡", "img": "../img/빡쏘.png", "bio": "작지만 강하다! 패기 넘치는 플레이로 빠르게 존재감을 키워가는 게임부 사원입니다.", "stats": [{"n": 2200, "u": "누적 방송시간(h)"}, {"n": 160, "u": "클립 수"}, {"n": 58000, "u": "누적 시청자"}], "soop": "soyoung6056"}, {"name": "희희덕", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#0a1a0a,#22c55e)", "initials": "희", "img": "../img/희희덕.png", "bio": "탄탄한 게임 실력과 성실함으로 팀에 기여하는 게임부 사원입니다.", "stats": [{"n": 1900, "u": "누적 방송시간(h)"}, {"n": 140, "u": "클립 수"}, {"n": 52000, "u": "누적 시청자"}], "soop": "poippoi52"}, {"name": "밀크티냠", "role": "컨텐츠부 사원", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a1200,#f59e0b)", "initials": "밀", "img": "../img/밀크티냠.png", "bio": "톡톡 튀는 아이디어와 꼼꼼함으로 콘텐츠 기획을 받치는 컨텐츠부 사원입니다.", "stats": [{"n": 2800, "u": "누적 방송시간(h)"}, {"n": 195, "u": "클립 수"}, {"n": 72000, "u": "누적 시청자"}], "soop": "ducke77"}, {"name": "삐요코", "role": "컨텐츠부 사원", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#0a1a1a,#14b8a6)", "initials": "삐", "img": "../img/삐요코.png", "bio": "꼼꼼한 편집과 센스 있는 기획으로 콘텐츠를 완성하는 컨텐츠부 사원입니다.", "stats": [{"n": 3000, "u": "누적 방송시간(h)"}, {"n": 240, "u": "클립 수"}, {"n": 95000, "u": "누적 시청자"}], "soop": "nlov555jij"}, {"name": "채하나", "role": "컨텐츠부 사원", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a0a00,#f97316)", "initials": "채", "img": "../img/채하나.png", "bio": "친근하고 활발한 에너지로 콘텐츠에 생기를 더하는 컨텐츠부 사원입니다.", "stats": [{"n": 2600, "u": "누적 방송시간(h)"}, {"n": 185, "u": "클립 수"}, {"n": 76000, "u": "누적 시청자"}], "soop": "chae1hana"}, {"name": "묵아", "role": "게임부 인턴", "dept": "게임부", "color": "linear-gradient(135deg,#0a1820,#06b6d4)", "initials": "묵", "img": "../img/묵아.png", "bio": "게임부에 새로 합류한 패기의 인턴. 근성으로 실력을 쌓아가는 중입니다.", "stats": [{"n": 1600, "u": "누적 방송시간(h)"}, {"n": 110, "u": "클립 수"}, {"n": 44000, "u": "누적 시청자"}], "soop": "nororo"}, {"name": "프하", "role": "게임부 인턴", "dept": "게임부", "color": "linear-gradient(135deg,#160a22,#a855f7)", "initials": "프", "img": "../img/프하.png", "bio": "장비 세팅부터 실전까지 하나씩 배워가는 게임부 인턴입니다.", "stats": [{"n": 2100, "u": "누적 방송시간(h)"}, {"n": 155, "u": "클립 수"}, {"n": 63000, "u": "누적 시청자"}], "soop": "peuhaha"}, {"name": "셀키", "role": "컨텐츠부 인턴", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a0808,#ef4444)", "initials": "셀", "img": "../img/셀키.png", "bio": "이제 막 합류한 컨텐츠부의 새내기 인턴. 밝은 인사로 팀에 스며드는 중입니다.", "stats": [{"n": 3400, "u": "누적 방송시간(h)"}, {"n": 260, "u": "클립 수"}, {"n": 89000, "u": "누적 시청자"}], "soop": "sellkey"}];</script><script>(function(){
+<script>window.WHALE_MEMBERS=[{"name": "울산큰고래", "role": "사장", "dept": "임원", "color": "linear-gradient(135deg,#0d1a4a,#2f63ff)", "initials": "고", "img": "../img/울산큰고래.png", "bio": "고래상사를 세운 수장. 든든한 리더십과 특유의 허당미로 16인 크루를 이끄는 대표입니다. 직원들의 고충을 누구보다 잘 압니다.", "birth": "05-03", "debut": "2009-12-12", "joined": "2025-09-07", "soop": "bach023"}, {"name": "견자희", "role": "부사장", "dept": "임원", "color": "linear-gradient(135deg,#0a1e20,#0fb5b0)", "initials": "부", "img": "../img/견자희.png", "bio": "냉철한 판단력과 탁월한 업무 능력으로 회사를 실질 운영하는 오른팔. 사장님의 폭주를 막는 든든한 억제기입니다.", "birth": "04-28", "debut": "2012-05-11", "joined": "2025-09-10", "soop": "gyeonjahee"}, {"name": "멜로딩딩", "role": "비서부 부장", "dept": "비서부", "color": "linear-gradient(135deg,#0a1025,#3b82f6)", "initials": "멜", "img": "../img/멜로딩딩.png", "bio": "비서부를 이끄는 부장. 꼼꼼한 일정·의전 관리로 대표진을 지근거리에서 보좌하는 회사의 핵심입니다.", "birth": "09-03", "debut": "2021-02-21", "joined": "2025-09-07", "soop": "melodingding"}, {"name": "김마렌", "role": "게임부 부장", "dept": "게임부", "color": "linear-gradient(135deg,#2a0a0a,#ff4d4d)", "initials": "게", "img": "../img/김마렌.png", "bio": "게임부를 이끄는 강인한 리더. 어떤 게임이든 폭풍 같은 플레이로 팀을 승리로 이끄는 부장입니다.", "birth": "06-03", "debut": "2021-01-01", "joined": "2025-09-12", "soop": "kimmaren77"}, {"name": "감자가비", "role": "컨텐츠부 부장", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a1800,#ffcb45)", "initials": "컨", "img": "../img/감자가비.png", "bio": "컨텐츠부를 총괄하는 아이디어의 원천. 투박해 보이지만 속은 꽉 찬, 콘텐츠 기획의 핵심 인재입니다.", "birth": "08-18", "debut": "2017-10-01", "joined": "2025-09-12", "soop": "doki0818"}, {"name": "이지수", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#150a30,#8b5cf6)", "initials": "이", "img": "../img/이지수.png", "bio": "게임부의 분위기 메이커. 승부욕과 순발력으로 팀에 활력을 불어넣는 사원입니다.", "birth": "04-08", "debut": "2017-12-28", "joined": "2025-09-12", "soop": "xpdpfv2"}, {"name": "쏭이", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#0a0a22,#6366f1)", "initials": "쏭", "img": "../img/쏭이.png", "bio": "무한한 가능성을 지닌 게임부의 기대주. 빠르게 성장하며 팀의 활력을 더하는 사원입니다.", "birth": "06-28", "debut": "2017-12-30", "joined": "2025-09-12", "soop": "gatgdf"}, {"name": "조아라", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#0a1a10,#10b981)", "initials": "조", "img": "../img/조아라.png", "bio": "게임부의 든든한 허리. 부장을 보좌하며 팀을 열정적으로 받치는 사원입니다.", "birth": "02-24", "debut": "2024-02-24", "joined": "2025-09-12", "soop": "joaras2"}, {"name": "빡쏘", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#1a0a18,#ec4899)", "initials": "빡", "img": "../img/빡쏘.png", "bio": "작지만 강하다! 패기 넘치는 플레이로 빠르게 존재감을 키워가는 게임부 사원입니다.", "birth": "10-01", "debut": "2024-11-18", "joined": "2025-09-07", "soop": "soyoung6056"}, {"name": "희희덕", "role": "게임부 사원", "dept": "게임부", "color": "linear-gradient(135deg,#0a1a0a,#22c55e)", "initials": "희", "img": "../img/희희덕.png", "bio": "탄탄한 게임 실력과 성실함으로 팀에 기여하는 게임부 사원입니다.", "birth": "05-02", "debut": "2024-02-22", "joined": "2026-04-05", "soop": "poippoi52"}, {"name": "밀크티냠", "role": "컨텐츠부 사원", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a1200,#f59e0b)", "initials": "밀", "img": "../img/밀크티냠.png", "bio": "톡톡 튀는 아이디어와 꼼꼼함으로 콘텐츠 기획을 받치는 컨텐츠부 사원입니다.", "birth": "08-10", "debut": "2019-10-11", "joined": "2025-09-12", "soop": "ducke77"}, {"name": "삐요코", "role": "컨텐츠부 사원", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#0a1a1a,#14b8a6)", "initials": "삐", "img": "../img/삐요코.png", "bio": "꼼꼼한 편집과 센스 있는 기획으로 콘텐츠를 완성하는 컨텐츠부 사원입니다.", "birth": "06-01", "debut": "2025-02-14", "joined": "2025-09-08", "soop": "nlov555jij"}, {"name": "채하나", "role": "컨텐츠부 사원", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a0a00,#f97316)", "initials": "채", "img": "../img/채하나.png", "bio": "친근하고 활발한 에너지로 콘텐츠에 생기를 더하는 컨텐츠부 사원입니다.", "birth": "01-08", "debut": "2025-12-04", "joined": "2026-04-05", "soop": "chae1hana"}, {"name": "묵아", "role": "게임부 인턴", "dept": "게임부", "color": "linear-gradient(135deg,#0a1820,#06b6d4)", "initials": "묵", "img": "../img/묵아.png", "bio": "게임부에 새로 합류한 패기의 인턴. 근성으로 실력을 쌓아가는 중입니다.", "birth": "03-20", "debut": "2020-05-16", "joined": "2026-06-04", "soop": "nororo"}, {"name": "프하", "role": "게임부 인턴", "dept": "게임부", "color": "linear-gradient(135deg,#160a22,#a855f7)", "initials": "프", "img": "../img/프하.png", "bio": "장비 세팅부터 실전까지 하나씩 배워가는 게임부 인턴입니다.", "birth": "12-16", "debut": "2025-02-01", "joined": "2026-06-04", "soop": "peuhaha"}, {"name": "셀키", "role": "컨텐츠부 인턴", "dept": "컨텐츠부", "color": "linear-gradient(135deg,#1a0808,#ef4444)", "initials": "셀", "img": "../img/셀키.png", "bio": "이제 막 합류한 컨텐츠부의 새내기 인턴. 밝은 인사로 팀에 스며드는 중입니다.", "birth": "02-22", "debut": "2024-02-04", "joined": "2026-06-07", "soop": "sellkey"}];</script><script>(function(){
   var M=window.WHALE_MEMBERS||[];
   var i=parseInt(new URLSearchParams(location.search).get('i')||'0',10);
   if(isNaN(i)||i<0||i>=M.length)i=0;
-  var PRM=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var SURL='https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/status.json';
   var STATUS={};  // soop id -> {is_live, viewers, title, live_url}
-  function countUp(el,t){if(PRM){el.textContent=t.toLocaleString();return;}
-    var s=null;(function step(ts){if(!s)s=ts;var p=Math.min((ts-s)/1200,1);
-    el.textContent=Math.floor((1-Math.pow(1-p,3))*t).toLocaleString();
-    if(p<1)requestAnimationFrame(step);})(performance.now());}
   function esc(x){var d=document.createElement('div');d.textContent=x==null?'':x;return d.innerHTML.replace(/"/g,'&quot;');}
   // st.live_url은 외부(status 피드) 값 → http/https만 허용, 아니면 신뢰 URL로 폴백(href javascript: 차단)
   function safeHttp(u,fb){try{var p=new URL(u,location.href);return (p.protocol==='http:'||p.protocol==='https:')?u:fb;}catch(e){return fb;}}
   // soop id는 자체 데이터(members.json)에서 오므로 신뢰됨. encodeURIComponent로만 방어.
-  function render(animate){
+  function render(){
     var m=M[i];if(!m)return;
     document.title=m.name+' · 고래상사';
     var st=STATUS[m.soop]||{}, live=!!st.is_live, sid=encodeURIComponent(m.soop||'');
@@ -306,8 +347,16 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
                         : ('https://www.sooplive.co.kr/station/'+sid);
     var soopBtn = '<a class="btn sm '+(live?'primary':'')+'" href="'+esc(soopHref)+'" target="_blank" rel="noopener">'+
                   (live?'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>방송 보러가기':'SOOP 방송국 →')+'</a>';
-    var stats=(m.stats||[]).map(function(s,k){
-      return '<div class="stat"><div class="n" id="ds'+k+'">0</div><div class="u">'+esc(s.u)+'</div></div>';}).join('');
+    /* 인사기록 3칸 = 홈 모달과 같은 계산(site.js WhaleDate) — 같은 사람이 페이지마다
+       다른 D-day를 말하지 않게 한 벌만 쓴다. site.js가 없으면 조용히 '—'로 둔다. */
+    var DT=window.WhaleDate||{};
+    var stats=[['생일',DT.birth&&DT.birth(m.birth)],['데뷔일',DT.past&&DT.past(m.debut)],
+               ['입사일',DT.past&&DT.past(m.joined)]].map(function(p){
+      var v=p[1];
+      return '<div class="stat"><div class="u">'+esc(p[0])+'</div>'
+        +'<div class="n">'+esc(v?v.v:'—')+'</div>'
+        +'<div class="dd">'+esc(v?v.d:'')+'</div>'
+        +'<div class="el">'+esc(v?v.e:'')+'</div></div>';}).join('');
     var el=document.getElementById('mDetail');
     el.innerHTML= media +
       '<div><div class="dept-label">'+esc(m.dept)+'</div>'+
@@ -318,14 +367,12 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
         '<div class="navrow"><button class="btn sm" id="dPrev">← 이전 멤버</button>'+
         '<button class="btn sm" id="dNext">다음 멤버 →</button>'+
         '<a class="btn sm" href="members.html">전체 목록</a></div></div>';
-    (m.stats||[]).forEach(function(s,k){var e=document.getElementById('ds'+k);if(!e)return;
-      animate?countUp(e,s.n):(e.textContent=s.n.toLocaleString());});
     document.getElementById('dPrev').onclick=function(){i=(i-1+M.length)%M.length;render(true);};
     document.getElementById('dNext').onclick=function(){i=(i+1)%M.length;render(true);};
   }
-  render(true);  // 즉시 페인트(초상). 상태 도착 후 방송중이면 임베드로 갱신
+  render();  // 즉시 페인트(초상). 상태 도착 후 방송중이면 임베드로 갱신
   fetch(SURL+'?v='+Date.now()).then(function(r){return r.json();}).then(function(d){
     if(d&&d.members)Object.keys(d.members).forEach(function(k){var m=d.members[k];STATUS[m.id]=m;});
-  }).catch(function(){}).then(function(){render(false);});
+  }).catch(function(){}).then(render);
 })();</script>
 </body></html>

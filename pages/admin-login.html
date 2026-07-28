@@ -48,10 +48,29 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink)}
 .pg-search::placeholder{color:var(--ink-2)}
 .pg-search:focus-visible{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
-.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;min-height:36px;
-  border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);cursor:pointer;max-width:190px}
+/* select은 닫힌 상태만 CSS로 칠할 수 있고 펼친 목록은 OS/브라우저가 그린다.
+   color-scheme:dark = 그 목록까지 다크로 그리게 하는 유일한 표준 스위치(하양 윈도우 목록 방지).
+   option 색은 그 위 보강(리눅스·구형 엣지). 화살표는 chip과 톤을 맞춘 인라인 SVG. */
+.pg-select{font:inherit;font-size:13px;font-weight:700;padding:8px 34px 8px 14px;border-radius:999px;min-height:36px;
+  border:1px solid var(--line-2);color:var(--ink-2);cursor:pointer;max-width:190px;color-scheme:dark;
+  appearance:none;-webkit-appearance:none;transition:.15s;
+  background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.6 6 6.4 11 1.6' fill='none' stroke='%239aa6bd' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 13px center/10px 7px}
+.pg-select:hover{border-color:var(--brand);color:var(--ink)}
 .pg-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
-.pg-select.on{border-color:var(--brand);color:var(--ink)}
+.pg-select.on{border-color:var(--brand);color:var(--ink);background-color:var(--brand-soft)}
+.pg-select option{background:#101625;color:var(--ink);font-weight:600}
+.pg-select option:checked{background:var(--brand);color:#fff}
+/* 클립 상세 → 아카이브 기록 역방향 링크 */
+.ct-links{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.ct-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:700;
+  transition:border-color .2s var(--ease),background .2s var(--ease),transform .2s var(--ease)}
+.ct-link:hover{border-color:var(--brand);background:var(--surface-2);transform:translateX(3px)}
+.ct-link-k{flex-shrink:0;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--accent);
+  border:1px solid rgba(15,181,176,.35);border-radius:999px;padding:2px 8px}
+.ct-link-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-link-d{flex-shrink:0;font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.ct-link .oi-ar{flex-shrink:0;color:var(--ink-2)}
 /* 멤버 그리드 */
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,26px)}
 @media(max-width:1000px){.mgrid{grid-template-columns:repeat(3,1fr)}}
@@ -125,9 +144,12 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .mdetail .role{font-size:15px;color:var(--ink-2);margin-bottom:20px}
 .mdetail .bio{font-size:clamp(15px,1.4vw,17px);color:#c3cee6;line-height:1.75;margin-bottom:26px;word-break:keep-all}
 .mdetail .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
-.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 10px;text-align:center}
-.mdetail .stat .n{font-size:clamp(20px,2.4vw,30px);font-weight:900;letter-spacing:-.02em}
-.mdetail .stat .u{font-size:11px;color:var(--ink-2);margin-top:4px}
+.mdetail .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 8px 12px;text-align:center}
+/* 라벨 → 날짜 → D-day → 경과 (홈 인사기록카드와 같은 배치) */
+.mdetail .stat .u{font-size:11px;font-weight:700;color:var(--ink-2)}
+.mdetail .stat .n{font-size:clamp(14px,1.7vw,18px);font-weight:900;letter-spacing:-.02em;margin-top:5px;white-space:nowrap}
+.mdetail .stat .dd{font-size:12.5px;font-weight:800;color:var(--brand);margin-top:3px}
+.mdetail .stat .el{font-size:11px;color:var(--ink-2);margin-top:1px;word-break:keep-all}
 .mdetail .navrow{display:flex;gap:10px;flex-wrap:wrap}
 .mdetail .soop-row{margin:0 0 14px}
 .mdetail .soop-row .btn{width:100%;justify-content:center;font-weight:800}
@@ -217,6 +239,30 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
 .n-modal .field select:focus,.n-modal .field textarea:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.07)}
 .n-modal .field textarea{resize:vertical;min-height:130px;line-height:1.6;font-family:inherit}
 .n-modal .field select option{background:#0e1524;color:var(--ink)}
+/* 태그 콤보박스 — 선택된 태그는 칩, 후보는 아래 목록. select 팝업과 달리 전부 우리 CSS로 그린다 */
+.tf-lab{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;
+  padding:7px 10px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04);
+  transition:border-color .15s,background .15s}
+.tagbox:focus-within{border-color:var(--brand);background:rgba(255,255,255,.07)}
+.tagbox #clTagChips{display:contents}
+.tagbox input{flex:1 1 130px;min-width:110px;font:inherit;font-size:15px;padding:4px 2px;
+  border:none;background:none;color:var(--ink)}
+.tagbox input:focus{outline:none}
+.tagbox input::placeholder{color:#7d89a0}
+.tg{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;
+  padding:4px 5px 4px 10px;border-radius:999px;color:var(--ink);
+  background:var(--brand-soft);border:1px solid rgba(47,99,255,.45)}
+.tg button{border:none;background:none;color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer;padding:0 3px}
+.tg button:hover{color:var(--hot)}
+.tagsug{margin-top:6px;max-height:200px;overflow-y:auto;border:1px solid var(--line-2);border-radius:10px;
+  background:#0e1524;box-shadow:0 16px 40px rgba(0,0,0,.55)}
+.tagsug[hidden]{display:none}
+.tagsug button{display:flex;align-items:center;width:100%;text-align:left;border:none;background:none;
+  color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;padding:9px 12px;cursor:pointer}
+.tagsug button:hover,.tagsug button:focus-visible{background:var(--brand-soft);outline:none}
+.tagsug .sg-k{margin-left:auto;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--accent)}
+.tagsug .sg-new{color:var(--ink-2);border-top:1px solid var(--line)}
 .n-pin-field{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);cursor:pointer;margin-bottom:14px}
 .n-pin-field input{width:16px;height:16px;accent-color:var(--brand)}
 .n-modal .btn{width:100%;justify-content:center;padding:12px;margin-top:6px}

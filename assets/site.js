@@ -308,16 +308,38 @@
   var MEMBERS = window.WHALE_MEMBERS || [];
   var curIdx = 0;
 
-  function countUp(el, target) {
-    if (PRM) { el.textContent = target.toLocaleString(); return; }
-    var st = null, dur = 1200;
-    (function step(ts) {
-      if (!st) st = ts;
-      var p = Math.min((ts - st) / dur, 1);
-      el.textContent = Math.floor((1 - Math.pow(1 - p, 3)) * target).toLocaleString();
-      if (p < 1) requestAnimationFrame(step);
-    })(performance.now());
+  /* 인사기록카드 날짜 — 생일은 다음 생일까지 D-, 데뷔·입사는 지난 날수 D+ 와 연·월·일 경과.
+     날짜만 다루므로 UTC 자정 기준으로 뺀다(로컬 시각·서머타임 때문에 하루 밀리는 것 방지).
+     기준일은 브라우저의 오늘 — 페이지를 열 때마다 자동으로 다시 센다. */
+  var DAY = 86400000;
+  function todayUTC() { var d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function birthInfo(s) {
+    var p = /^(\d{2})-(\d{2})$/.exec(String(s || '')); if (!p) return null;
+    var mo = +p[1], da = +p[2], t = todayUTC(), y = new Date(t).getUTCFullYear();
+    var next = Date.UTC(y, mo - 1, da);
+    if (next < t) next = Date.UTC(y + 1, mo - 1, da);
+    var n = Math.round((next - t) / DAY);
+    return { v: mo + '월 ' + da + '일', d: n === 0 ? 'D-DAY' : 'D-' + n, e: '' };
   }
+  function pastInfo(s) {
+    var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '')); if (!p) return null;
+    var t = todayUTC(), from = Date.UTC(+p[1], +p[2] - 1, +p[3]);
+    var n = Math.round((t - from) / DAY), now = new Date(t);
+    // 연·월·일 경과는 달력 기준 — 달마다 길이가 달라 날수 나눗셈으로는 맞출 수 없다
+    var y = now.getUTCFullYear() - +p[1], mo = now.getUTCMonth() + 1 - +p[2], d = now.getUTCDate() - +p[3];
+    if (d < 0) { mo--; d += new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).getUTCDate(); }
+    if (mo < 0) { y--; mo += 12; }
+    return { v: p[1] + '-' + p[2] + '-' + p[3], d: (n >= 0 ? 'D+' : 'D') + n,
+             e: y > 0 || mo > 0 || d > 0 ? y + '년 ' + mo + '개월 ' + d + '일' : '' };
+  }
+  function setStat(k, info) {
+    var el = document.querySelector('.modal-stats .stat[data-k="' + k + '"]'); if (!el) return;
+    el.querySelector('.stat-v').textContent = info ? info.v : '—';
+    el.querySelector('.stat-d').textContent = info ? info.d : '';
+    el.querySelector('.stat-e').textContent = info ? info.e : '';
+  }
+  /* 멤버 상세(member.html)도 같은 계산을 쓴다 — 홈 모달과 상세가 서로 다른 날짜를 말하면 안 된다 */
+  window.WhaleDate = { birth: birthInfo, past: pastInfo };
   function escH(x) {
     var d = document.createElement('div');
     d.textContent = x == null ? '' : x;
@@ -336,10 +358,9 @@
     set('memberModalName', m.name || '');
     set('memberModalRole', m.role || '');
     set('memberModalBio',  m.bio || '');
-    (m.stats || []).forEach(function (s, i) {
-      var en = document.getElementById('mstat' + i), eu = document.getElementById('mstat' + i + 'u');
-      if (en) countUp(en, s.n); if (eu) eu.textContent = s.u;
-    });
+    setStat('birth',  birthInfo(m.birth));
+    setStat('debut',  pastInfo(m.debut));
+    setStat('joined', pastInfo(m.joined));
   }
   function openMember(idx) { if (!memberModalBg) return; curIdx = idx; fillModal(idx); memberModalBg.hidden = false; }
   function closeMember()   { if (memberModalBg) memberModalBg.hidden = true; }
