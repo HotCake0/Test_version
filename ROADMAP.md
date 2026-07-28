@@ -245,6 +245,20 @@
 - 재현: 로컬 `python3 -m http.server` + Playwright Chromium `--headless=new --enable-logging=stderr --virtual-time-budget=5000 --dump-dom`,
   stderr에서 `INFO:CONSOLE`을 긁어 `source: https://` 없는 것만 집계(부록 E-3 헤드리스 절차의 경량판 — playwright npm 불필요).
 
+**07-29 최종 전수 검증 (수정 반영본 기준, 전 항목 PASS)** — 이 스냅샷이 **D-Day 직전 기준선**이다:
+
+| 축 | 결과 |
+|---|---|
+| ①빌드 재현성 | 19페이지 재생성, `git diff` **0건** |
+| ②구문 | `node --check` site.js·embed.js OK |
+| ③자체검사(C-4) | **69/69** |
+| ④인라인 스크립트 | **45개 0실패** |
+| ⑤임베드 보안(C-2) | **10/10 PASS** (대상 = `assets/embed.js`) |
+| ⑥헤드리스 순회 | 21페이지 **우리 오리진 콘솔 0** · HTTP 21/21 200 |
+| ⑦워커 | `/auth/firebase` **401** · cron `status` **168초 전 갱신**(5분 주기 내, 외부 Date 헤더로 시계 교차확인 — WSL 오차 +1초) |
+| ⑦규칙 | v2 생존(`indexOn` 쿼리 **200**) · 무토큰 POST **Permission denied** |
+| ⑦데이터 | `/rework` = clips·schedules·notices·contests·**clipviews** 5노드 |
+
 ---
 
 ## 1. 즉시 뒷정리 — 보안 (cutover 무관, 지금 바로)
