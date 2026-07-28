@@ -133,6 +133,10 @@
 
   // 개발용 로그인: 실제 OAuth가 불가한 로컬에서 닉네임으로 세션을 흉내낸다.
   // 권한 계정이면 admin/editor, 아니면 member(로그인만 한 일반)로 세션 생성 → 일반 사용자 CRUD도 테스트 가능.
+  // ⚠️로컬 전용 — 운영 도메인에선 마크업째 제거한다(/permissions 닉 열거 + admin-only UI 게이팅 우회 차단).
+  //   같은 블록이 index.html 인라인 사본에도 있다(홈은 site.js 미로드) — 한쪽만 고치지 말 것.
+  var DEV_LOGIN_OK = !location.hostname || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  if (devLoginForm && !DEV_LOGIN_OK) { (devLoginForm.closest('details') || devLoginForm).remove(); devLoginForm = null; }
   if (devLoginForm) devLoginForm.addEventListener('submit', function (e) {
     e.preventDefault();
     var nick = devLoginForm.querySelector('[name="nick"]').value.trim();

@@ -268,6 +268,24 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.error('  ✗ ' + msg); 
   });
 }
 
+/* ── 4.5 개발용 로그인 가드 (assets/site.js + index.html 인라인 사본) ── */
+{
+  // 운영 도메인에 dev 로그인이 남으면 /permissions 닉 열거 + admin-only UI 게이팅이 우회된다
+  const cut = s => grab(s, /  var DEV_LOGIN_OK = [\s\S]*?devLoginForm = null; \}/, '개발용 로그인 가드')[0];
+  const guard = cut(read('assets/site.js'));
+  ok(guard === cut(read('index.html')), '홈 인라인 사본과 site.js의 dev 로그인 가드가 동일');
+
+  const removedOn = hostname => {
+    let removed = false;
+    const form = { closest: () => ({ remove: () => { removed = true; } }) };
+    new Function('location', 'devLoginForm', guard)({ hostname }, form);
+    return removed;
+  };
+  ok(removedOn('www.goraesangsa.com') === true, '운영 도메인에선 dev 로그인 마크업 제거');
+  ok(removedOn('localhost') === false, 'localhost에선 유지');
+  ok(removedOn('') === false, 'file:// 열람에선 유지');
+}
+
 /* ── 5. 사이트 조회수 WhaleViews (assets/site.js) ─────────────── */
 {
   const src = grab(read('assets/site.js'),
@@ -317,7 +335,7 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.error('  ✗ ' + msg); 
   var done = () => {
     pending = false;
     if (fail) { console.error(`\n❌ ${fail}건 실패`); process.exit(1); }
-    console.log('✅ 클립 검색 8 · 아카이브 필터 17 · 아카이브↔클립 연결 11 · 태그 콤보박스 5 · 홈 정렬 5 · 인사기록카드 14 · 조회수 5 — 전부 통과');
+    console.log('✅ 클립 검색 8 · 아카이브 필터 17 · 아카이브↔클립 연결 11 · 태그 콤보박스 5 · 홈 정렬 5 · 인사기록카드 14 · dev 로그인 가드 4 · 조회수 5 — 전부 통과');
   };
   process.on('exit', () => { if (pending) { console.error('❌ 조회수 검사가 끝나지 않음'); process.exitCode = 1; } });
 }

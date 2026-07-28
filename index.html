@@ -529,6 +529,10 @@
   if (soopLoginBtn) soopLoginBtn.addEventListener('click', soopLogin);
 
   /* 개발용: 숲 닉네임 → Firebase 권한만 조회해 로그인 (localhost 테스트) */
+  /* ⚠️로컬 전용 — 운영 도메인에선 마크업째 제거한다(/permissions 닉 열거 + admin-only UI 게이팅 우회 차단).
+     같은 블록이 assets/site.js에도 있다(홈은 site.js 미로드라 사본 보유) — 한쪽만 고치지 말 것. */
+  var DEV_LOGIN_OK = !location.hostname || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  if (devLoginForm && !DEV_LOGIN_OK) { (devLoginForm.closest('details') || devLoginForm).remove(); devLoginForm = null; }
   if (devLoginForm) devLoginForm.addEventListener('submit', function (e) {
     e.preventDefault();
     var nick = devLoginForm.querySelector('[name="nick"]').value.trim();

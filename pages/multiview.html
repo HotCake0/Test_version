@@ -432,7 +432,7 @@ html.js-anim .pg-head.img-aniload .pg-sub{opacity:1;transform:none}
   function card(m){
     var thumb=m.thumbnail?'<img loading="lazy" decoding="async" src="'+esc(m.thumbnail)+'" alt="'+esc(m.name)+'" onerror="this.style.display=\'none\'">':'';
     var ava='<div class="ava" style="background:'+(m.color||'#1f2a52')+'">'
-      +(m.img?'<img src="'+esc(m.img)+'" onerror="this.style.display=\'none\'">':esc(m.initials||''))+'</div>';
+      +(m.img?'<img src="'+esc(m.img)+'" alt="" onerror="this.style.display=\'none\'">':esc(m.initials||''))+'</div>';
     return '<div class="mv-card" data-id="'+esc(m.id)+'" role="button" tabindex="0">'
       +'<div class="mv-thumb">'+thumb+ava
       +'<span class="mv-badge"><span class="d"></span>LIVE</span>'

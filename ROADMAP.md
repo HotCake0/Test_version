@@ -1,4 +1,4 @@
-# 고래상사 리워크 — 로드맵 v4.3 (2026-07-28 필터 UX·연결·인사기록카드판)
+# 고래상사 리워크 — 로드맵 v4.4 (2026-07-28 저녁 전수 감사·문서 정합판)
 
 > 리워크가 운영(goraesangsa.com)을 대체하는 순간(cutover)까지, 그리고 그 이후의 전체 계획.
 > 각 항목에 **실행자 / 선행조건 / 절차 / 합격 기준**을 명시한다. 진행하면서 체크박스를 갱신할 것.
@@ -83,7 +83,9 @@
   - `/contests` 15건(운영) / `/rework/contests` 15건(07-02 이관 사본) — cutover 직전 diff 재이관 필요.
     ⚠️이 15건은 `category` 필드 없음 → 리워크 렌더가 크루대전으로 기본 처리(07-08 하위호환). 이관 스크립트에서 `category:"크루대전"` 명시 주입 권장(§3-C).
   - `/rework/notices` 1건 = **dev 테스트 공지**(ownerId `dev:핫케이크_`, title "테스트") → 삭제 대상(§1-4).
-  - `/rework/clips`·`/rework/schedules` **비어 있음** (시드 미이관 — 실데이터 넣을 때 충돌 없음).
+  - ~~`/rework/clips`·`/rework/schedules` 비어 있음~~ → ⚠️**07-22 REST 시딩으로 채워짐(v4.4 정정, 07-28 실측)**:
+    **clips 13건**(실 대회 클립 12 + 🔴테스트 클립 1, 전부 `ownerId:"seed"`) · **schedules 1건**(🔴"테스트 방송").
+    테스트 2건은 §4-5-0에서 삭제. 실 클립 12건이 이미 있으므로 **4-5-5 이관 버튼은 0건이 정상**.
   - `/crews` = 상대 크루 사전 `{aliases:[], currentName}` (아카이브 상세가 참조). `/permissions` = 닉→"admin"|"editor".
 - 이미지 자산(2026-07-08 실측, `img/` 20장 7.5MB): **`wave-bg.png` 4.8MB(최대 압축 대상)**, 멤버 초상 `.png` 200~300KB 다수(멜로딩딩299·삐요코293·채하나284·조아라271·프하200·울산큰고래185). **favicon 없음**. 압축 도구: Pillow 12.2.0 로컬 사용가능, 운영본 `Whale-Corp-main/favicon.png` 이식 가능(§2-B-4/6 참조).
 - 레포: `github.com/HotCake0/Test_version`. ✅**로컬 브랜치도 `main`**(1-3 완료, 2026-07-10) → 푸시는 `git push`.
@@ -100,7 +102,7 @@
 - **빌드 재현성 PASS**: `python3 src/build.py` → 19페이지 재생성, `git diff` 0건(pages/ = build.py 완전 동기).
 - **JS 구문**: `node --check assets/site.js` PASS. 워킹트리 클린(main = origin/main `63670f4`).
 - **RTDB 실측 = 계획과 정확 일치**: `/rework` = {contests 15, notices 1(dev "테스트" — 4-5-0 삭제 예정)},
-  clips/schedules 비어 있음. 운영 contests 15 = rework 15(**diff 0** — 아카이브 이관 버튼은 "이미 모두 있음"이 정상).
+  clips/schedules 비어 있음(⚠️**07-22 시딩으로 무효 — §0-3 정정 참조**). 운영 contests 15 = rework 15(**diff 0** — 아카이브 이관 버튼은 "이미 모두 있음"이 정상).
 - **인프라 생존**: 워커 `/auth/firebase` 401(정상), apex→www 307, `www.goraesangsa.com` 200.
 - 결론: **cutover 선행조건·필수 작업 잔여 0.** 남은 것 = §2.6(전부 선택) + §4 런북(8/3) + Q6(보류).
 - **07-13 갱신**: §2.6 Claude 몫 전부 소진(2.6-8 critique 26/40·P1 0건 완료). 잔여 = 2.6-9 리허설(D-1, 사용자)·2.6-10 Q6 재상신(D-7)·§4 런북뿐.
@@ -193,6 +195,42 @@
 인사기록카드 14·조회수 5) · 16인 D-day가 시트와 완전 일치 + 경계(당일=D-DAY·D+0·일수 빌림·잘못된 형식=`—`) ·
 빌드 19페이지 · 인라인 `<script>` 전수 `node --check` · 더미 스탯 잔재 grep 0건 · 커밋 전 `git status`에 `D og*.png` 없음 확인.
 
+### 0-10. 2026-07-28 저녁 D-6 전수 감사 (v4.4 — 진척도 대조 + 문서 갭)
+
+**진척도**: 체크박스 완료 26 · 미완 12(그중 **9건이 D-Day 당일 항목**) · 보류 7 → **코드 잔여 사실상 0.**
+표준 검증 전 항목 PASS(빌드 재현성 diff 0 · 자체검사 · 인라인 45개 0실패 · 임베드 C-2 10/10 ·
+워커 401 · 규칙 v2 indexOn 200 · 무토큰 쓰기 Permission denied). v4.2/v4.3이 주장한 기능 10건은 **코드 실측 전부 일치**.
+
+**🔴 최대 갭 — 07-22 데이터 시딩이 이 문서에 기록되지 않았음.** 실측 `/rework/clips` **13건**·`/rework/schedules` **1건**
+(전부 `ownerId:"seed"`)인데 §0-3·§0-5·§2-A-2·§4-5-5 **4곳이 "비어 있음"으로 방치**돼 있었다 → 전부 정정.
+- 파생①: **런북 4-5-5의 합격 기준이 뒤집힌다** — 클립 13건이 이미 있으므로 이관 버튼은 URL 중복 스킵으로
+  **0건 등록 = "이미 모두 있음"이 정상**. 종전 문구("13건 등록 확인")대로면 당일 정상 동작을 실패로 오인한다.
+- 파생②: **홈 대표 클립이 아직 테스트 데이터** — `-Oy8tuep…` `title:"테스트 클립"`이 `featured:true`라
+  홈 정렬(featured 최우선, `index.html`)상 **전환 직후 히어로 1번 슬롯에 노출**된다. §4-5-0에 청소 절차 추가.
+  (나머지 12건은 태그=대회 제목인 실 클립이라 정상 데이터 — 지울 것은 테스트 클립 1건 + "테스트 방송" 일정 1건뿐.)
+
+**문서 좌표 부패 6건(전부 정정)** — 기능은 멀쩡하고 "후속 작업자가 참고할 좌표"만 낡았던 것:
+부록 E-2의 `WhaleEmbed`(site.js 402행 → **`assets/embed.js`**) · 부록 B의 `embedUrlOf` 위치(build_archive_detail 인라인 →
+**`assets/embed.js`**) · 부록 F 앵커 3종(`_CLIP_JS_SHARED` 681→773 · `archive_json_script()` 1115→1382 ·
+`build_stub` 2736→3143) · 부록 C-4 건수(35 → **69**).
+⚠️**교훈: 행번호 앵커는 커밋마다 부패한다** → 부록 F 앵커를 전부 **함수명 grep 지시**로 교체(행번호는 참고용 병기).
+특히 E-2는 목차가 아니라 보안 불변식 조항이라, 죽은 좌표를 두면 후속자가 "iframe src 직접 조립"으로 우회할 위험이 실질적이었다.
+
+**부록 A/B 스키마 미갱신 정정**: 아키텍처에 `assets/embed.js`·`/rework/clipviews` 추가, 데이터사전의
+`members.stats[{n,u}]×3` → `birth/debut/joined`(v4.3 실반영), `clipviews` 항목 신설.
+→ 파생: **§5-4 E-2("멤버 스탯 = placeholder")의 전제가 이미 무효** — 그 3칸은 실데이터로 교체됐다. 항목 재정의함.
+
+**당일 처리한 코드 3건(프리즈 예외, 사용자 "전부 진행해" 지시)**:
+- 🔒 **개발용 로그인 운영 노출 차단**: `assets/site.js` + `index.html` 인라인 사본 양쪽에 호스트 가드
+  (`localhost`/`127.0.0.1`/`[::1]`/`file://` 외에서는 `<details>`째 `.remove()`). 종전엔 전 20페이지 로그인 모달에
+  가드 없이 노출 → 방문자가 닉네임을 넣어 `/permissions`(공개읽기)로 **admin/editor 여부를 열거**하고
+  `.admin-only` UI 게이팅을 우회할 수 있었다(실쓰기는 idToken 부재로 401이라 데이터는 안전했음).
+  `display:none`이 아니라 제거인 이유 = 숨기기만 하면 콘솔에서 submit 디스패치로 그대로 우회된다.
+- ♿ 멀티뷰 카드 아바타 `<img>` `alt=""` 부여(`build.py` `card()`) — 이름은 썸네일 alt·카드 본문에 이미 있어 장식용 처리가 정답.
+- ✅ `src/test_pages.js` **65→69건**(dev 로그인 가드 4: 사본 동일성 + 호스트 3케이스). 사본 2벌 함정을 또 테스트로 고정.
+
+**신규 백로그**: E-13(CSP 헤더 부재 — 보안헤더 4종에 없음) · 미문서화 자산 4건은 부록 E-1에 등재.
+
 ---
 
 ## 1. 즉시 뒷정리 — 보안 (cutover 무관, 지금 바로)
@@ -242,7 +280,9 @@
 
   - `stats`(방송시간/클립수/시청자)는 실측 부재로 기존 placeholder 유지 → §5-4(SOOP API 실데이터)에서 교체.
   - 잔여 미세정리(후순위): `crew.html` 프로즈에 "대표이사/신입사원" 옛 표현 잔존, admin-clips 데모 테이블에 옛 부서명(정적 목업이라 무해) — cutover 콘텐츠 손질 때 정리.
-- [~] **2-A-2. 클립 실데이터** — `/rework/clips` 비어 있음. ✅**경로 확정(07-11, §2.5-4)**: 클립 페이지 관리자 전용 "운영 아카이브에서 클립 불러오기" 1클릭 버튼 구현(13건±, 런북 §4-5-5에서 실행). 추가 클립은 (b) UI 직접 입력. 아래는 이력 보존:
+- [x] **2-A-2. 클립 실데이터** — ✅**사실상 완료(v4.4 정정, 07-28 실측)**: `/rework/clips`에 **실 대회 클립 12건 존재**
+  (07-22 REST 시딩분, `ownerId:"seed"`, tags=대회 제목). 잔여는 🔴테스트 클립 1건 삭제(§4-5-0)뿐.
+  종전 표기 "비어 있음"은 07-07 실측치가 그대로 남아 있던 것. ✅**경로 확정(07-11, §2.5-4)**: 클립 페이지 관리자 전용 "운영 아카이브에서 클립 불러오기" 1클릭 버튼 구현(13건±, 런북 §4-5-5에서 실행). 추가 클립은 (b) UI 직접 입력. 아래는 이력 보존:
   - (a) ~~cutover 후 "시드 불러오기" 1클릭~~ **삭제됨**. 대신 필요하면 **Claude가 admin 토큰 이관 스크립트**로 일괄 입력(§3-C 아카이브/일정 이관과 동일 패턴, `clips.json`→`/rework/clips` POST).
   - (b) **cutover 후 관리자 로그인으로 UI에서 직접 입력**(권장 — 실데이터가 적고 사용자가 직접 골라 넣는 게 자연스러움).
   - 입력 팁: `url`은 `https?://`만 통과(safeUrl). SOOP VOD = `https://vod.sooplive.com/player/{id}`, 유튜브 = `youtu.be/{id}` 또는 `watch?v={id}`. **이미지 URL은 선택** — 비우면 카드/관련클립이 영상 링크로 임베드 미리보기(07-08 embedUrlOf), SOOP 썸네일 이미지를 따로 구할 필요 없음. `tags`에 관련 아카이브 태그 넣으면 그 아카이브 상세에 자동 노출.
@@ -369,8 +409,10 @@
   - 절차: §4를 함께 읽으며 사용자 콘솔 몫의 화면 위치를 사전 확인 — Vercel(Settings→Git→Disconnect/Connect),
     Firebase(RTDB 데이터 탭→⋮→JSON 내보내기), SOOP 로그인 계정 준비. 소요·순서 최종 점검.
   - 합격: 사용자 "당일 헤맬 곳 없음" 확인. (2.5-6 배포 리허설 취소와 별개 — 이건 문서·화면 확인만.)
-- [ ] **2.6-10. Q6 키교체 재상신** (W-1) — 보류 존중하되 D-7에 1회만 재확인. 근거: `/rework`가 실서비스로 승격되는
-  순간 노출키(§1-1)의 영향 범위가 "격리 경로"에서 "정식 데이터"로 커짐. 거절 시 §5-5 로테이션으로 최종 이관.
+- [~] **2.6-10. Q6 키교체 재상신** (W-1) — ✅**2026-07-28(D-6) 상신 완료, 사용자 답변 대기.** 근거: `/rework`가 실서비스로
+  승격되는 순간 노출키(§1-1)의 영향 범위가 "격리 경로"에서 "정식 데이터"로 커짐. **작업량은 콘솔 10분·코드 변경 0**
+  (Cloudflare secret `FIREBASE_SA_KEY` 값 교체 → GCP에서 옛 키 `04cee49a…` 삭제. 재배포 불필요).
+  거절 시 §5-5 **F-2**로 최종 이관(D+2주 내 1회 권장 유지).
 
 ---
 
@@ -498,14 +540,25 @@
   - `/status` 데이터로 멀티뷰/멤버 LIVE 뱃지 렌더(워커 cron 무영향 증거).
   - **NEW: 아카이브 카테고리 칩 필터 동작 + 관련클립 임베드 렌더 스팟 체크.**
 - [ ] **4-5. 실로그인 검증 (사용자 + Claude 안내)** — **Phase B의 첫 실전 검증 지점**
-  0. **§1-4 처리**: admin 로그인 상태에서 `/rework/notices`의 dev 테스트 공지("테스트", ownerId `dev:핫케이크_`) 삭제 — 개시 공지 게시 전에 먼저.
+  0. **§1-4 처리 — 시드/테스트 데이터 청소 3건**(admin 로그인 상태, 개시 공지 게시 전에 먼저).
+     ⚠️v4.4 확장: 종전엔 공지 1건만 지시했으나 07-22 시딩 잔재가 2건 더 있다(07-28 실측).
+     | 대상 | 위치 | 왜 |
+     |---|---|---|
+     | 공지 "테스트" (`ownerId dev:핫케이크_`) | `/rework/notices` | 개시 공지와 섞임 |
+     | 🔴클립 **"테스트 클립"** (`-Oy8tuep…`, `featured:true`) | `/rework/clips` | **`featured`라 홈 히어로 1번 슬롯을 점유** — 전환 직후 "테스트 클립"이 대표 노출된다 |
+     | 일정 "테스트 방송" (2026-07-22, `ownerId:"seed"`) | `/rework/schedules` | 캘린더에 과거 더미 |
+     - 삭제만 하면 홈 히어로는 조회수·최신순 다음 항목으로 자동 승계된다(별도 지정 불필요).
+       대표를 고르고 싶으면 원하는 클립에 `featured` 토글.
+     - **더 빠른 대안(권장)**: D-Day 전에 사용자가 Firebase 콘솔 데이터 탭에서 위 3개 노드를 직접 삭제해도 된다(Claude는 쓰기 수단 없음).
   1. 관리자(울산큰고래 or editor 핫케이크_) SOOP 로그인 → Session Storage `soop_user`(role) + `soop_fb`(idToken) 확인.
   2. 공지 작성→수정→pinned 토글→삭제 / 클립 작성→featured 토글→**태그 넣고 관련아카이브 노출 확인** / 일정 작성 / 아카이브 수정→**카테고리 전환 확인**. 전부 성공.
      ⚠️**규칙 v2(07-18) 게시된 상태라면**: 여기서 정상 저장이 401나면 규칙 상한 오탐 — `src/firebase-rules.v1.json` 재게시(§5-2 롤백)로 즉시 복구 후 Claude 진단.
   3. 일반 SOOP 계정(권한 미등록) 로그인 → 본인 글 작성/수정 성공, 남의 글 버튼 미노출.
   4. (심화) 일반 계정 콘솔 강제 호출: `fetch('.../rework/notices/<남의글키>.json?auth='+idToken,{method:'DELETE'})` → 401.
   - **실패 시**: `soop_fb` 없음=교환 실패(워커/키), 쓰기 401=토큰첨부/규칙. Claude 호출 진단.
-  5. **클립 일괄 이관(§2.5-4)**: 검증 성공 직후 admin 상태로 클립 페이지 → "운영 아카이브에서 클립 불러오기" 1클릭 → 13건± 등록 확인. (07-11 멱등화 — URL 중복 스킵, 부분 실패 시 재클릭으로 잔여분만 재시도.)
+  5. **클립 일괄 이관(§2.5-4)**: 검증 성공 직후 admin 상태로 클립 페이지 → "운영 아카이브에서 클립 불러오기" 1클릭.
+     ⚠️**합격 기준 정정(v4.4)**: 07-22 시딩으로 실 클립 12건이 **이미 들어있으므로 "0건 등록 / 이미 모두 있음"이 정상**이다.
+     (07-11 멱등화 — URL 중복 스킵.) 운영에 새 클립이 추가돼 있었다면 그 차이분만 등록된다. **0건을 실패로 오인하지 말 것.**
   6. **아카이브 diff 이관(§3-C)**: 아카이브 페이지 → "운영 기록 불러오기 (누락분 이관)" 1클릭 → 운영 추가분만 등록(0건이면 "이미 모두 있음" 안내가 정상).
 - [ ] **4-6. 모니터링** — 첫 24h 집중, 이후 1주. 로그인 성공률·편집 401 오탐·멀티뷰 5분갱신·Vercel 4xx/5xx.
   - **롤백 트리거**: ①로그인 전면불가 ②주요페이지 백지/크래시 ③데이터 유실. 사소한 스타일은 전진 수정.
@@ -619,8 +672,11 @@
   ②`date`/`duration`은 렌더 코드만 있고 규칙 화이트리스트 밖이라 영구 미표시 → E-6b 죽은 코드로 이관 정리.
 - **E-12. 아카이브 데이터 위생** ⭐v4.2 신설 — 기록 15건에 `category` 전무(→"컨텐츠" 칩 항상 0건)·`tags` 전무
   (→제목 매칭으로 우회 중이라 **제목을 수정하면 관련 클립 연결이 끊김**). 폼에서 category 필수화 + 저장 시 제목을 태그로 자동 부여(E-4와 함께).
-- **E-2. 멤버 스탯 실데이터** (Claude 코드 + 사용자 워커 배포, ~반나절): 현재 멤버 모달/상세 스탯 = 세계관 placeholder
-  ("인사기록카드" 프레임으로 완화된 상태 — critique 판정). 워커 cron 확장(주1회 SOOP stationinfo 16인 조회 →
+- **E-2. 멤버 방송통계 실데이터** ⚠️**v4.4 재정의**(전제가 무효화됨): 종전 서술은 "스탯 3칸 = 세계관 placeholder"였으나,
+  v4.3에서 그 3칸은 **birth/debut/joined 실데이터로 교체 완료**됐다. 따라서 이 항목은 "placeholder 교체"가 아니라
+  **SOOP 방송통계(팔로워·방송시간)를 넣을 자리를 새로 만드는 일**이 된다 — 인사기록카드 3칸은 그대로 두고
+  별도 행/섹션 추가 여부부터 결정해야 한다(디자인 판단 필요 → 착수 전 사용자 확인 1회).
+  (Claude 코드 + 사용자 워커 배포, ~반나절): 워커 cron 확장(주1회 SOOP stationinfo 16인 조회 →
   `/memberstats.json` PUT, §5-1 SA 인증 재사용) → member 상세·모달이 fetch, 실패 시 현행 placeholder 폴백.
   - 합격: 실 팔로워/방송시간 표기 + status cron(5분)과 독립 동작 + 무토큰 PUT 401.
 - **E-3. LIVE "지금 방송 중" 그리드 재도입** (조건부): 과거 홈에 넣었다 사용자 요청으로 제거한 이력(2026-06-29) —
@@ -639,10 +695,16 @@
 - **E-6b. 죽은 코드 정리(07-19 ponytail-audit, 전부 런타임 영향 0 — 프리즈라 cutover 후 F-5로 이월)** — grep 검증 완료:
   - `assets/site.js:284~343` 멤버 프로필 모달(`fillModal/openMember/closeMember/countUp/escH` ~60줄) — site.js 로드 페이지 중 `#memberModalBg` 마크업 가진 곳 0, index.html은 site.js 미로드(인라인 재구현)라 완전 사문. `if(memberModalBg&&MEMBERS.length)` 가드라 제거해도 무동작 변화.
   - `src/build.py:188 member_modal()` + `write()`의 `need_member_modal` 파라미터 — 항상 False, True 호출 0(멤버카드 클릭이 `member.html?i=idx` 이동으로 바뀐 뒤 남은 잔재). 위 모달과 세트로 제거.
-  - `src/build.py:1115 archive_json_script()` + `WHALE_ARCHIVE` — 호출자 0(아카이브는 `WhaleData.list('contests')` 런타임 렌더). 사문.
-  - `src/build.py:2736~2742 build_stub` 루프 — **`build_stub` 함수 미정의인데 전 페이지가 `done`이라 stub_count=0으로 절대 실행 안 돼 크래시 안 남**(휴면 지뢰: 향후 SITE groups에 미구현 페이지 추가 시 NameError). 루프 삭제 or 스텁 구현 택1.
+  - `src/build.py:1382`(v4.4 재측정, 종전 1115) `archive_json_script()` + `WHALE_ARCHIVE` — 호출자 0(아카이브는 `WhaleData.list('contests')` 런타임 렌더). 사문.
+  - `src/build.py:3146`(v4.4 재측정, 종전 2736~2742) `build_stub` 루프 — **`build_stub` 함수 미정의인데 전 페이지가 `done`이라 stub_count=0으로 절대 실행 안 돼 크래시 안 남**(휴면 지뢰: 향후 SITE groups에 미구현 페이지 추가 시 NameError). 루프 삭제 or 스텁 구현 택1.
   - (감사 오판 기각) `.project_title` — §2.6-4에서 "실존 마크업의 의도적 숨김"으로 이미 조사·보류 결정, 죽은 코드 아님.
   - 순효과 ~-90줄. 순수 삭제라 리스크 낮으나 프리즈 방침(§2.6-4 "실익 없어 보류") 준수해 D-Day 후 일괄.
+- **E-13. CSP 헤더 도입** ⭐v4.4 신설 — 07-18 보안헤더 4종(nosniff/X-Frame-Options/Referrer-Policy/Permissions-Policy)에
+  **Content-Security-Policy만 없다.** 프론트엔드 헤더 축이 백로그에 아예 없었던 것을 감사에서 발견.
+  - 난도: 제3자 iframe(SOOP·YouTube)·CDN 스크립트·인라인 `<script>` 45개 때문에 `unsafe-inline` 없이는 못 간다 →
+    **실익이 큰 지시자부터 부분 적용 권장**: `frame-ancestors 'none'`(X-Frame-Options 상위 호환)·`object-src 'none'`·
+    `base-uri 'self'`. 전면 CSP(nonce 도입)는 인라인 스크립트를 build.py가 생성하는 구조라 대공사 — YAGNI.
+  - 착수 트리거: cutover 안정화 후 아무 때나(배포=`vercel.json` 1회). 합격 = 헤더 존재 + 20페이지 콘솔 CSP 위반 0.
 - **E-7. 목록 페이지네이션(limitToLast)** (Claude, ~반나절) — §8-5 #3 성장 대응 1탄.
   - **착수 트리거(둘 중 먼저)**: clips 300건 초과 **또는** news 페이지 payload 150KB 초과(F-6 월점검에서 측정). 그 전엔 YAGNI.
   - 절차: ①규칙에 `.indexOn: ["createdAt"]`(clips/notices/schedules — 없으면 쿼리가 전체스캔 경고+거부) 게시
@@ -822,7 +884,10 @@ RTDB 컬렉션 실측(2026-07-18 curl):
 ```
 [브라우저]
   ├─ 정적: index.html(손수정, site.css 링크) + pages/*.html(산출물 — 수정은 src/build.py!)
-  ├─ 공유: assets/site.css(디자인 단일소스), assets/site.js(WhaleUI 게이팅/WhaleData CRUD/idToken 첨부)
+  ├─ 공유: assets/site.css(디자인 단일소스), assets/site.js(WhaleUI 게이팅/WhaleData CRUD/idToken 첨부/WhaleViews/WhaleDate),
+  │        assets/embed.js(WhaleEmbed — 임베드 URL 호스트강제. ⚠️홈이 site.js를 안 써서 별도 파일로 분리, v4.2)
+  │        ※홈 index.html은 site.js 미로드 → 로그인·모달·목록 일부를 **인라인 사본**으로 보유(사본 어긋남이 단골 사고,
+  │          test_pages.js가 사본 동일성을 대조한다)
   ├─ 로그인: SOOP OAuth(response_type=code) → /auth/callback.html
   │    └ 워커 /auth/token(code→access_token) → /auth/firebase(→커스텀토큰)
   │      → identitytoolkit signInWithCustomToken(→idToken) → sessionStorage.soop_fb
@@ -839,13 +904,17 @@ RTDB 컬렉션 실측(2026-07-18 curl):
 [Firebase RTDB  whaie-corp (asia-southeast1)]
   ├─ 운영(공개쓰기, Phase C 대상): /status /contests(15) /schedules(73) /crews
   ├─ /permissions/{닉} = "admin"|"editor"  (.write:false)
-  └─ /rework/{notices,clips,schedules,contests} — 서버강제(소유권/admin), 규칙사본 src/firebase-rules.json
+  └─ /rework/{notices,clips,schedules,contests,clipviews} — 서버강제(소유권/admin), 규칙사본 src/firebase-rules.json
+       clipviews = 클립별 조회수 카운터(익명 쓰기지만 규칙이 `기존값+1`만 허용, v4.2)
 ```
 
 ## 부록 B. 데이터 사전
 
 **`src/content/members.json`** (빌드타임 실렌더 소스, 16인): `slug, name, role(직책), dept(임원|비서부|게임부|컨텐츠부),
-rank(정렬키 임원0~/부장10~/사원20~/인턴30~), color(그라데이션), initials, img(리워크루트 상대), bio, stats[{n,u}]×3, soop(id)`.
+rank(정렬키 임원0~/부장10~/사원20~/인턴30~), color(그라데이션), initials, img(리워크루트 상대), bio, soop(id),
+birth"MM-DD", debut"YYYY-MM-DD", joined"YYYY-MM-DD"`.
+⚠️v4.3에서 더미 `stats[{n,u}]×3`(누적방송시간/클립수/시청자)은 **삭제**되고 위 3필드로 교체됨(출처=운영자 카운트다운 시트, 48값 전수 대조).
+표시는 `window.WhaleDate`가 브라우저 오늘 기준으로 D-day·경과를 재계산 — 소비처 3곳(`assets/site.js`·`pages/member.html`·홈 인라인 사본).
 직급/부서/순서 권위 소스 = 운영 index.html #org (07-08 동기화, §2-A-1 표).
 **`/rework/notices`** (실측): `title, cat(카테고리), date"YYYY-MM-DD", body[문단배열], pinned:bool(관리자), owner/시간 4종`
 **`/rework/clips`** (폼 기준, 07-08 `tags` 추가): `title, creator, category, desc, url(https만), img(url|비우면 임베드/그라데이션),
@@ -860,7 +929,10 @@ rank:int(컨텐츠는 null), total_teams:int, notes, videos[{label,type,url}], t
 **`/crews`**: `{pushKey: {aliases[], currentName}}`
 **`/status`**: `{members{soopId:{id,name,is_live,title,viewers,thumbnail,live_url}}, updated_at}` — 워커 5분 PUT
 
-**임베드 규칙(`embedUrlOf`, build_archive_detail 인라인)**: 입력 url → `new URL` 파싱 →
+**`/rework/clipviews`** (v4.2): `{클립 pushKey: 정수}` — 규칙이 **기존값+1만** 허용(임의값·감소·삭제·상위경로 PATCH 차단).
+표시는 `WhaleViews`(site.js), 같은 세션 중복 증가 차단. 알려진 천장 = 조작 가능(§7 리스크·E-11).
+
+**임베드 규칙(`embedUrlOf` — ⚠️v4.2부터 `assets/embed.js`의 `window.WhaleEmbed`. 종전 표기 "build_archive_detail 인라인"·"site.js"는 무효)**: 입력 url → `new URL` 파싱 →
 host ∈ {`youtu.be`,`youtube.com`,`youtube-nocookie.com`,`sooplive.com`,`sooplive.co.kr`}(정확일치 또는 `.`접미사) →
 YouTube: `[\w-]{6,}` videoId 검증 후 `https://www.youtube.com/embed/{id}` / SOOP: `/player/(\d+)` → `https://{host}/player/{id}/embed`.
 그 외/파싱실패/비http(s) → null(정적 카드 폴백). **원본 문자열 패스스루 없음(주입 차단).**
@@ -914,7 +986,9 @@ Phase C 이후 +3종: 무토큰 PUT /status 401, 무토큰 PUT /contests 401, �
 ### C-4. 페이지 로직 자체검사 (v4.2 신설 — `node src/test_pages.js`, 빌드 후 상시)
 - 로직을 복붙하지 않고 **빌드 산출물에서 실제 코드를 추출해 실행**한다. `build.py`에서 로직이 바뀌면
   같이 따라가거나 "찾지 못함"으로 즉시 깨진다(실제로 `relatedOf` 변경을 이 방식이 잡아냄).
-- 35건: 클립 검색 8 · 아카이브 필터 11 · 아카이브→클립 연결 6 · 홈 정렬 5 · 조회수 5.
+- **69건(v4.4 갱신)**: 클립 검색 8 · 아카이브 필터 17 · 아카이브↔클립 연결 11 · 태그 콤보박스 5 · 홈 정렬 5 ·
+  인사기록카드 14 · **dev 로그인 가드 4** · 조회수 5. (v4.2=35건 → v4.3=65건 → v4.4=69건.
+  ⚠️건수를 바꿨으면 이 줄과 스크립트 마지막 `console.log` 요약을 같이 고칠 것 — v4.3에서 이 줄만 안 고쳐 문서가 어긋났었다.)
 - 합격 = `✅ … 전부 통과` 출력(실패 시 exit 1).
 
 ### C-5. clipviews 규칙 매트릭스 (v4.2 신설 — 게시 후 재실행용, 10/10 PASS)
@@ -962,13 +1036,22 @@ curl -s "https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app/re
 - **`pages/*.html`은 산출물 — 직접 수정 절대 금지.** 수정은 `src/build.py`(페이지 생성)·`src/content/*.json`(시드)에만.
   단 **`index.html`(홈)만 예외적으로 손수정 파일**(취약 — 인라인 검증본. head/스크립트 수정 시 특히 조심).
 - 수정 후 반드시 `python3 src/build.py` 재빌드 → **pages/ 변경분을 소스와 같은 커밋에 포함**(재빌드 누락이 단골 사고).
-- 공유 자산 `assets/site.css`(디자인 단일소스)·`assets/site.js`(WhaleUI/WhaleData)는 빌드 대상 아님 — 직접 수정.
+- 공유 자산 `assets/site.css`(디자인 단일소스)·`assets/site.js`(WhaleUI/WhaleData)·`assets/embed.js`(WhaleEmbed)는 빌드 대상 아님 — 직접 수정.
 - 워커 소스 = `03_WCHP/whale-auth-worker/worker.js`(**레포 밖**). 배포 = 사용자가 Cloudflare 대시보드에 전문 붙여넣기(Claude는 코드만 작성).
+- **레포에 있지만 사이트와 무관한 자산**(v4.4 등재 — 건드리지도, 지우려 들지도 말 것. 전부 `.vercelignore`로 배포 제외):
+  | 자산 | 정체 | 처분 |
+  |---|---|---|
+  | `index.before-assets.html` | site.css/js 분리 리팩터 **직전 홈 스냅샷** | cutover 안정 후 삭제 가능(§4-8) |
+  | `src/data/n*.json` (25개) | `와이어프레임/*.html` 렌더용 원시 노드트리 export. **빌드·사이트 참조 0** | 참고자료로 보존 |
+  | `고래상사 디자인 시스템 (standalone).html` (**22MB**) | 최초 디자인 툴 번들 산출물. **레포 최대 파일**(OneDrive 동기화 부담) | 사람이 읽는 건 `.md`쪽 — 편집 대상 아님 |
+  | `리워크폐기/` | `.vercelignore`가 참조하나 **현재 미존재**(§4-8에서 옛 운영코드 옮길 자리) | no-op |
 
 ### E-2. 코드 작성 규칙 (보안 불변식 — 위반 금지)
-- 사용자 입력을 HTML에 넣을 땐 **반드시 `esc()`**, href에 넣을 땐 **반드시 `safeUrl()`**, 임베드는 **반드시 `WhaleEmbed`**(site.js 402행) — 원본 문자열 패스스루 신설 금지.
+- 사용자 입력을 HTML에 넣을 땐 **반드시 `esc()`**, href에 넣을 땐 **반드시 `safeUrl()`**, 임베드는 **반드시 `WhaleEmbed`**
+  (⚠️v4.2부터 **`assets/embed.js`** — `grep -n "window.WhaleEmbed" assets/embed.js`. 종전 "site.js 402행" 표기는 무효였음) —
+  원본 문자열 패스스루 신설 금지. **함수를 못 찾겠다고 iframe src를 직접 조립하는 것이 최악의 우회다.**
 - 동적 텍스트는 가급적 `textContent` 조립(innerHTML 지양). 새 외부 링크는 `target="_blank" rel="noopener"` 필수.
-- build.py의 JS 템플릿 중 **`_CLIP_JS_SHARED`(681행)는 비raw 문자열 — JS의 `\n`은 `\\n`, 정규식 `\/`는 `\\/`로 써야 함**(r-string 아님 주의. 다른 템플릿도 접두사 확인 후 작업).
+- build.py의 JS 템플릿 중 **`_CLIP_JS_SHARED`(`grep -n "_CLIP_JS_SHARED = " src/build.py`, v4.4 기준 773행)는 비raw 문자열 — JS의 `\n`은 `\\n`, 정규식 `\/`는 `\\/`로 써야 함**(r-string 아님 주의. 다른 템플릿도 접두사 확인 후 작업).
 - 날짜 생성은 KST 기준(`Asia/Seoul`) — `new Date().toISOString()` 날짜 절단은 UTC라 하루 밀림(07-11에 3곳 수정한 전례).
 
 ### E-3. 표준 검증 절차 (코드 변경 시 이 순서로 전부 실행 — 하나라도 실패 시 커밋 금지)
@@ -1008,6 +1091,14 @@ curl -s "$B/.json" -o ~/Downloads/rtdb-$(date +%Y%m%d).json # 전체 백업(레�
 
 ## 부록 F. Phase C~F 실행 스펙 (v4.1 — 코드 앵커·스케치 포함, §5의 실행판)
 
+> ⚠️**앵커 사용 규칙(v4.4 신설)**: 아래 **행번호는 커밋마다 밀리는 참고값**이다(v4.1→v4.4에 F 앵커 대부분이
+> 수백 행씩 이동해 있었다). **반드시 이름으로 grep해서 찾을 것** — 행번호는 "대략 어디쯤"의 힌트로만 쓴다.
+> ```bash
+> grep -n "^def <함수명>\|^<상수명> = " src/build.py     # build.py 앵커
+> grep -n "<이름>" assets/site.js assets/embed.js         # 공유 자산 앵커
+> ```
+> 아래 행번호는 **v4.4(2026-07-28) 실측 기준으로 전부 재측정**했다.
+
 ### F-C. Phase C — 운영 경로 잠금 (실행 순서 고정: 워커 먼저, 규칙 나중)
 1. **워커에 SA 인증 추가** (Claude 코드 작성 → 사용자 대시보드 배포):
    - 앵커: `worker.js` — `importSaKey()` 115행(PEM 로드), `mintCustomToken()` 128행(RS256 서명 — 이 서명 로직 재사용),
@@ -1036,21 +1127,22 @@ curl -s "$B/.json" -o ~/Downloads/rtdb-$(date +%Y%m%d).json # 전체 백업(레�
 5. 실패 시 롤백: 규칙만 이전판 재게시(워커 SA 인증은 규칙과 무관하게 동작하므로 순서를 지켰다면 중단 구간 없음).
 
 ### F-D. Phase D-1 — admin 테이블 실연동 (앵커·재사용 패턴)
-- 앵커: `build.py` — `ADMIN_GATE_JS` 2334행(게이트·authchange 이벤트 — 그대로 재사용), `admin_gate()` 2348행,
-  `build_admin_dashboard()` 2356행, `admin_table()` 2397행(목업 테이블 생성부 — 교체 대상).
-- 재사용 패턴: 목록 렌더+폼 모달 = `build_notices()` 1932행 구조 복제 / 일괄삭제의 항목별 실패 집계 = 클립 이관 버튼(795행 부근 `ok++/fails.push` 체인) 패턴.
+- 앵커(v4.4 재측정): `build.py` — `ADMIN_GATE_JS` **2717행**(게이트·authchange 이벤트 — 그대로 재사용), `admin_gate()` **2731행**,
+  `build_admin_dashboard()` **2739행**, `admin_table()` **2780행**(목업 테이블 생성부 — 교체 대상).
+- 재사용 패턴: 목록 렌더+폼 모달 = `build_notices()` **2315행** 구조 복제 / 일괄삭제의 항목별 실패 집계 = 클립 이관 버튼(`_CLIP_JS_SHARED` 내 `ok++/fails.push` 체인) 패턴.
 - 절차: admin_table의 정적 rows를 `D.list()` 런타임 렌더로 교체 → 행 체크박스+전체선택 → "선택 삭제" 버튼(admin 토큰, 실패 집계) → 데모 시드 참조 제거.
 - 합격: admin에서 CRUD·일괄삭제 → 공개 페이지 즉시 반영 / 일반 계정 게이트 차단 유지 / 표준 검증 절차(부록 E-3) 전부 PASS.
 
 ### F-E. Phase E 성장 항목 코드 지점 (트리거는 §5-4에 정의됨)
-- **E-7(limitToLast)**: `site.js` `list()` 213행 — `list(col, n)` 시그니처로 확장, n 있으면
+- **E-7(limitToLast)**: `site.js` `list()` **217행** — `list(col, n)` 시그니처로 확장, n 있으면
   `'.json?orderBy="createdAt"&limitToLast='+n` (규칙 `.indexOn`은 07-18 v2에 이미 게시됨 — 규칙 작업 불필요).
   적용 우선순위: news(30이면 충분) → clips(200+"더 보기").
-- **E-8(TTL 캐시)**: 같은 `list()` — sessionStorage `{ts,data}` 60초 캐시, `create/update/remove`(219~240행) 성공 시 해당 col 캐시 삭제. `?v=Date.now()` 버스터 제거.
-- **E-9(낙관적 잠금)**: `update()` 229행 — 호출부가 `expectedUpdatedAt` 전달 시 저장 직전
+- **E-8(TTL 캐시)**: 같은 `list()` — sessionStorage `{ts,data}` 60초 캐시, `create/update/remove`(**223·233·240행**) 성공 시 해당 col 캐시 삭제. `?v=Date.now()` 버스터 제거.
+- **E-9(낙관적 잠금)**: `update()` **233행** — 호출부가 `expectedUpdatedAt` 전달 시 저장 직전
   `GET /{col}/{id}/updatedAt.json`(~15B) 비교 → 불일치면 reject('다른 사용자가 방금 수정했습니다...').
 - **E-2(멤버 스탯)**: worker.js `scheduled()` 286행에 주1회 분기(아래 F-F cron 분기 방식 공용) → SOOP stationinfo 16인 →
-  `PUT /memberstats.json?access_token=...`(F-C의 saAccessToken 재사용). 클라는 member 상세(587행 build_member)에서 fetch+폴백.
+  `PUT /memberstats.json?access_token=...`(F-C의 saAccessToken 재사용). 클라는 member 상세(**650행** `build_member`)에서 fetch+폴백.
+  ⚠️**v4.4 전제 변경**: 그 3칸은 이제 placeholder가 아니라 실데이터(birth/debut/joined)다 → **표시 자리를 새로 만들어야 한다**(§5-4 E-2 재정의 참조).
 
 ### F-F. Phase F-1 — 주간 백업 (cron 분기 방식 확정)
 1. 사용자: Cloudflare 대시보드 → R2 버킷 생성(`whale-backup`) → 워커 설정 → R2 바인딩 추가(변수명 `BACKUP_BUCKET`).
