@@ -541,12 +541,24 @@
   - 데이터: RTDB 전체 export — Firebase 콘솔 → RTDB → 데이터 탭 → ⋮ → "JSON 내보내기"
     (또는 Claude가 `GET /.json` 덤프). **합격: 파일 열어 최상위 키 6종 확인.**
   - Claude 실행 명령(백업은 레포/OneDrive 밖에!):
+    ⚠️**08-03 정정: 루트 `GET /.json`은 Permission denied**다. 규칙 v2는 `.read`를 **노드별로** 열어두고
+    루트에는 안 열어놨기 때문(옛 명령대로면 36바이트짜리 error JSON을 백업하고 성공으로 착각한다).
+    → **노드 6종을 각각 받아 합치는 방식**으로 교체:
     ```bash
     B="https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app"
-    curl -s "$B/.json" -o ~/Downloads/rtdb-backup-$(date +%Y%m%d).json
-    python3 -c "import json;d=json.load(open('$HOME/Downloads/rtdb-backup-$(date +%Y%m%d).json'));print(sorted(d.keys()))"
-    # 기대: ['contests','crews','permissions','rework','schedules','status'] 6종
+    F=~/Downloads/rtdb-backup-$(date +%Y%m%d).json
+    python3 - "$B" "$F" <<'PY'
+    import json,sys,urllib.request
+    B,F=sys.argv[1],sys.argv[2]
+    out={n:json.load(urllib.request.urlopen(f"{B}/{n}.json"))
+         for n in ["status","contests","schedules","crews","permissions","rework"]}
+    json.dump(out,open(F,"w"),ensure_ascii=False,indent=1)
+    print(sorted(out.keys()), {k:len(v) for k,v in out["rework"].items()})
+    PY
     ```
+    **합격: 최상위 키 6종 + 파일 크기 수십 KB급**(수십 바이트면 error JSON을 받은 것).
+  - ✅**2026-08-03 09:0x 실행 완료**: `~/Downloads/rtdb-backup-20260803.json` **57KB**, 키 6종,
+    rework = clips 13·clipviews 5·contests 15·notices 1·schedules 1, 운영 contests 15·schedules 73.
 - [ ] **4-2. 데이터 최신화** — ⚠️07-11 재설계: Claude는 쓰기 수단 없음(키 삭제) → **전부 4-5 실로그인 후 UI 1클릭/입력으로 이동**
   - §3-C 아카이브 diff 재이관 → **4-5-6 '운영 기록 불러오기' 버튼**(07-11 diff·멱등 승격, category/tags/notes/total_teams 주입).
   - ~~일정 이관 73건~~ **취소됨(Q2, 2026-07-10)** — 일정은 4-5 실로그인 후 관리자 UI로 **예정 일정부터 신규 입력**(§2-A-4 참조).
@@ -586,7 +598,11 @@
        (Claude는 쓰기 수단 없음 — 반드시 사용자 실로그인 후 admin UI 또는 콘솔.)
      - 삭제 후 홈 히어로 예상(07-28 실측 정렬 기준): 1위 **감징어게임 클립**(조회 3) → 러스트 클립 3 → 땅콩컵 → 습레기통.
        `featured`가 0건이 되므로 대표를 고정하려면 원하는 클립에 featured 토글.
-  1. 관리자(울산큰고래 or editor 핫케이크_) SOOP 로그인 → Session Storage `soop_user`(role) + `soop_fb`(idToken) 확인.
+  1. 관리자 SOOP 로그인 → Session Storage `soop_user`(role) + `soop_fb`(idToken) 확인.
+     ⚠️**08-03 실측 정정 — 계정 표기가 반대였다.** `/permissions` = **`핫케이크_`=admin** · `울산큰고래`=editor ·
+     **`견자희`=editor(신규, 07-22 이후 추가됨)**. 종전 문구("관리자 울산큰고래 or editor 핫케이크_")는 뒤바뀐 것.
+     → 기능상으로는 셋 다 통과한다(`WhaleUI.isAdmin()`이 admin·editor 둘 다 true, 워커도 둘 다 `admin` claim 발급).
+     다만 **로그인은 `핫케이크_`로 하는 게 정석**(진짜 admin).
   2. 공지 작성→수정→pinned 토글→삭제 / 클립 작성→featured 토글→**태그 넣고 관련아카이브 노출 확인** / 일정 작성 / 아카이브 수정→**카테고리 전환 확인**. 전부 성공.
      ⚠️**규칙 v2(07-18) 게시된 상태라면**: 여기서 정상 저장이 401나면 규칙 상한 오탐 — `src/firebase-rules.v1.json` 재게시(§5-2 롤백)로 즉시 복구 후 Claude 진단.
   3. 일반 SOOP 계정(권한 미등록) 로그인 → 본인 글 작성/수정 성공, 남의 글 버튼 미노출.
