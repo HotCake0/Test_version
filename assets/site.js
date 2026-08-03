@@ -72,7 +72,9 @@
 
   var SOOP_CLIENT_ID = '936af2a8f0c73e188f1318c8dd6a2737';
   var SOOP_AUTH_URL  = 'https://openapi.sooplive.com/auth/code';
-  var REDIRECT_URI   = location.origin + '/auth/callback.html';
+  // ⚠️SOOP 앱에 등록된 값·워커 REDIRECT_URI 상수와 문자 단위로 같아야 함(다르면 redirect_uri_mismatch).
+  // 확장자 없는 형태가 등록값 — cleanUrls가 /auth/callback → auth/callback.html 로 서빙한다.
+  var REDIRECT_URI   = 'https://www.goraesangsa.com/auth/callback';
   var FIREBASE_BASE  = 'https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app';
   // Firebase 웹 API 키(공개키, 노출 무방) — idToken 만료 시 refresh에 필요
   var FIREBASE_WEB_API_KEY = 'AIzaSyBZpdQES1EeZLieWiRwo-sNrA2wJQ6vZ9k';

@@ -489,7 +489,8 @@
 
   var SOOP_CLIENT_ID = '936af2a8f0c73e188f1318c8dd6a2737';
   var SOOP_AUTH_URL  = 'https://openapi.sooplive.com/auth/code';
-  var REDIRECT_URI   = location.origin + '/auth/callback.html';
+  // ⚠️site.js 사본과 동일 — SOOP 앱 등록값·워커 상수와 문자 단위 일치 필수(redirect_uri_mismatch 방지)
+  var REDIRECT_URI   = 'https://www.goraesangsa.com/auth/callback';
   var FIREBASE_BASE  = 'https://whaie-corp-default-rtdb.asia-southeast1.firebasedatabase.app';
 
   function currentUser() {
