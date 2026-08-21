@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <style>
   :root{
@@ -100,7 +99,6 @@
   <div class="wrap bar">
     <h1>단가 · 재고 장부</h1>
     <span id="who" class="who"></span>
-    <button class="ghost" id="authBtn" hidden onclick="toggleAuth()"></button>
     <button class="ghost" onclick="backup()" aria-label="백업 파일로 저장"><svg><use href="#i-save"/></svg><span>백업</span></button>
     <button class="ghost" onclick="document.getElementById('file').click()" aria-label="백업 파일 불러오기"><svg><use href="#i-open"/></svg><span>불러오기</span></button>
     <input type="file" id="file" accept=".json,application/json" hidden onchange="restore(this)">
@@ -131,14 +129,10 @@
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-// ▼▼▼ 파이어베이스 콘솔 > 프로젝트 설정 > 내 앱(웹) 에서 복사한 값을 넣으세요 ▼▼▼
-// 비워 두면 예전처럼 이 컴퓨터에만 저장됩니다. 값을 넣으면 로그인 후 여러 기기가 같은 자료를 봅니다.
+// 로그인을 쓰지 않으므로 DB 주소만 있으면 붙는다 (apiKey는 인증용이라 필요 없음)
+// 접근 통제는 전적으로 파이어베이스 '규칙'이 한다
 const FIREBASE = {
-  apiKey: "",                                    // ← 콘솔에서 복사해 채워야 하는 값
-  appId: "",                                     // ← 콘솔에서 복사해 채워야 하는 값
-  authDomain: "goraecity.firebaseapp.com",
-  databaseURL: "https://goraecity-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "goraecity"
+  databaseURL: "https://goraecity-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 const CLOUD_PATH = 'momstock/items';   // 데이터베이스 안에서 이 장부가 사는 자리
 // ▲▲▲ 여기까지 ▲▲▲
@@ -243,7 +237,7 @@ function restore(input){
 // ---------- 파이어베이스 동기화 ----------
 // ponytail: 줄 하나 고칠 때마다 목록 전체를 통째로 덮어쓴다. 품목 수백 개까지는 무해하고,
 // 두 사람이 같은 순간에 고치면 나중 저장이 이긴다. 동시 편집이 잦아지면 줄 단위 키로 올릴 것.
-let cloudRef = null, cloudUser = null;
+let cloudRef = null;
 
 function normalize(list){
   return (list || []).filter(Boolean).map(it => ({
@@ -251,37 +245,22 @@ function normalize(list){
   }));
 }
 
-function toggleAuth(){
-  cloudUser ? firebase.auth().signOut()
-            : firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-                      .catch(e => alert('로그인 실패: ' + e.message));
+function paintCloud(on){
+  const who = document.getElementById('who');
+  who.className = on ? 'who on' : 'who';
+  who.textContent = on ? '여러 기기 동기화 중' : '';
 }
 
-function paintAuth(){
-  const btn = document.getElementById('authBtn'), who = document.getElementById('who');
-  btn.hidden = false;
-  btn.innerHTML = cloudUser ? '<span>로그아웃</span>' : '<span>구글 로그인</span>';
-  btn.setAttribute('aria-label', cloudUser ? '로그아웃' : '구글 계정으로 로그인');
-  who.className = cloudUser ? 'who on' : 'who';
-  who.textContent = cloudUser ? (cloudUser.displayName || cloudUser.email || '') + ' · 동기화 중' : '';
-}
-
-if(FIREBASE.apiKey && FIREBASE.databaseURL){
+if(FIREBASE.databaseURL){
   firebase.initializeApp(FIREBASE);
-  firebase.auth().onAuthStateChanged(u => {
-    cloudUser = u; paintAuth();
-    if(cloudRef){ cloudRef.off(); cloudRef = null; }
-    if(!u){ toast('로그인하면 다른 기기와 같이 봅니다'); return; }
-
-    console.log('내 계정 코드(UID):', u.uid);   // 규칙에 넣을 값
-    cloudRef = firebase.database().ref(CLOUD_PATH);
-    cloudRef.on('value', snap => {
-      const remote = normalize(snap.val() && Object.values(snap.val()));
-      if(JSON.stringify(remote) === JSON.stringify(items)) return;   // 내가 방금 올린 것이면 무시
-      if(!remote.length && items.length){ cloudRef.set(items); return; }  // 클라우드가 비었으면 이 기기 것을 올린다
-      items = remote; render(); toast('다른 기기에서 바뀐 내용을 받았어요');
-    }, e => toast('클라우드 연결 실패: ' + e.message));
-  });
+  cloudRef = firebase.database().ref(CLOUD_PATH);
+  cloudRef.on('value', snap => {
+    paintCloud(true);
+    const remote = normalize(snap.val() && Object.values(snap.val()));
+    if(JSON.stringify(remote) === JSON.stringify(items)) return;      // 내가 방금 올린 것이면 무시
+    if(!remote.length && items.length){ cloudRef.set(items); return; } // 클라우드가 비었으면 이 기기 것을 올려 되살린다
+    items = remote; render(); toast('다른 기기에서 바뀐 내용을 받았어요');
+  }, e => { paintCloud(false); toast('클라우드 연결 실패: ' + e.message, 3000); });
 }
 
 // 자체 점검: 주소 끝에 #test 를 붙여 열면 검증
