@@ -237,6 +237,7 @@ function restore(input){
 // ---------- 파이어베이스 동기화 ----------
 // ponytail: 줄 하나 고칠 때마다 목록 전체를 통째로 덮어쓴다. 품목 수백 개까지는 무해하고,
 // 두 사람이 같은 순간에 고치면 나중 저장이 이긴다. 동시 편집이 잦아지면 줄 단위 키로 올릴 것.
+// 클라우드가 원본이고 localStorage는 캐시일 뿐이다. 실수로 다 지웠을 때 되돌리는 건 '백업 불러오기'.
 let cloudRef = null;
 
 function normalize(list){
@@ -258,8 +259,9 @@ if(FIREBASE.databaseURL){
     paintCloud(true);
     const remote = normalize(snap.val() && Object.values(snap.val()));
     if(JSON.stringify(remote) === JSON.stringify(items)) return;      // 내가 방금 올린 것이면 무시
-    if(!remote.length && items.length){ cloudRef.set(items); return; } // 클라우드가 비었으면 이 기기 것을 올려 되살린다
-    items = remote; render(); toast('다른 기기에서 바뀐 내용을 받았어요');
+    // 클라우드가 원본이다. 지운 건 지운 대로 따라간다 (되살리지 않음)
+    items = remote; render();
+    toast(remote.length ? '다른 기기에서 바뀐 내용을 받았어요' : '다른 기기에서 모두 지웠어요');
   }, e => { paintCloud(false); toast('클라우드 연결 실패: ' + e.message, 3000); });
 }
 
