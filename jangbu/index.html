@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>단가 · 재고 장부</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --bg:#F1F5F9; --surface:#FFFFFF; --line:#E2E8F0; --line-strong:#CBD5E1;
+    --txt:#1E293B; --muted:#475569; --accent:#2563EB; --accent-soft:#EFF6FF;
+    --danger:#B91C1C; --danger-soft:#FEF2F2;
+    --shadow:0 1px 2px rgba(15,23,42,.06), 0 10px 24px -18px rgba(15,23,42,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--txt);
+       font:20px/1.6 "Pretendard Variable",Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+       -webkit-text-size-adjust:100%}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 12px}
+
+  header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  .bar{display:flex;align-items:center;gap:8px;height:68px}
+  h1{font-size:22px;font-weight:700;margin:0 auto 0 0;letter-spacing:-.02em}
+  button{font:inherit;cursor:pointer}
+  .ghost{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+         min-height:52px;min-width:52px;padding:0 14px;font-size:17px;
+         border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);color:var(--muted);
+         transition:background .2s,color .2s,border-color .2s}
+  .ghost:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+  .ghost svg{width:22px;height:22px;flex:none}
+  .who{font-size:16px;color:var(--muted);white-space:nowrap;display:none}
+  .who.on{display:inline;color:var(--accent);font-weight:500}
+  @media(max-width:600px){.who{display:none!important}}
+  .ghost span{display:none}
+  @media(min-width:600px){.ghost span{display:inline}}
+
+  .tools{display:flex;gap:8px;margin:14px 0}
+  .search{position:relative;flex:1}
+  .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--muted);pointer-events:none}
+  .search input{width:100%;min-height:56px;padding:10px 16px 10px 48px;font:inherit;
+                border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);color:var(--txt)}
+  .add{background:var(--accent);border:0;border-radius:12px;color:#fff;font-weight:700;font-size:18px;
+       min-height:56px;padding:0 20px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+       transition:background .2s}
+  .add:hover{background:#1D4ED8}
+  .add svg{width:24px;height:24px}
+
+  /* ---------- 표 ---------- */
+  .sheet{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+         box-shadow:var(--shadow);overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:700px;table-layout:fixed}
+  th{background:#F1F5F9;color:var(--muted);
+     font-size:16px;font-weight:500;text-align:left;padding:12px;
+     border-bottom:2px solid var(--line-strong);border-right:1px solid var(--line-strong)}
+  th.num{text-align:right}
+  th:last-child{border-right:0}
+  td{padding:0;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+  td:last-child{border-right:0;text-align:center}
+  td.unit{text-align:right;padding:10px 12px;background:#F8FAFC;color:var(--muted);
+          font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
+  tbody tr:hover td{background:#F8FAFC}
+  td input{width:100%;min-height:60px;padding:10px 12px;font:inherit;font-size:20px;
+           border:0;background:transparent;color:var(--txt);outline-offset:-3px;
+           text-overflow:ellipsis}
+  td input:focus{background:var(--accent-soft)}
+  td input.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+  td input::placeholder{color:#94A3B8;font-weight:400}
+  col.c-name{width:24%} col.c-spec{width:14%} col.c-cost{width:17%} col.c-unit{width:17%} col.c-memo{width:26%} col.c-del{width:64px}
+  .del{min-width:56px;min-height:56px;display:inline-flex;align-items:center;justify-content:center;
+       border:0;background:none;color:#94A3B8;border-radius:10px;transition:background .2s,color .2s}
+  .del:hover{background:var(--danger-soft);color:var(--danger)}
+  .del svg{width:22px;height:22px}
+
+  .empty{text-align:center;color:var(--muted);padding:56px 16px}
+  .empty strong{display:block;font-size:21px;color:var(--txt);margin-bottom:6px}
+  .hint{color:var(--muted);font-size:16px;margin:12px 2px 40px}
+
+  #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;z-index:50;
+         padding:11px 20px;border-radius:999px;background:#0F172A;color:#fff;font-size:17px;
+         opacity:0;pointer-events:none;transition:opacity .25s}
+  #toast.on{opacity:.92}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg hidden aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0 4 4m-4-4-4 4"/><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></symbol>
+</svg>
+
+<header>
+  <div class="wrap bar">
+    <h1>단가 · 재고 장부</h1>
+    <span id="who" class="who"></span>
+    <button class="ghost" id="authBtn" hidden onclick="toggleAuth()"></button>
+    <button class="ghost" onclick="backup()" aria-label="백업 파일로 저장"><svg><use href="#i-save"/></svg><span>백업</span></button>
+    <button class="ghost" onclick="document.getElementById('file').click()" aria-label="백업 파일 불러오기"><svg><use href="#i-open"/></svg><span>불러오기</span></button>
+    <input type="file" id="file" accept=".json,application/json" hidden onchange="restore(this)">
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tools">
+    <div class="search">
+      <svg aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="q" type="search" placeholder="품목·포장수량·비고로 찾기" aria-label="품목 검색" oninput="render()">
+    </div>
+    <button class="add" onclick="add()"><svg aria-hidden="true"><use href="#i-plus"/></svg>줄 추가</button>
+  </div>
+
+  <div class="sheet">
+    <table>
+      <colgroup><col class="c-name"><col class="c-spec"><col class="c-cost"><col class="c-unit"><col class="c-memo"><col class="c-del"></colgroup>
+      <thead><tr>
+        <th>품목</th><th>포장수량</th><th class="num">단가 (원)</th><th class="num">객단가</th><th>비고</th><th></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="hint"><b id="count">0</b>개 품목 · 칸을 눌러 바로 고치면 자동 저장됩니다. Tab 키로 옆 칸, 아래로 다음 줄로 넘어가요.</p>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ▼▼▼ 파이어베이스 콘솔 > 프로젝트 설정 > 내 앱(웹) 에서 복사한 값을 넣으세요 ▼▼▼
+// 비워 두면 예전처럼 이 컴퓨터에만 저장됩니다. 값을 넣으면 로그인 후 여러 기기가 같은 자료를 봅니다.
+const FIREBASE = {
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  appId: ""
+};
+const CLOUD_PATH = 'momstock/items';   // 데이터베이스 안에서 이 장부가 사는 자리
+// ▲▲▲ 여기까지 ▲▲▲
+
+const KEY = 'mom-stock-v1';
+const n = v => Number(String(v ?? '').replace(/[^0-9.-]/g, '')) || 0;
+const fmt = v => n(v) ? n(v).toLocaleString('ko-KR') : '';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// 객단가 = 단가 ÷ 포장수량의 첫 숫자 ("500g" -> 500, "1.5L" -> 1.5). 포장수량이 비었으면 계산하지 않는다
+// 숫자만 걸러내면 "1박스(30개)" 가 130 이 되므로 첫 숫자만 읽는다
+function specQty(v){ const m = String(v ?? '').match(/\d+(?:\.\d+)?/); return m ? Number(m[0]) : 0; }
+function unit(it){ const q = specQty(it.spec); return q ? n(it.cost) / q : null; }
+const unitText = it => {
+  const u = unit(it);
+  return u === null ? '–' : u.toLocaleString('ko-KR',{maximumFractionDigits:2}) + '원';
+};
+
+// 예전 형식(매입총액·판매가·최소재고)으로 저장된 자료를 지금 형식으로 옮겨 온다
+let items = JSON.parse(localStorage.getItem(KEY) || '[]').map(it => ({
+  name: it.name || '',
+  spec: it.spec || '',
+  cost: 'cost' in it ? n(it.cost)
+        : (n(it.buyQty) ? (n(it.buyTotal) + n(it.extra)) / n(it.buyQty) : n(it.price)),
+  memo: it.memo || '',
+  qty : 'qty' in it ? n(it.qty) : n(it.stock)   // 화면에는 없지만 예전 재고 수량은 보존
+}));
+
+let toastTimer;
+function toast(msg, ms){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), ms || 1200);
+}
+
+function save(msg){
+  localStorage.setItem(KEY, JSON.stringify(items));
+  if(cloudRef) cloudRef.set(items).catch(e => toast('클라우드 저장 실패: ' + e.message, 3000));
+  toast(msg || (cloudRef ? '저장했어요 · 클라우드 반영' : '저장했어요'));
+}
+
+// 칸을 고칠 때는 표 전체를 다시 그리지 않는다 — 다시 그리면 Tab 키 이동이 끊긴다
+function set(i, key, el){
+  items[i][key] = key === 'cost' ? n(el.value) : el.value;
+  if(key === 'cost') el.value = fmt(items[i][key]);
+  el.closest('tr').querySelector('.unit').textContent = unitText(items[i]);
+  save();
+}
+function add(){
+  items.push({name:'', spec:'', cost:0, memo:''});
+  save('줄을 추가했어요'); render();
+  document.querySelector('#rows tr:last-child input')?.focus();
+}
+function del(i){
+  if(confirm(`"${items[i].name || '품목명 없음'}" 줄을 지울까요?`)){
+    items.splice(i,1); save('삭제했어요'); render();
+  }
+}
+
+function render(){
+  const q = document.getElementById('q').value.trim();
+  const rows = items.map((it,i) => ({it,i}))
+    .filter(({it}) => !q || (it.name+' '+it.spec+' '+it.memo).includes(q));
+
+  document.getElementById('rows').innerHTML = rows.length ? rows.map(({it,i}) => `
+    <tr>
+      <td><input value="${esc(it.name)}" placeholder="품목" aria-label="품목" onchange="set(${i},'name',this)"></td>
+      <td><input value="${esc(it.spec)}" placeholder="예: 500g, 30개" aria-label="포장수량" onchange="set(${i},'spec',this)"></td>
+      <td><input class="num" inputmode="numeric" value="${fmt(it.cost)}" placeholder="0" aria-label="단가" onchange="set(${i},'cost',this)"></td>
+      <td class="unit">${unitText(it)}</td>
+      <td><input value="${esc(it.memo)}" placeholder="메모" aria-label="비고" onchange="set(${i},'memo',this)"></td>
+      <td><button class="del" aria-label="이 줄 삭제" onclick="del(${i})"><svg><use href="#i-trash"/></svg></button></td>
+    </tr>`).join('')
+    : `<tr><td colspan="6"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
+       ${items.length ? '다른 말로 찾아보세요.' : '오른쪽 위 <b>줄 추가</b> 버튼을 눌러 시작하세요.'}</div></td></tr>`;
+  document.getElementById('count').textContent = items.length;
+}
+
+// 백업/복원 — localStorage는 브라우저 청소 한 번에 날아가므로 파일 백업을 남긴다
+function backup(){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(items,null,1)],{type:'application/json'}));
+  a.download = `재고백업_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  save('백업 파일을 내려받았어요');
+}
+function restore(input){
+  const f = input.files[0]; if(!f) return;
+  f.text().then(t => {
+    const data = JSON.parse(t);
+    if(!Array.isArray(data)) throw 0;
+    if(confirm(`${data.length}개 품목으로 되돌립니다. 지금 내용은 사라져요. 계속할까요?`)){
+      items = data.map(it => ({name:it.name||'', spec:it.spec||'', cost:n(it.cost), memo:it.memo||'', qty:n(it.qty)}));
+      save('되돌렸어요'); render();
+    }
+  }).catch(() => alert('백업 파일을 읽지 못했어요. 다른 파일을 골라 주세요.'));
+  input.value = '';
+}
+
+// ---------- 파이어베이스 동기화 ----------
+// ponytail: 줄 하나 고칠 때마다 목록 전체를 통째로 덮어쓴다. 품목 수백 개까지는 무해하고,
+// 두 사람이 같은 순간에 고치면 나중 저장이 이긴다. 동시 편집이 잦아지면 줄 단위 키로 올릴 것.
+let cloudRef = null, cloudUser = null;
+
+function normalize(list){
+  return (list || []).filter(Boolean).map(it => ({
+    name: it.name || '', spec: it.spec || '', cost: n(it.cost), memo: it.memo || '', qty: n(it.qty)
+  }));
+}
+
+function toggleAuth(){
+  cloudUser ? firebase.auth().signOut()
+            : firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+                      .catch(e => alert('로그인 실패: ' + e.message));
+}
+
+function paintAuth(){
+  const btn = document.getElementById('authBtn'), who = document.getElementById('who');
+  btn.hidden = false;
+  btn.innerHTML = cloudUser ? '<span>로그아웃</span>' : '<span>구글 로그인</span>';
+  btn.setAttribute('aria-label', cloudUser ? '로그아웃' : '구글 계정으로 로그인');
+  who.className = cloudUser ? 'who on' : 'who';
+  who.textContent = cloudUser ? (cloudUser.displayName || cloudUser.email || '') + ' · 동기화 중' : '';
+}
+
+if(FIREBASE.apiKey && FIREBASE.databaseURL){
+  firebase.initializeApp(FIREBASE);
+  firebase.auth().onAuthStateChanged(u => {
+    cloudUser = u; paintAuth();
+    if(cloudRef){ cloudRef.off(); cloudRef = null; }
+    if(!u){ toast('로그인하면 다른 기기와 같이 봅니다'); return; }
+
+    console.log('내 계정 코드(UID):', u.uid);   // 규칙에 넣을 값
+    cloudRef = firebase.database().ref(CLOUD_PATH);
+    cloudRef.on('value', snap => {
+      const remote = normalize(snap.val() && Object.values(snap.val()));
+      if(JSON.stringify(remote) === JSON.stringify(items)) return;   // 내가 방금 올린 것이면 무시
+      if(!remote.length && items.length){ cloudRef.set(items); return; }  // 클라우드가 비었으면 이 기기 것을 올린다
+      items = remote; render(); toast('다른 기기에서 바뀐 내용을 받았어요');
+    }, e => toast('클라우드 연결 실패: ' + e.message));
+  });
+}
+
+// 자체 점검: 주소 끝에 #test 를 붙여 열면 검증
+if(location.hash === '#test'){
+  console.assert(unitText({cost:4500, spec:'500g'}) === '9원', '객단가');
+  console.assert(unitText({cost:12000, spec:'1.5L'}) === '8,000원', '소수 규격');
+  console.assert(unitText({cost:5000, spec:'1박스(30개)'}) === '5,000원', '첫 숫자만 읽기');
+  console.assert(unitText({cost:1000, spec:'한 박스'}) === '–', '숫자 없는 규격');
+  console.assert(unitText({cost:1000, spec:'0'}) === '–', '0으로 나누기');
+  console.assert(n('10,000') === 10000, '쉼표 파싱');
+  console.assert(n('') === 0 && n(undefined) === 0, '빈칸');
+  alert('계산 점검 통과 (콘솔에 오류 없으면 정상)');
+}
+render();
+</script>
