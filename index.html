@@ -109,7 +109,7 @@
   <div class="tools">
     <div class="search">
       <svg aria-hidden="true"><use href="#i-search"/></svg>
-      <input id="q" type="search" placeholder="품목·포장수량·비고로 찾기" aria-label="품목 검색" oninput="render()">
+      <input id="q" type="search" lang="ko" placeholder="품목·포장수량·비고로 찾기" aria-label="품목 검색" oninput="render()">
     </div>
     <button class="add" onclick="add()"><svg aria-hidden="true"><use href="#i-plus"/></svg>줄 추가</button>
   </div>
@@ -201,11 +201,11 @@ function render(){
 
   document.getElementById('rows').innerHTML = rows.length ? rows.map(({it,i}) => `
     <tr>
-      <td><input value="${esc(it.name)}" placeholder="품목" aria-label="품목" onchange="set(${i},'name',this)"></td>
-      <td><input value="${esc(it.spec)}" placeholder="예: 500g, 30개" aria-label="포장수량" onchange="set(${i},'spec',this)"></td>
+      <td><input lang="ko" value="${esc(it.name)}" placeholder="품목" aria-label="품목" onchange="set(${i},'name',this)"></td>
+      <td><input lang="ko" value="${esc(it.spec)}" placeholder="예: 500g, 30개" aria-label="포장수량" onchange="set(${i},'spec',this)"></td>
       <td><input class="num" inputmode="numeric" value="${fmt(it.cost)}" placeholder="0" aria-label="단가" onchange="set(${i},'cost',this)"></td>
       <td class="unit">${unitText(it)}</td>
-      <td><input value="${esc(it.memo)}" placeholder="메모" aria-label="비고" onchange="set(${i},'memo',this)"></td>
+      <td><input lang="ko" value="${esc(it.memo)}" placeholder="메모" aria-label="비고" onchange="set(${i},'memo',this)"></td>
       <td><button class="del" aria-label="이 줄 삭제" onclick="del(${i})"><svg><use href="#i-trash"/></svg></button></td>
     </tr>`).join('')
     : `<tr><td colspan="6"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
