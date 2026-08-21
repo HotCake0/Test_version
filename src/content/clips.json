@@ -1,4 +1,0 @@
-{
-  "_comment": "고래상사 클립 정적 시드 — admin-clips 미리보기 표 전용. ⚠️실 클립 페이지(clips.html/clip.html)·뉴스 피드(news)는 Firebase(WhaleData.list('clips'))에서 렌더하며 이 파일을 쓰지 않음. 더미 제거로 비워둠(2026-07-22) — admin-clips 표는 빈 상태로 렌더된다.",
-  "clips": []
-}

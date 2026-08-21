@@ -1,4 +1,0 @@
-{
-  "_comment": "방송 일정 정적 시드 — admin-notices 미리보기 표 전용. ⚠️실 일정 페이지(schedule)·뉴스 피드(news)는 Firebase(WhaleData.list('schedules'))에서 렌더하며 이 파일을 쓰지 않음. 더미 제거로 비워둠(2026-07-22) — admin-notices 일정 표는 빈 상태로 렌더된다.",
-  "schedule": []
-}

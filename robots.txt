@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /pages/admin
-Disallow: /auth/
-
-Sitemap: https://www.goraesangsa.com/sitemap.xml
