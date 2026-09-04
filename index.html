@@ -52,7 +52,7 @@
   /* ---------- 표 ---------- */
   .sheet{background:var(--surface);border:1px solid var(--line);border-radius:14px;
          box-shadow:var(--shadow);overflow-x:auto}
-  table{border-collapse:collapse;width:100%;min-width:700px;table-layout:fixed}
+  table{border-collapse:collapse;width:100%;min-width:940px;table-layout:fixed}
   th{background:#F1F5F9;color:var(--muted);
      font-size:16px;font-weight:500;text-align:left;padding:12px;
      border-bottom:2px solid var(--line-strong);border-right:1px solid var(--line-strong)}
@@ -62,6 +62,7 @@
   td:last-child{border-right:0;text-align:center}
   td.unit{text-align:right;padding:10px 12px;background:#F8FAFC;color:var(--muted);
           font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
+  td.loss{color:var(--danger);font-weight:700}
   tbody tr:hover td{background:#F8FAFC}
   td input{width:100%;min-height:60px;padding:10px 12px;font:inherit;font-size:20px;
            border:0;background:transparent;color:var(--txt);outline-offset:-3px;
@@ -69,7 +70,7 @@
   td input:focus{background:var(--accent-soft)}
   td input.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
   td input::placeholder{color:#94A3B8;font-weight:400}
-  col.c-name{width:24%} col.c-spec{width:14%} col.c-cost{width:17%} col.c-unit{width:17%} col.c-memo{width:26%} col.c-del{width:64px}
+  col.c-name{width:19%} col.c-spec{width:11%} col.c-cost{width:13%} col.c-unit{width:13%} col.c-sell{width:13%} col.c-margin{width:12%} col.c-memo{width:19%} col.c-del{width:64px}
   .del{min-width:56px;min-height:56px;display:inline-flex;align-items:center;justify-content:center;
        border:0;background:none;color:#94A3B8;border-radius:10px;transition:background .2s,color .2s}
   .del:hover{background:var(--danger-soft);color:var(--danger)}
@@ -116,9 +117,9 @@
 
   <div class="sheet">
     <table>
-      <colgroup><col class="c-name"><col class="c-spec"><col class="c-cost"><col class="c-unit"><col class="c-memo"><col class="c-del"></colgroup>
+      <colgroup><col class="c-name"><col class="c-spec"><col class="c-cost"><col class="c-unit"><col class="c-sell"><col class="c-margin"><col class="c-memo"><col class="c-del"></colgroup>
       <thead><tr>
-        <th>품목</th><th>포장수량</th><th class="num">단가 (원)</th><th class="num">객단가</th><th>비고</th><th></th>
+        <th>품목</th><th>포장수량</th><th class="num">단가 (원)</th><th class="num">객단가</th><th class="num">판매가 (원)</th><th class="num">마진률</th><th>비고</th><th></th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -151,12 +152,24 @@ const unitText = it => {
   return u === null ? '–' : u.toLocaleString('ko-KR',{maximumFractionDigits:2}) + '원';
 };
 
+// 마진률 = (판매가 - 객단가) / 판매가 x 100
+// 비교 대상은 '단가'가 아니라 '객단가'다. 판매가는 낱개 가격이고 단가는 묶음 매입가라서,
+// 단가와 비교하면 20개들이 상품이 전부 마이너스로 나온다.
+// 매입가 대비로 보고 싶으면 아래 s 를 u 로 바꾸면 된다 (마크업률)
+function margin(it){
+  const u = unit(it), s = n(it.sell);
+  return (u && s) ? (s - u) / s * 100 : null;   // 단가나 판매가가 비면 계산하지 않는다
+}
+const marginText = it => { const m = margin(it); return m === null ? '–' : m.toFixed(1) + '%'; };
+const marginCls  = it => { const m = margin(it); return m !== null && m < 0 ? 'unit margin loss' : 'unit margin'; };
+
 // 예전 형식(매입총액·판매가·최소재고)으로 저장된 자료를 지금 형식으로 옮겨 온다
 let items = JSON.parse(localStorage.getItem(KEY) || '[]').map(it => ({
   name: it.name || '',
   spec: it.spec || '',
   cost: 'cost' in it ? n(it.cost)
         : (n(it.buyQty) ? (n(it.buyTotal) + n(it.extra)) / n(it.buyQty) : n(it.price)),
+  sell: n(it.sell),
   memo: it.memo || '',
   qty : 'qty' in it ? n(it.qty) : n(it.stock)   // 화면에는 없지만 예전 재고 수량은 보존
 }));
@@ -178,13 +191,18 @@ function save(msg){
 
 // 칸을 고칠 때는 표 전체를 다시 그리지 않는다 — 다시 그리면 Tab 키 이동이 끊긴다
 function set(i, key, el){
-  items[i][key] = key === 'cost' ? n(el.value) : el.value;
-  if(key === 'cost') el.value = fmt(items[i][key]);
-  el.closest('tr').querySelector('.unit').textContent = unitText(items[i]);
+  const isNum = key === 'cost' || key === 'sell';
+  items[i][key] = isNum ? n(el.value) : el.value;
+  if(isNum) el.value = fmt(items[i][key]);
+  const tr = el.closest('tr');
+  tr.querySelector('.unit').textContent = unitText(items[i]);          // 객단가
+  const mc = tr.querySelector('.margin');                              // 마진률
+  mc.className = marginCls(items[i]);
+  mc.textContent = marginText(items[i]);
   save();
 }
 function add(){
-  items.push({name:'', spec:'', cost:0, memo:''});
+  items.push({name:'', spec:'', cost:0, sell:0, memo:''});
   save('줄을 추가했어요'); render();
   document.querySelector('#rows tr:last-child input')?.focus();
 }
@@ -205,10 +223,12 @@ function render(){
       <td><input lang="ko" value="${esc(it.spec)}" placeholder="예: 500g, 30개" aria-label="포장수량" onchange="set(${i},'spec',this)"></td>
       <td><input class="num" inputmode="numeric" value="${fmt(it.cost)}" placeholder="0" aria-label="단가" onchange="set(${i},'cost',this)"></td>
       <td class="unit">${unitText(it)}</td>
+      <td><input class="num" inputmode="numeric" value="${fmt(it.sell)}" placeholder="0" aria-label="판매가" onchange="set(${i},'sell',this)"></td>
+      <td class="${marginCls(it)}">${marginText(it)}</td>
       <td><input lang="ko" value="${esc(it.memo)}" placeholder="메모" aria-label="비고" onchange="set(${i},'memo',this)"></td>
       <td><button class="del" aria-label="이 줄 삭제" onclick="del(${i})"><svg><use href="#i-trash"/></svg></button></td>
     </tr>`).join('')
-    : `<tr><td colspan="6"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
+    : `<tr><td colspan="8"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
        ${items.length ? '다른 말로 찾아보세요.' : '오른쪽 위 <b>줄 추가</b> 버튼을 눌러 시작하세요.'}</div></td></tr>`;
   document.getElementById('count').textContent = items.length;
 }
@@ -227,7 +247,7 @@ function restore(input){
     const data = JSON.parse(t);
     if(!Array.isArray(data)) throw 0;
     if(confirm(`${data.length}개 품목으로 되돌립니다. 지금 내용은 사라져요. 계속할까요?`)){
-      items = data.map(it => ({name:it.name||'', spec:it.spec||'', cost:n(it.cost), memo:it.memo||'', qty:n(it.qty)}));
+      items = data.map(it => ({name:it.name||'', spec:it.spec||'', cost:n(it.cost), sell:n(it.sell), memo:it.memo||'', qty:n(it.qty)}));
       save('되돌렸어요'); render();
     }
   }).catch(() => alert('백업 파일을 읽지 못했어요. 다른 파일을 골라 주세요.'));
@@ -242,7 +262,7 @@ let cloudRef = null;
 
 function normalize(list){
   return (list || []).filter(Boolean).map(it => ({
-    name: it.name || '', spec: it.spec || '', cost: n(it.cost), memo: it.memo || '', qty: n(it.qty)
+    name: it.name || '', spec: it.spec || '', cost: n(it.cost), sell: n(it.sell), memo: it.memo || '', qty: n(it.qty)
   }));
 }
 
@@ -272,6 +292,11 @@ if(location.hash === '#test'){
   console.assert(unitText({cost:5000, spec:'1박스(30개)'}) === '5,000원', '첫 숫자만 읽기');
   console.assert(unitText({cost:1000, spec:'한 박스'}) === '–', '숫자 없는 규격');
   console.assert(unitText({cost:1000, spec:'0'}) === '–', '0으로 나누기');
+  console.assert(marginText({cost:1000, spec:'10', sell:200}) === '50.0%', '마진률');
+  console.assert(marginText({cost:1000, spec:'10', sell:80}) === '-25.0%', '역마진');
+  console.assert(marginText({cost:1000, spec:'10', sell:0}) === '–', '판매가 없음');
+  console.assert(marginText({cost:1000, spec:'한 박스', sell:500}) === '–', '객단가 없음');
+  console.assert(marginCls({cost:1000, spec:'10', sell:80}) === 'unit margin loss', '역마진 표시');
   console.assert(n('10,000') === 10000, '쉼표 파싱');
   console.assert(n('') === 0 && n(undefined) === 0, '빈칸');
   alert('계산 점검 통과 (콘솔에 오류 없으면 정상)');
