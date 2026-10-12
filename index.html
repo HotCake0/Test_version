@@ -20,7 +20,7 @@
   body{background:var(--bg);color:var(--txt);
        font:20px/1.6 "Pretendard Variable",Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
        -webkit-text-size-adjust:100%}
-  .wrap{max-width:1100px;margin:0 auto;padding:0 12px}
+  .wrap{max-width:1400px;margin:0 auto;padding:0 12px}
 
   header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
   .bar{display:flex;align-items:center;gap:8px;height:68px}
@@ -52,7 +52,7 @@
   /* ---------- 표 ---------- */
   .sheet{background:var(--surface);border:1px solid var(--line);border-radius:14px;
          box-shadow:var(--shadow);overflow-x:auto}
-  table{border-collapse:collapse;width:100%;min-width:940px;table-layout:fixed}
+  table{border-collapse:collapse;width:100%;min-width:1200px;table-layout:fixed}
   th{background:#F1F5F9;color:var(--muted);
      font-size:16px;font-weight:500;text-align:left;padding:12px;
      border-bottom:2px solid var(--line-strong);border-right:1px solid var(--line-strong)}
@@ -70,7 +70,7 @@
   td input:focus{background:var(--accent-soft)}
   td input.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
   td input::placeholder{color:#94A3B8;font-weight:400}
-  col.c-name{width:19%} col.c-spec{width:11%} col.c-cost{width:13%} col.c-unit{width:13%} col.c-sell{width:13%} col.c-margin{width:12%} col.c-memo{width:19%} col.c-del{width:64px}
+  col.c-name{width:24%} col.c-spec{width:9%} col.c-qty{width:8%} col.c-cost{width:11%} col.c-unit{width:11%} col.c-sell{width:11%} col.c-margin{width:9%} col.c-memo{width:17%} col.c-del{width:64px}
   .del{min-width:56px;min-height:56px;display:inline-flex;align-items:center;justify-content:center;
        border:0;background:none;color:#94A3B8;border-radius:10px;transition:background .2s,color .2s}
   .del:hover{background:var(--danger-soft);color:var(--danger)}
@@ -117,9 +117,9 @@
 
   <div class="sheet">
     <table>
-      <colgroup><col class="c-name"><col class="c-spec"><col class="c-cost"><col class="c-unit"><col class="c-sell"><col class="c-margin"><col class="c-memo"><col class="c-del"></colgroup>
+      <colgroup><col class="c-name"><col class="c-spec"><col class="c-qty"><col class="c-cost"><col class="c-unit"><col class="c-sell"><col class="c-margin"><col class="c-memo"><col class="c-del"></colgroup>
       <thead><tr>
-        <th>품목</th><th>포장수량</th><th class="num">단가 (원)</th><th class="num">객단가</th><th class="num">판매가 (원)</th><th class="num">마진률</th><th>비고</th><th></th>
+        <th>품목</th><th>포장수량</th><th class="num">현재고</th><th class="num">단가 (원)</th><th class="num">객단가</th><th class="num">판매가 (원)</th><th class="num">마진률</th><th>비고</th><th></th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -171,7 +171,7 @@ let items = JSON.parse(localStorage.getItem(KEY) || '[]').map(it => ({
         : (n(it.buyQty) ? (n(it.buyTotal) + n(it.extra)) / n(it.buyQty) : n(it.price)),
   sell: n(it.sell),
   memo: it.memo || '',
-  qty : 'qty' in it ? n(it.qty) : n(it.stock)   // 화면에는 없지만 예전 재고 수량은 보존
+  qty : 'qty' in it ? n(it.qty) : n(it.stock)   // 현재고 (예전 형식은 stock)
 }));
 
 let toastTimer;
@@ -191,7 +191,7 @@ function save(msg){
 
 // 칸을 고칠 때는 표 전체를 다시 그리지 않는다 — 다시 그리면 Tab 키 이동이 끊긴다
 function set(i, key, el){
-  const isNum = key === 'cost' || key === 'sell';
+  const isNum = key === 'cost' || key === 'sell' || key === 'qty';
   items[i][key] = isNum ? n(el.value) : el.value;
   if(isNum) el.value = fmt(items[i][key]);
   const tr = el.closest('tr');
@@ -202,7 +202,7 @@ function set(i, key, el){
   save();
 }
 function add(){
-  items.push({name:'', spec:'', cost:0, sell:0, memo:''});
+  items.push({name:'', spec:'', cost:0, sell:0, memo:'', qty:0});
   save('줄을 추가했어요'); render();
   document.querySelector('#rows tr:last-child input')?.focus();
 }
@@ -220,7 +220,8 @@ function render(){
   document.getElementById('rows').innerHTML = rows.length ? rows.map(({it,i}) => `
     <tr>
       <td><input lang="ko" value="${esc(it.name)}" placeholder="품목" aria-label="품목" onchange="set(${i},'name',this)"></td>
-      <td><input lang="ko" value="${esc(it.spec)}" placeholder="예: 500g, 30개" aria-label="포장수량" onchange="set(${i},'spec',this)"></td>
+      <td><input lang="ko" value="${esc(it.spec)}" placeholder="예: 30개" aria-label="포장수량" onchange="set(${i},'spec',this)"></td>
+      <td><input class="num" inputmode="decimal" value="${fmt(it.qty)}" placeholder="0" aria-label="현재고" onchange="set(${i},'qty',this)"></td>
       <td><input class="num" inputmode="numeric" value="${fmt(it.cost)}" placeholder="0" aria-label="단가" onchange="set(${i},'cost',this)"></td>
       <td class="unit">${unitText(it)}</td>
       <td><input class="num" inputmode="numeric" value="${fmt(it.sell)}" placeholder="0" aria-label="판매가" onchange="set(${i},'sell',this)"></td>
@@ -228,7 +229,7 @@ function render(){
       <td><input lang="ko" value="${esc(it.memo)}" placeholder="메모" aria-label="비고" onchange="set(${i},'memo',this)"></td>
       <td><button class="del" aria-label="이 줄 삭제" onclick="del(${i})"><svg><use href="#i-trash"/></svg></button></td>
     </tr>`).join('')
-    : `<tr><td colspan="8"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
+    : `<tr><td colspan="9"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
        ${items.length ? '다른 말로 찾아보세요.' : '오른쪽 위 <b>줄 추가</b> 버튼을 눌러 시작하세요.'}</div></td></tr>`;
   document.getElementById('count').textContent = items.length;
 }
