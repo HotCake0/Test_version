@@ -35,6 +35,8 @@
   .who{font-size:16px;color:var(--muted);white-space:nowrap;display:none}
   .who.on{display:inline;color:var(--accent);font-weight:500}
   @media(max-width:600px){.who{display:none!important}}
+  .who-m{display:none;margin:12px 2px 0;font-size:16px;color:var(--accent);font-weight:500}
+  @media(max-width:600px){.who-m.on{display:block}}
   .ghost span{display:none}
   @media(min-width:600px){.ghost span{display:inline}}
 
@@ -88,7 +90,7 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
-<svg hidden aria-hidden="true">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">  <!-- hidden 속성은 svg에 안 먹어 150px 빈칸이 생겼다 -->
   <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
   <symbol id="i-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
@@ -108,6 +110,7 @@
 </header>
 
 <div class="wrap">
+  <p id="whoM" class="who-m"></p>
   <div class="tools">
     <div class="search">
       <svg aria-hidden="true"><use href="#i-search"/></svg>
@@ -271,10 +274,19 @@ function normalize(list){
   }));
 }
 
+// 사입 판매 자동 반영(GitHub Actions, 06·12·18시)이 마지막으로 돈 시각 — 재고를 셀 때 방금 돌았는지 보려고
+let sapipAt = null, cloudOn = false;
+const atText = () => {
+  if(!sapipAt) return '';
+  const d = new Date(sapipAt + 9 * 3600e3), p = v => String(v).padStart(2, '0');   // 한국 시각
+  return `판매 반영 ${d.getUTCMonth() + 1}/${d.getUTCDate()} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+};
 function paintCloud(on){
-  const who = document.getElementById('who');
-  who.className = on ? 'who on' : 'who';
-  who.textContent = on ? '여러 기기 동기화 중' : '';
+  cloudOn = on;
+  const t = [atText(), on ? '여러 기기 동기화 중' : ''].filter(Boolean).join(' · ');
+  const who = document.getElementById('who'), m = document.getElementById('whoM');
+  who.className = t ? 'who on' : 'who';  m.className = sapipAt ? 'who-m on' : 'who-m';
+  who.textContent = t;  m.textContent = atText();
 }
 
 if(FIREBASE.databaseURL){
@@ -288,6 +300,7 @@ if(FIREBASE.databaseURL){
     items = remote; render();
     toast(remote.length ? '다른 기기에서 바뀐 내용을 받았어요' : '다른 기기에서 모두 지웠어요');
   }, e => { paintCloud(false); toast('클라우드 연결 실패: ' + e.message, 3000); });
+  firebase.database().ref('momstock/sapip_at').on('value', s => { sapipAt = s.val(); paintCloud(cloudOn); });
 }
 
 // 자체 점검: 주소 끝에 #test 를 붙여 열면 검증
