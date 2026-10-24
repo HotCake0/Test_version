@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>가격표 출력</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  @page { size: A4; margin: 0; }
+  :root{
+    --bg:#F1F5F9; --surface:#FFFFFF; --line:#E2E8F0; --line-strong:#CBD5E1;
+    --txt:#1E293B; --muted:#475569; --accent:#2563EB; --accent-soft:#EFF6FF;
+    --danger:#B91C1C; --danger-soft:#FEF2F2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--txt);
+       font:20px/1.6 "Pretendard Variable",Pretendard,"Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+       -webkit-text-size-adjust:100%}
+  .wrap{max-width:900px;margin:0 auto;padding:0 12px}
+  button,input{font:inherit}
+  button{cursor:pointer}
+
+  header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  .bar{display:flex;align-items:center;gap:8px;height:68px}
+  h1{font-size:22px;font-weight:700;margin:0 auto 0 0}
+  .ghost{display:inline-flex;align-items:center;min-height:52px;padding:0 16px;font-size:17px;text-decoration:none;
+         border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);color:var(--muted)}
+
+  .scan{margin:16px 0 6px}
+  .scan input{width:100%;min-height:72px;padding:10px 18px;font-size:26px;font-variant-numeric:tabular-nums;
+              border:3px solid var(--accent);border-radius:14px;background:var(--surface);color:var(--txt)}
+  #msg{min-height:1.6em;font-size:18px;color:var(--muted);margin:0 4px}
+  #msg.err{color:var(--danger);font-weight:600}
+
+  .new{display:none;gap:8px;flex-wrap:wrap;background:var(--accent-soft);border-radius:14px;padding:12px;margin:8px 0}
+  .new.on{display:flex}
+  .new input{min-height:56px;padding:8px 12px;border:1px solid var(--line-strong);border-radius:10px}
+  .new .nm{flex:2 1 220px} .new .pr{flex:1 1 120px}
+  .btn{min-height:56px;padding:0 22px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-weight:700}
+  .btn.big{width:100%;min-height:68px;font-size:22px}
+
+  .list{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
+  .item{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:0}
+  .item .nm{flex:1 1 300px;min-width:0;min-height:52px;padding:6px 8px;border:1px solid transparent;border-radius:8px;background:none}
+  .item .pr{width:120px;min-height:52px;padding:6px 8px;text-align:right;border:1px solid transparent;border-radius:8px;background:none;font-weight:600}
+  .item input:focus{border-color:var(--accent);background:var(--accent-soft)}
+  .qty{display:flex;align-items:center}
+  .qty button{width:48px;height:48px;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;font-size:24px;line-height:1}
+  .qty b{min-width:44px;text-align:center}
+  .del{width:48px;height:48px;border:0;background:none;color:#94A3B8;font-size:26px;border-radius:10px}
+  .del:hover{background:var(--danger-soft);color:var(--danger)}
+  .empty{padding:36px 16px;text-align:center;color:var(--muted)}
+  .actions{display:flex;gap:8px;margin:12px 0}
+  .actions .btn{flex:1}
+  .actions .ghost{min-height:68px}
+  #info{color:var(--muted);font-size:17px;margin:4px}
+
+  details{margin:16px 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:16px}
+  summary{cursor:pointer;color:var(--muted)}
+  .opts{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .opts label{display:flex;flex-direction:column;gap:2px}
+  .opts input{width:96px;min-height:44px;padding:4px 8px;border:1px solid var(--line-strong);border-radius:8px}
+  #out{overflow-x:auto;padding-bottom:20px}
+
+  /* ---------- A4 시트 ---------- */
+  .sheet { width: 210mm; height: 297mm; margin: 12px auto; background: #fff; display: grid; font-family: system-ui, sans-serif; color:#222;
+           padding: var(--py) var(--px); gap: var(--gap); page-break-after: always; break-after: page; }
+  .sheet:last-child { page-break-after: auto; break-after: auto; }
+
+  /* ---------- 라벨 양식 ---------- */
+  .label { overflow: hidden; outline: 1px dashed #ccc; padding: 2.2mm 3.2mm;
+           display: flex; flex-direction: column; justify-content: center; }
+  .label .name { font-size: var(--fs-name); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .label .sku { font-size: calc(var(--fs-name) * 0.8); text-align: center; margin-top: 0.4mm; }
+  .label .bars { display: block; width: var(--bw); height: var(--bh); margin: 0.8mm auto 0; }
+  .label .num { font-family: 'Consolas', monospace; font-size: calc(var(--fs-name) * 0.72); text-align: center; letter-spacing: 0.3mm; margin-top: 0.3mm; }
+  .label .price { font-size: var(--fs-price); font-weight: 800; line-height: 1; margin-top: 1.2mm; letter-spacing: 0.2mm; }
+  .label .price small { font-size: 0.55em; font-weight: 600; margin-left: 1.2mm; }
+  .label.empty { outline-style: dotted; }
+
+  @media print {
+    body { background: #fff; }
+    header, .wrap { display: none; }
+    #out { overflow: visible; padding: 0; }
+    .sheet { margin: 0; }
+    .label, .label.empty { outline: none; }
+    body.cutlines .label:not(.empty) { outline: 0.2mm solid #bbb; }
+  }
+</style>
+
+<header>
+  <div class="wrap bar">
+    <h1>가격표 출력</h1>
+    <a class="ghost" href="./">← 장부로</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="scan"><input id="barcode" autocomplete="off" inputmode="numeric" placeholder="바코드를 찍으세요" aria-label="바코드" autofocus></div>
+  <p id="msg">상품 정보를 불러오는 중…</p>
+
+  <div class="new" id="new">
+    <input class="nm" id="newName" placeholder="상품 이름" aria-label="상품 이름">
+    <input class="pr" id="newPrice" inputmode="numeric" placeholder="가격" aria-label="가격">
+    <button class="btn" id="newAdd" type="button">넣기</button>
+  </div>
+
+  <div class="list" id="list"></div>
+  <p id="info"></p>
+  <div class="actions">
+    <button class="btn big" id="printBtn" type="button">인쇄하기</button>
+    <button class="ghost" id="clearBtn" type="button">모두 지우기</button>
+  </div>
+
+  <details>
+    <summary>용지 설정 (라벨지가 바뀔 때만)</summary>
+    <div class="opts">
+      <label>열<input id="cols" type="number" value="4" min="1"></label>
+      <label>행<input id="rows" type="number" value="8" min="1"></label>
+      <label>시작 칸<input id="skip" type="number" value="1" min="1"></label>
+      <label>좌우 여백(mm)<input id="px" type="number" value="4" min="0" step="0.5"></label>
+      <label>상하 여백(mm)<input id="py" type="number" value="6" min="0" step="0.5"></label>
+      <label>라벨 간격(mm)<input id="gap" type="number" value="0" min="0" step="0.5"></label>
+      <label>바코드 폭(mm)<input id="bw" type="number" value="34" min="20" step="1"></label>
+      <label>바코드 높이(mm)<input id="bh" type="number" value="9" min="5" step="0.5"></label>
+      <label>이름 글자(mm)<input id="fsName" type="number" value="3.3" min="2" step="0.1"></label>
+      <label>가격 글자(mm)<input id="fsPrice" type="number" value="6.5" min="3" step="0.5"></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input id="cutlines" type="checkbox" style="width:auto;min-height:0"> 재단선 인쇄</label>
+    </div>
+  </details>
+</div>
+<div id="out"></div>
+
+<script>
+/* ===== 바코드 인코딩 (EAN-13 / EAN-8) ===== */
+const L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const R = L.map(s => [...s].map(b => b === '1' ? '0' : '1').join(''));
+const G = R.map(s => [...s].reverse().join(''));
+const PARITY = ['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+
+function ean13Check(d12) { let s = 0; for (let i = 0; i < 12; i++) s += (+d12[i]) * (i % 2 ? 3 : 1); return (10 - s % 10) % 10; }
+function ean8Check(d7)   { let s = 0; for (let i = 0; i < 7; i++)  s += (+d7[i])  * (i % 2 ? 1 : 3); return (10 - s % 10) % 10; }
+
+// 12자리: 스캐너가 보내는 UPC-A(검증 숫자 포함)면 앞에 0을 붙여 EAN-13, 아니면 검증 숫자가 빠진 EAN-13
+function normalizeBarcode(raw) {
+  const v = String(raw || '').replace(/\D/g, '');
+  if (v.length === 12) return ean13Check('0' + v.slice(0, 11)) === +v[11] ? '0' + v : v + ean13Check(v);
+  if (v.length === 7)  return v + ean8Check(v);
+  if (v.length === 13) {
+    const c = ean13Check(v.slice(0, 12));
+    if (+v[12] !== c) throw new Error(`${v}: 바코드 번호가 맞지 않아요 (끝자리 확인)`);
+    return v;
+  }
+  if (v.length === 8) {
+    const c = ean8Check(v.slice(0, 7));
+    if (+v[7] !== c) throw new Error(`${v}: 바코드 번호가 맞지 않아요 (끝자리 확인)`);
+    return v;
+  }
+  throw new Error(`${String(raw).trim()}: 바코드는 8자리나 13자리예요`);
+}
+
+function bitsOf(code) {
+  if (code.length === 8) {
+    return '101' + [...code.slice(0, 4)].map(d => L[d]).join('') + '01010'
+         + [...code.slice(4)].map(d => R[d]).join('') + '101';
+  }
+  const par = PARITY[+code[0]];
+  let b = '101';
+  for (let i = 1; i <= 6; i++) b += (par[i - 1] === 'L' ? L : G)[+code[i]];
+  b += '01010';
+  for (let i = 7; i <= 12; i++) b += R[+code[i]];
+  return b + '101';
+}
+
+function barsSVG(code) {
+  const bits = bitsOf(code), n = bits.length;
+  let rects = '';
+  for (let i = 0; i < n;) {
+    if (bits[i] === '0') { i++; continue; }
+    let j = i;
+    while (j < n && bits[j] === '1') j++;
+    rects += `<rect x="${i}" y="0" width="${j - i}" height="40"/>`;
+    i = j;
+  }
+  return `<svg class="bars" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} 40" preserveAspectRatio="none" shape-rendering="crispEdges"><g fill="#000">${rects}</g></svg>`;
+}
+
+/* ===== 상품 정보: 장부(사입, 판매가) → 시스페이스 바코드 사전 순으로 찾는다 ===== */
+const DB = 'https://goraecity-default-rtdb.asia-southeast1.firebasedatabase.app/momstock';
+let ledger = {}, dict = {};   // 바코드 → {name, price, sku}
+const tidy = s => String(s || '').replace(/^[^\]]{1,10}\]/, '').trim();   // "남양]초코에몽" → "초코에몽"
+
+async function loadDB() {
+  try {
+    const [items, codes] = await Promise.all([fetch(DB + '/items.json').then(r => r.json()), fetch(DB + '/barcodes.json').then(r => r.json())]);
+    dict = codes || {};
+    ledger = {};
+    Object.values(items || {}).forEach(it => {
+      if (!it || !it.barcode) return;
+      try { const k = normalizeBarcode(it.barcode); if (!ledger[k]) ledger[k] = it; } catch (e) {}
+    });
+    say(`상품 ${Object.keys(dict).length.toLocaleString('ko-KR')}개 준비됐어요. 바코드를 찍으세요.`);
+  } catch (e) { say('상품 정보를 못 불러왔어요. 인터넷 연결을 확인하세요. (이름·가격은 직접 넣을 수 있어요)', true); }
+}
+function lookup(code) {
+  const d = dict[code], l = ledger[code];
+  if (l) return { name: l.name.trim(), price: String(l.sell || (d && d.p) || ''), sku: d ? d.c : '' };
+  if (d) return { name: tidy(d.n), price: String(d.p || ''), sku: d.c };
+  return null;
+}
+
+/* ===== 상태 ===== */
+const $ = id => document.getElementById(id);
+const KEY = 'price-label-a4-state';
+const OPTS = ['cols','rows','px','py','gap','bw','bh','fsName','fsPrice','skip'];
+let items = []; // { name, sku, barcode, price, qty }
+let pending = null;  // 사전에 없는 바코드 — 이름·가격을 받는 중
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const priceText = p => { const n = String(p ?? '').replace(/\D/g, ''); return n ? Number(n).toLocaleString('ko-KR') : ''; };
+function say(t, err) { $('msg').textContent = t; $('msg').className = err ? 'err' : ''; }
+
+function scan(raw) {
+  let code;
+  try { code = normalizeBarcode(raw); } catch (e) { say(e.message, true); return; }
+  const had = items.find(it => it.barcode === code);
+  if (had) { had.qty++; update(); say(`${had.name} ${had.qty}장`); return; }
+  const hit = lookup(code);
+  if (hit) { items.push({ ...hit, barcode: code, qty: 1 }); update(); say(`${hit.name} 넣었어요`); return; }
+  pending = code;
+  $('new').classList.add('on'); $('newName').value = ''; $('newPrice').value = '';
+  say(`${code}: 처음 보는 상품이에요. 이름과 가격을 적어 주세요.`, true);
+  $('newName').focus();
+}
+
+/* ===== 라벨 양식 ===== */
+function labelHTML(it) {
+  if (!it) return '<div class="label empty"></div>';
+  const p = priceText(it.price);
+  return `<div class="label">
+    <div class="name">${esc(it.name) || '&nbsp;'}</div>
+    <div class="sku">${it.sku ? `(${esc(it.sku)})` : '&nbsp;'}</div>
+    ${barsSVG(it.barcode)}
+    <div class="num">${it.barcode}</div>
+    <div class="price">${p ? `${p}<small>원</small>` : '&nbsp;'}</div>
+  </div>`;
+}
+
+function renderList() {
+  $('list').innerHTML = items.map((it, i) => `
+    <div class="item">
+      <input class="nm" data-i="${i}" data-k="name" value="${esc(it.name)}" aria-label="상품 이름">
+      <input class="pr" data-i="${i}" data-k="price" value="${priceText(it.price)}" inputmode="numeric" aria-label="가격">
+      <div class="qty"><button type="button" data-q="${i}" data-d="-1" aria-label="한 장 빼기">−</button><b>${it.qty}</b><button type="button" data-q="${i}" data-d="1" aria-label="한 장 더">+</button></div>
+      <button class="del" type="button" data-del="${i}" aria-label="빼기">×</button>
+    </div>`).join('') || '<div class="empty">찍은 상품이 여기에 나와요</div>';
+}
+
+function renderSheets() {
+  const v = id => Math.max(0, +$(id).value || 0);
+  const cols = Math.max(1, v('cols')), rows = Math.max(1, v('rows'));
+  const skip = Math.max(0, (+$('skip').value || 1) - 1);
+  const perPage = cols * rows;
+
+  const cells = Array(skip).fill(null);
+  items.forEach(it => { for (let k = 0; k < it.qty; k++) cells.push(it); });
+  const total = cells.length - skip;
+  const pages = total > 0 ? Math.ceil(cells.length / perPage) : 0;
+  $('info').textContent = total ? `가격표 ${total}장 · A4 ${pages}장` : '';
+
+  const out = $('out');
+  out.innerHTML = '';
+  [['--px','px'],['--py','py'],['--gap','gap'],['--bw','bw'],['--bh','bh'],['--fs-name','fsName'],['--fs-price','fsPrice']]
+    .forEach(([css, id]) => out.style.setProperty(css, `${v(id)}mm`));
+  document.body.classList.toggle('cutlines', $('cutlines').checked);
+
+  for (let p = 0; p < pages; p++) {
+    const sheet = document.createElement('div');
+    sheet.className = 'sheet';
+    sheet.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    sheet.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    const slice = cells.slice(p * perPage, (p + 1) * perPage);
+    while (slice.length < perPage) slice.push(null);
+    sheet.innerHTML = slice.map(labelHTML).join('');
+    out.appendChild(sheet);
+  }
+}
+
+function save() {
+  try {
+    const opts = {};
+    OPTS.forEach(k => opts[k] = $(k).value);
+    opts.cutlines = $('cutlines').checked;
+    localStorage.setItem(KEY, JSON.stringify({ items, opts }));
+  } catch (e) {}
+}
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (!s) return;
+    items = Array.isArray(s.items) ? s.items : [];
+    Object.entries(s.opts || {}).forEach(([k, val]) => {
+      if (k === 'cutlines') $('cutlines').checked = !!val; else if ($(k)) $(k).value = val;
+    });
+  } catch (e) {}
+}
+
+function update() { renderList(); renderSheets(); save(); }
+
+/* ===== 이벤트 ===== */
+$('barcode').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const v = $('barcode').value; $('barcode').value = '';
+  if (v.trim()) scan(v);
+});
+
+function addPending() {
+  if (!pending) return;
+  const name = $('newName').value.trim();
+  if (!name) { $('newName').focus(); return; }
+  items.push({ name, sku: '', barcode: pending, price: $('newPrice').value.replace(/\D/g, ''), qty: 1 });
+  pending = null; $('new').classList.remove('on');
+  update(); say(`${name} 넣었어요`); $('barcode').focus();
+}
+$('newAdd').onclick = addPending;
+$('newPrice').addEventListener('keydown', e => { if (e.key === 'Enter') addPending(); });
+$('newName').addEventListener('keydown', e => { if (e.key === 'Enter') $('newPrice').focus(); });
+
+$('list').addEventListener('change', e => {
+  const { i, k } = e.target.dataset;
+  if (i === undefined) return;
+  items[+i][k] = k === 'price' ? e.target.value.replace(/\D/g, '') : e.target.value;
+  if (k === 'price') e.target.value = priceText(items[+i].price);
+  renderSheets(); save();
+});
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.del !== undefined) items.splice(+b.dataset.del, 1);
+  else if (b.dataset.q !== undefined) { const it = items[+b.dataset.q]; it.qty = Math.max(1, it.qty + +b.dataset.d); }
+  update();
+});
+
+$('clearBtn').onclick = () => { if (items.length && confirm('찍은 상품을 모두 지울까요?')) { items = []; update(); $('barcode').focus(); } };
+$('printBtn').onclick = () => {
+  if (!items.length) { say('먼저 바코드를 찍으세요', true); $('barcode').focus(); return; }
+  window.print();
+};
+[...OPTS, 'cutlines'].forEach(id => $(id).addEventListener('input', () => { renderSheets(); save(); }));
+
+// 자체 점검: 주소 끝에 #test
+if (location.hash === '#test') {
+  console.assert(normalizeBarcode('8809586953944') === '8809586953944', 'EAN-13');
+  console.assert(normalizeBarcode('080432402733') === '0080432402733', 'UPC-A 12자리');
+  console.assert(normalizeBarcode('880958695394') === '8809586953944', '검증 숫자 빠진 12자리');
+  console.assert(normalizeBarcode('07920660') === '07920660', 'EAN-8');
+  console.assert(bitsOf('8809586953944').length === 95 && bitsOf('07920660').length === 67, '막대 길이');
+  let bad = false; try { normalizeBarcode('8809586953945'); } catch (e) { bad = true; } console.assert(bad, '틀린 끝자리 거부');
+  console.assert(tidy('남양]초코에몽250ml') === '초코에몽250ml' && tidy('굿케어 요실금 대형') === '굿케어 요실금 대형', '이름 정리');
+  alert('점검 끝 (콘솔에 오류 없으면 정상)');
+}
+
+load();
+update();
+loadDB();
+</script>

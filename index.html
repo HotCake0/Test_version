@@ -52,7 +52,7 @@
   /* ---------- 표 ---------- */
   .sheet{background:var(--surface);border:1px solid var(--line);border-radius:14px;
          box-shadow:var(--shadow);overflow-x:auto}
-  table{border-collapse:collapse;width:100%;min-width:1200px;table-layout:fixed}
+  table{border-collapse:collapse;width:100%;min-width:1360px;table-layout:fixed}
   th{background:#F1F5F9;color:var(--muted);
      font-size:16px;font-weight:500;text-align:left;padding:12px;
      border-bottom:2px solid var(--line-strong);border-right:1px solid var(--line-strong)}
@@ -70,7 +70,7 @@
   td input:focus{background:var(--accent-soft)}
   td input.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
   td input::placeholder{color:#94A3B8;font-weight:400}
-  col.c-name{width:24%} col.c-spec{width:9%} col.c-qty{width:8%} col.c-cost{width:11%} col.c-unit{width:11%} col.c-sell{width:11%} col.c-margin{width:9%} col.c-memo{width:17%} col.c-del{width:64px}
+  col.c-name{width:21%} col.c-spec{width:8%} col.c-qty{width:7%} col.c-cost{width:10%} col.c-unit{width:10%} col.c-sell{width:10%} col.c-margin{width:8%} col.c-memo{width:13%} col.c-bc{width:13%} col.c-del{width:64px}
   .del{min-width:56px;min-height:56px;display:inline-flex;align-items:center;justify-content:center;
        border:0;background:none;color:#94A3B8;border-radius:10px;transition:background .2s,color .2s}
   .del:hover{background:var(--danger-soft);color:var(--danger)}
@@ -100,6 +100,7 @@
   <div class="wrap bar">
     <h1>단가 · 재고 장부</h1>
     <span id="who" class="who"></span>
+    <a class="ghost" href="label.html" style="text-decoration:none;color:var(--accent);border-color:var(--accent)"><span style="display:inline">가격표 출력</span></a>
     <button class="ghost" onclick="backup()" aria-label="백업 파일로 저장"><svg><use href="#i-save"/></svg><span>백업</span></button>
     <button class="ghost" onclick="document.getElementById('file').click()" aria-label="백업 파일 불러오기"><svg><use href="#i-open"/></svg><span>불러오기</span></button>
     <input type="file" id="file" accept=".json,application/json" hidden onchange="restore(this)">
@@ -110,16 +111,16 @@
   <div class="tools">
     <div class="search">
       <svg aria-hidden="true"><use href="#i-search"/></svg>
-      <input id="q" type="search" lang="ko" placeholder="품목·포장수량·비고로 찾기" aria-label="품목 검색" oninput="render()">
+      <input id="q" type="search" lang="ko" placeholder="품목·포장수량·비고·바코드로 찾기" aria-label="품목 검색" oninput="render()">
     </div>
     <button class="add" onclick="add()"><svg aria-hidden="true"><use href="#i-plus"/></svg>줄 추가</button>
   </div>
 
   <div class="sheet">
     <table>
-      <colgroup><col class="c-name"><col class="c-spec"><col class="c-qty"><col class="c-cost"><col class="c-unit"><col class="c-sell"><col class="c-margin"><col class="c-memo"><col class="c-del"></colgroup>
+      <colgroup><col class="c-name"><col class="c-spec"><col class="c-qty"><col class="c-cost"><col class="c-unit"><col class="c-sell"><col class="c-margin"><col class="c-memo"><col class="c-bc"><col class="c-del"></colgroup>
       <thead><tr>
-        <th>품목</th><th>포장수량</th><th class="num">현재고</th><th class="num">단가 (원)</th><th class="num">객단가</th><th class="num">판매가 (원)</th><th class="num">마진률</th><th>비고</th><th></th>
+        <th>품목</th><th>포장수량</th><th class="num">현재고</th><th class="num">단가 (원)</th><th class="num">객단가</th><th class="num">판매가 (원)</th><th class="num">마진률</th><th>비고</th><th>바코드</th><th></th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -171,7 +172,8 @@ let items = JSON.parse(localStorage.getItem(KEY) || '[]').map(it => ({
         : (n(it.buyQty) ? (n(it.buyTotal) + n(it.extra)) / n(it.buyQty) : n(it.price)),
   sell: n(it.sell),
   memo: it.memo || '',
-  qty : 'qty' in it ? n(it.qty) : n(it.stock)   // 현재고 (예전 형식은 stock)
+  qty : 'qty' in it ? n(it.qty) : n(it.stock),  // 현재고 (예전 형식은 stock)
+  barcode: it.barcode || ''                     // 가격표 출력이 이 칸으로 사입 상품을 찾는다
 }));
 
 let toastTimer;
@@ -202,7 +204,7 @@ function set(i, key, el){
   save();
 }
 function add(){
-  items.push({name:'', spec:'', cost:0, sell:0, memo:'', qty:0});
+  items.push({name:'', spec:'', cost:0, sell:0, memo:'', qty:0, barcode:''});
   save('줄을 추가했어요'); render();
   document.querySelector('#rows tr:last-child input')?.focus();
 }
@@ -215,7 +217,7 @@ function del(i){
 function render(){
   const q = document.getElementById('q').value.trim();
   const rows = items.map((it,i) => ({it,i}))
-    .filter(({it}) => !q || (it.name+' '+it.spec+' '+it.memo).includes(q));
+    .filter(({it}) => !q || (it.name+' '+it.spec+' '+it.memo+' '+it.barcode).includes(q));
 
   document.getElementById('rows').innerHTML = rows.length ? rows.map(({it,i}) => `
     <tr>
@@ -227,9 +229,10 @@ function render(){
       <td><input class="num" inputmode="numeric" value="${fmt(it.sell)}" placeholder="0" aria-label="판매가" onchange="set(${i},'sell',this)"></td>
       <td class="${marginCls(it)}">${marginText(it)}</td>
       <td><input lang="ko" value="${esc(it.memo)}" placeholder="메모" aria-label="비고" onchange="set(${i},'memo',this)"></td>
+      <td><input inputmode="numeric" value="${esc(it.barcode)}" placeholder="찍거나 입력" aria-label="바코드" onchange="set(${i},'barcode',this)"></td>
       <td><button class="del" aria-label="이 줄 삭제" onclick="del(${i})"><svg><use href="#i-trash"/></svg></button></td>
     </tr>`).join('')
-    : `<tr><td colspan="9"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
+    : `<tr><td colspan="10"><div class="empty"><strong>${items.length ? '찾는 품목이 없어요' : '아직 품목이 없어요'}</strong>
        ${items.length ? '다른 말로 찾아보세요.' : '오른쪽 위 <b>줄 추가</b> 버튼을 눌러 시작하세요.'}</div></td></tr>`;
   document.getElementById('count').textContent = items.length;
 }
@@ -248,7 +251,7 @@ function restore(input){
     const data = JSON.parse(t);
     if(!Array.isArray(data)) throw 0;
     if(confirm(`${data.length}개 품목으로 되돌립니다. 지금 내용은 사라져요. 계속할까요?`)){
-      items = data.map(it => ({name:it.name||'', spec:it.spec||'', cost:n(it.cost), sell:n(it.sell), memo:it.memo||'', qty:n(it.qty)}));
+      items = data.map(it => ({name:it.name||'', spec:it.spec||'', cost:n(it.cost), sell:n(it.sell), memo:it.memo||'', qty:n(it.qty), barcode:it.barcode||''}));
       save('되돌렸어요'); render();
     }
   }).catch(() => alert('백업 파일을 읽지 못했어요. 다른 파일을 골라 주세요.'));
@@ -263,7 +266,7 @@ let cloudRef = null;
 
 function normalize(list){
   return (list || []).filter(Boolean).map(it => ({
-    name: it.name || '', spec: it.spec || '', cost: n(it.cost), sell: n(it.sell), memo: it.memo || '', qty: n(it.qty)
+    name: it.name || '', spec: it.spec || '', cost: n(it.cost), sell: n(it.sell), memo: it.memo || '', qty: n(it.qty), barcode: it.barcode || ''
   }));
 }
 
