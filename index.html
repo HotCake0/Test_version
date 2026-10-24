@@ -24,7 +24,7 @@
 
   header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
   .bar{display:flex;align-items:center;gap:8px;height:68px}
-  h1{font-size:22px;font-weight:700;margin:0 auto 0 0;letter-spacing:-.02em}
+  h1{font-size:22px;font-weight:700;margin:0 auto 0 0;letter-spacing:-.02em;white-space:nowrap}
   button{font:inherit;cursor:pointer}
   .ghost{display:inline-flex;align-items:center;justify-content:center;gap:6px;
          min-height:52px;min-width:52px;padding:0 14px;font-size:17px;
@@ -100,7 +100,7 @@
   <div class="wrap bar">
     <h1>단가 · 재고 장부</h1>
     <span id="who" class="who"></span>
-    <a class="ghost" href="label.html" style="text-decoration:none;color:var(--accent);border-color:var(--accent)"><span style="display:inline">가격표 출력</span></a>
+    <a class="ghost" href="label.html" style="text-decoration:none;color:var(--accent);border-color:var(--accent);white-space:nowrap">가격표<span>&nbsp;출력</span></a>
     <button class="ghost" onclick="backup()" aria-label="백업 파일로 저장"><svg><use href="#i-save"/></svg><span>백업</span></button>
     <button class="ghost" onclick="document.getElementById('file').click()" aria-label="백업 파일 불러오기"><svg><use href="#i-open"/></svg><span>불러오기</span></button>
     <input type="file" id="file" accept=".json,application/json" hidden onchange="restore(this)">
@@ -125,6 +125,7 @@
       <tbody id="rows"></tbody>
     </table>
   </div>
+  <button class="add" onclick="add()" style="width:100%;justify-content:center;margin-top:12px"><svg aria-hidden="true"><use href="#i-plus"/></svg>줄 추가</button>
   <p class="hint"><b id="count">0</b>개 품목 · 칸을 눌러 바로 고치면 자동 저장됩니다. Tab 키로 옆 칸, 아래로 다음 줄로 넘어가요.</p>
 </div>
 
